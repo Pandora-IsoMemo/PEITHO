@@ -1,8 +1,41 @@
+peitho_user_agent <- function() {
+  ver <- utils::packageVersion("PEITHO")
+  sprintf(
+    "PEITHO-WebTextFetcher/%s (source: https://github.com/Pandora-IsoMemo/PEITHO)",
+    ver
+  )
+}
+
+#' Fetch and parse web text from a URL
+#'
+#' This function retrieves the HTML content from the specified URL,
+#' extracts text based on the provided CSS selector, and returns a
+#' `WebText` object containing the extracted text and metadata.
+#'
+#' @param url A character string specifying the URL to fetch.
+#' @param css_selector A character string specifying the CSS selector
+#'   to identify text-containing HTML elements. Default is
+#'   `"h1, h2, h3, p, li"`.
+#' @param timeout_sec An integer specifying the timeout for the HTTP
+#'   request in seconds. Default is `10`.
+#' @param user_agent An optional character string specifying the User-Agent
+#'   header for the HTTP request. If `NULL`, a default User-Agent
+#'   string is used.
+#' @return A `WebText` object containing the extracted text and metadata.
+#' @export
 fetch_WebText <- function(
   url,
   css_selector = "h1, h2, h3, p, li",
-  timeout_sec  = 10
+  timeout_sec  = 10,
+  user_agent   = NULL
 ) {
+  # allow user to set default user agent via options()
+  if (is.null(user_agent)) {
+    user_agent <- getOption("peitho.user_agent", default = NULL)
+  }
+  # if still NULL, use package default
+  if (is.null(user_agent)) user_agent <- peitho_user_agent()
+
   warn_msgs <- character()
   err_msgs  <- character()
   status_code <- NA_integer_
@@ -13,7 +46,7 @@ fetch_WebText <- function(
   resp <- tryCatch(
     {
       httr2::request(url) |>
-        httr2::req_user_agent(NULL) |>
+        httr2::req_user_agent(user_agent) |>
         httr2::req_timeout(timeout_sec) |>
         httr2::req_perform()
     },
