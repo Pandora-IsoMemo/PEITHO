@@ -2,3 +2,10 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rbuildignore
+.DS_Store
+.Rproj
+.lintr
+.Renviron
+.Rprofile
+.vscode/
