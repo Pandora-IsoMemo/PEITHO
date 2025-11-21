@@ -16,6 +16,8 @@ tagList(
           actionButton("example", "Create Example")
         ),
         mainPanel(
+          width = 10,
+          stepsUI("steps")
         ),
       )
     )

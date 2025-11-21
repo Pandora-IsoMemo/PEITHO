@@ -12,9 +12,10 @@ LazyData: true
 RoxygenNote: 7.3.2
 Depends: R (>= 3.5.0)
 Imports: 
-    shiny,
     httr2,
+    llmModule,
     rvest,
+    shiny,
     stringr,
     tibble
 Suggests: 
