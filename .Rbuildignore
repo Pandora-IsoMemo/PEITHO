@@ -4,6 +4,7 @@
 ^lib$
 ^libLinux$
 ^Dockerfile$
+^docker-compose.yml
 ^deps$
 ^Jenkinsfile$
 ^bin$
@@ -15,3 +16,5 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^inst/scripts
+^tests/testthat/testdata_large/
