@@ -95,7 +95,7 @@ stepsServer <- function(id) {
         paste("Step", input$step)
       })
       output$text_result <- renderText({
-        "This might some placeholder text.\nWe will display results here."
+        "This is some placeholder text.\nWe might display results here."
       })
     }
   )
