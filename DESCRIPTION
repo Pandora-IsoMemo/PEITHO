@@ -16,6 +16,7 @@ Imports:
     llmModule,
     rvest,
     shiny,
+    shinyjs,
     stringr,
     tibble
 Suggests: 

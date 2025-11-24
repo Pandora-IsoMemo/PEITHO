@@ -2,6 +2,7 @@ library(shiny)
 library(PEITHO)
 
 tagList(
+  useShinyjs(),
   navbarPage(
     title = paste("PEITHO", packageVersion("PEITHO")),
     theme = shinythemes::shinytheme("flatly"),
@@ -9,11 +10,13 @@ tagList(
     collapsible = TRUE,
     id = "tab",
     tabPanel(
-      title = "Tab",
+      title = "RAG Workflow Builder",
       sidebarLayout(
         sidebarPanel(
           width = 2,
-          actionButton("example", "Create Example")
+          stepsSidebarUI("steps_sidebar"),
+          tags$hr(),
+          actionButton("example", "Create Example", width = "100%")
         ),
         mainPanel(
           width = 10,
