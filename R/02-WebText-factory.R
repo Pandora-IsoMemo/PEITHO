@@ -23,6 +23,11 @@ peitho_user_agent <- function() {
 #'   string is used.
 #' @return A `WebText` object containing the extracted text and metadata.
 #' @export
+#'
+#' @examples
+#' # Fetch text from example.com
+#' wt <- fetch_WebText("https://example.com")
+#' print(wt)
 fetch_WebText <- function(
   url,
   css_selector = "h1, h2, h3, p, li",

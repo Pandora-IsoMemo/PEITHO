@@ -33,3 +33,8 @@ This function retrieves the HTML content from the specified URL,
 extracts text based on the provided CSS selector, and returns a
 `WebText` object containing the extracted text and metadata.
 }
+\examples{
+# Fetch text from example.com
+wt <- fetch_WebText("https://example.com")
+print(wt)
+}
