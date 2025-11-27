@@ -28,9 +28,9 @@ stepsUI <- function(id) {
       ns("operation"),
       "Select operation to apply (Availability will depend on 'input source')",
       choices = c(
-        "chat" = "chat",
-        "rag query (calls ragnar)" = "rag_query",
-        "rag summarize" = "rag_summarize",
+        "chat (llm)" = "chat",
+        "rag query (ragnar + llm)" = "rag_query",
+        "rag summarize (ragnar)" = "rag_summarize",
         "fetch" = "fetch",
         "aggregate" = "aggregate",
         "text to list" = "text_to_list",
@@ -50,6 +50,14 @@ stepsUI <- function(id) {
         prompt_placeholder = "... your natural language instructions ...",
         theme = "cobalt"
       )
+    ),
+    conditionalPanel(
+      condition = "input.operation == 'rag_query' || input.operation == 'rag_summarize'",
+      ns = ns,
+      tags$div(
+        "RAG functionality will be implemented soon..."
+      ),
+      tags$hr(),
     ),
     conditionalPanel(
       condition = "input.operation == 'fetch'",

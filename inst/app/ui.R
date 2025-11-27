@@ -10,7 +10,7 @@ tagList(
     collapsible = TRUE,
     id = "tab",
     tabPanel(
-      title = "RAG Workflow Builder",
+      title = "Retrieval-Augmented Generation (RAG) Workflow Builder",
       sidebarLayout(
         sidebarPanel(
           width = 2,

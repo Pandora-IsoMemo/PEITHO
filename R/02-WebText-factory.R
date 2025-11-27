@@ -47,7 +47,7 @@ fetch_WebText <- function(
   title <- ""
   text_blocks <- character()
 
-  # Try the request
+  # Try the request: check if URL is reachable
   resp <- tryCatch(
     {
       httr2::request(url) |>
