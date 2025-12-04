@@ -8,11 +8,13 @@ extract_tag_varname <- function(x, pattern) {
   normalize_varname(varname)
 }
 
-get_commands <- function(path_to_folder, command_file = "commands.json") {
-  commands_path <- file.path(path_to_folder, command_file)
-  if (!file.exists(commands_path)) return(list())
+read_json_if_exists <- function(path) {
+  if (!file.exists(path)) return(list())
+  jsonlite::fromJSON(path, simplifyVector = FALSE)
+}
 
-  jsonlite::fromJSON(commands_path, simplifyVector = FALSE)
+get_commands <- function(path_to_folder, command_file = "commands.json") {
+  read_json_if_exists(file.path(path_to_folder, command_file))
 }
 
 get_inputs <- function(
@@ -25,11 +27,7 @@ get_inputs <- function(
 
   # load input.json or input.txt
   if (grepl("\\.json$", input_path)) {
-    if (file.exists(input_path)) {
-      input_list <- jsonlite::fromJSON(input_path, simplifyVector = FALSE)
-    } else {
-      input_list <- list()
-    }
+    input_list <- read_json_if_exists(input_path)
   } else if (grepl("\\.txt$", input_path)) {
     if (file.exists(input_path)) {
       lines <- readLines(input_path)
@@ -61,14 +59,7 @@ get_inputs <- function(
 }
 
 get_results <- function(path_to_folder, result_file = "results.json") {
-  result_path <- file.path(path_to_folder, result_file)
-  if (file.exists(result_path)) {
-    result_list <- jsonlite::fromJSON(result_path, simplifyVector = FALSE)
-  } else {
-    result_list <- list()
-  }
-
-  result_list
+  read_json_if_exists(file.path(path_to_folder, result_file))
 }
 
 is_input_tag <- function(x) {
@@ -133,11 +124,54 @@ make_param_from_arg <- function(
       step_id = step_i,
       position = arg_i,
       name     = arg_name,
-      value    = arg,
+      value    = strip_outer_quotes(arg),
       label    = "",
       type     = "literal",
-      loop     = "no"
+      loop     = cmd_loop %||% "no"
     )
+  }
+}
+
+parse_args <- function(arg_string) {
+  if (is.null(arg_string) || !nzchar(arg_string)) {
+    return(list(values = character(0), names = character(0)))
+  }
+  # split on commas, but not inside single or double quotes
+  args_vec <- strsplit(
+    arg_string,
+    ",(?=(?:[^']*'[^']*')*[^']*$)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",
+    perl = TRUE
+  )[[1]] |> trimws()
+
+  arg_names <- character(length(args_vec))
+  arg_values <- character(length(args_vec))
+  for (i in seq_along(args_vec)) {
+    x <- args_vec[[i]]
+    if (grepl("=", x)) {
+      x_split <- trimws(strsplit(x, "=", fixed = TRUE)[[1]])
+      arg_names[i] <- x_split[[1]]
+      arg_values[i]  <- x_split[[2]]
+    } else {
+      # positional / unnamed argument
+      arg_names[i] <- ""
+      arg_values[i]  <- x
+    }
+  }
+
+  list(values = arg_values, names = arg_names)
+}
+
+strip_outer_quotes <- function(x) {
+  x <- trimws(x)
+  if (nchar(x) < 2L) return(x)
+
+  first <- substr(x, 1L, 1L)
+  last  <- substr(x, nchar(x), nchar(x))
+
+  if (first == last && first %in% c("'", "\"")) {
+    substr(x, 2L, nchar(x) - 1L)
+  } else {
+    x
   }
 }
 
@@ -160,31 +194,19 @@ extract_workflow_from_files <- function(
   steps <- lapply(seq_along(commands_list), function(step_i) {
     cmd <- commands_list[[step_i]]
 
-    # split args string into list, only trim ws
-    args_vec <- strsplit(cmd$args, split = ",")[[1]] |> trimws()
-
-    # split name from value if given
-    args_names <- vector("list", length(args_vec))
-    args_vec <- lapply(seq_along(args_vec), function(arg_i) {
-      if (!grepl("=", args_vec[[arg_i]])) return(args_vec[[arg_i]])
-
-      # split and normalize name
-      x_split <- strsplit(args_vec[[arg_i]], split = "=")[[1]] |>
-        normalize_varname()
-      
-      args_names[[arg_i]] <<- x_split[[1]] %||% NULL
-      x <- x_split[[2]]
-
-      x
-    })
-    names(args_vec) <- unlist(args_names)
+    parsed   <- parse_args(cmd$args)
+    args_vec <- parsed$values
+    args_names <- parsed$names
 
     # create params
     params <- vector("list", length(args_vec))
     for (arg_i in seq_along(args_vec)) {
+      arg_name <- args_names[arg_i]
+      if (!nzchar(arg_name)) arg_name <- NULL
+
       params[[arg_i]] <- make_param_from_arg(
         arg      = args_vec[[arg_i]],
-        arg_name = args_names[[arg_i]],
+        arg_name = arg_name,
         arg_i    = arg_i,
         step_i   = step_i,
         cmd_loop = cmd$loop,

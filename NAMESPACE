@@ -2,6 +2,7 @@
 
 S3method(add_steprun,workflowstate)
 S3method(current_step,workflow)
+S3method(extract_arg,operationparam)
 S3method(goto_step,workflow)
 S3method(next_step,workflow)
 S3method(previous_step,workflow)

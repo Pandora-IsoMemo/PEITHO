@@ -22,6 +22,10 @@ add_steprun <- function(state, steprun, ...) {
   UseMethod("add_steprun")
 }
 
+extract_arg <- function(param) {
+  UseMethod("extract_arg")
+}
+
 run_workflow <- function(wf, state = NULL, ...) {
   UseMethod("run_workflow")
 }

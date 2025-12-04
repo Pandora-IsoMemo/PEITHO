@@ -61,6 +61,13 @@ print.operationparam <- function(x, ...) {
   invisible(x)
 }
 
+#' Extract argument value from operationparam object
+#' @param x A `operationparam` object.
+#' @param path_to_folder Path to folder containing results.json (default: package's peitho_files).
+#' @param result_file Name of the results file (default: "results.json").
+#' @param ... Additional arguments (not used).
+#' @return A list containing the argument value, named if applicable.
+#' @export
 extract_arg.operationparam <- function(
   x,
   path_to_folder = system.file("scripts", "peitho_files", package = "PEITHO"),

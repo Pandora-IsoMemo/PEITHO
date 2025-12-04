@@ -12,15 +12,19 @@ create_test_files <- function(commands, input_txt = NULL) {
 test_that("extract_workflow_from_files returns workflow steps from commands.json", {
   commands <- list(
     list(name = "Step 1", command = "strsplit", args = "x = 'foo, bar', split = ', '", label = "First Step"),
-    list(name = "Step 2", command = "toupper", args = "x = 'hello world'", label = "Second Step")
+    list(name = "Step 2", command = "toupper", args = "x = 'hello world'", label = "Second Step"),
+    list(name = "Step 3", command = "strsplit", args = 'x = "foo, bar", split = ", "', label = "Third Step")
   )
   tmpdir <- create_test_files(commands)
   steps <- extract_workflow_from_files(path_to_folder = tmpdir)
   expect_type(steps, "list")
-  expect_length(steps, 2)
+  expect_length(steps, 3)
   expect_s3_class(steps[[1]], "workflowstep")
   expect_equal(steps[[1]]$name, "Step 1")
+  expect_equal(steps[[1]]$params[[1]]$value, "foo, bar")
   expect_equal(steps[[2]]$operation, "toupper")
+  expect_equal(steps[[3]]$name, "Step 3")
+  expect_equal(steps[[3]]$params[[1]]$value, "foo, bar")
   unlink(tmpdir, recursive = TRUE)
 })
 
