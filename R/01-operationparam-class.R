@@ -54,8 +54,11 @@ new_operationparam <- function(
 #' @export
 print.operationparam <- function(x, ...) {
   cat("<operationparam>\n")
+  cat("  step_id:  ", x$step_id, "\n", sep = "")
   cat("  position: ", x$position, "\n", sep = "")
   cat("  name:     ", x$name, "\n", sep = "")
+  cat("  value:    ", if (is.null(x$value)) "NULL" else "…", "\n", sep = "")
+  cat("  label:    ", x$label, "\n", sep = "")
   cat("  type:     ", x$type, "\n", sep = "")
   cat("  loop:     ", x$loop, "\n", sep = "")
   invisible(x)
@@ -63,17 +66,11 @@ print.operationparam <- function(x, ...) {
 
 #' Extract argument value from operationparam object
 #' @param x A `operationparam` object.
-#' @param path_to_folder Path to folder containing results.json (default: package's peitho_files).
-#' @param result_file Name of the results file (default: "results.json").
+#' @param result_path Path to the results JSON file.
 #' @param ... Additional arguments (not used).
 #' @return A list containing the argument value, named if applicable.
 #' @export
-extract_arg.operationparam <- function(
-  x,
-  path_to_folder = system.file("scripts", "peitho_files", package = "PEITHO"),
-  result_file = "results.json",
-  ...
-) {
+extract_arg.operationparam <- function(x, result_path, ...) {
   if (x$type %in% c("input", "literal")) {
     if (x$name != "") {
       return(setNames(list(x$value), x$name))
@@ -83,40 +80,45 @@ extract_arg.operationparam <- function(
   }
 
   if (x$type == "result") {
-    # get result from results.json
+    # get result from JSON file
     # load result json file
-    result_path <- file.path(path_to_folder, result_file)
+
     if (file.exists(result_path)) {
       result_list <- jsonlite::fromJSON(result_path, simplifyVector = FALSE)
     } else {
       result_list <- list()
     }
-
-    if (!any(x$step_id %in% sapply(result_list, function(res) res$entry))) {
+    
+    last_step_id <- as.integer(x$step_id) - 1L
+    if (!any(last_step_id %in% sapply(result_list, function(res) res$entry))) {
       stop(
-        "Result for step '", x$step_id, "' not found in results.json.",
+        "Result for previous step '", last_step_id, "' not found in results JSON.",
         call. = FALSE
       )
     }
 
-    res_indx <- which(result_list$entry == x$step_id)
+    res_indx <- which(sapply(result_list, function(res) res$entry) == last_step_id)
 
     # get results value <- SHOULD THIS BE DONE LATER?
-
-    if (result_list[res_indx][["errors"]] != "") {
+    if (result_list[[res_indx]][["errors"]] != "") {
       stop(
         "Stopping workflow because of error during step '", x$step_id, "': ",
-        result_list[res_indx][["errors"]]
+        result_list[[res_indx]][["errors"]]
       )
     }
 
-    if (!is.character(result_list[res_indx][["result"]])) {
+    last_result <- result_list[[res_indx]][["result"]]
+    # check if result is character or list of characters
+    if (
+      !is.character(last_result) &&
+        (is.list(last_result) && !all(sapply(last_result, is.character)))
+    ) {
       stop(
-        "Stopping workflow because result of step '", x$step_id, "' was not character."
+        "Stopping workflow because result of step '", x$step_id, "' was not character or list of characters."
       )
     }
 
-    arg_value <- result_list[res_indx][["result"]]
+    arg_value <- last_result
 
     if (x$name != "") {
       return(setNames(list(arg_value), x$name))
@@ -125,6 +127,5 @@ extract_arg.operationparam <- function(
     }
   }
 
-
-
+  stop("Unknown operationparam type '", x$type, "'.", call. = FALSE)
 }

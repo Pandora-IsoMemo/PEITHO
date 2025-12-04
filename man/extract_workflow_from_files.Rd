@@ -9,8 +9,8 @@ extract_workflow_from_files(
 )
 }
 \arguments{
-\item{path_to_folder}{Path to folder containing `commands.json` and optionally `inputs.txt` or
-`inputs.json` and `results.json`. Default is the package's `peitho_files` folder.}
+\item{path_to_folder}{Path to folder containing `commands.json` and `inputs.txt` and `results_summary.json`.
+Default is the package's `peitho_files` folder.}
 }
 \value{
 A list of `workflowstep` objects.

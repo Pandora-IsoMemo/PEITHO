@@ -22,7 +22,7 @@ add_steprun <- function(state, steprun, ...) {
   UseMethod("add_steprun")
 }
 
-extract_arg <- function(param) {
+extract_arg <- function(param, result_path, ...) {
   UseMethod("extract_arg")
 }
 

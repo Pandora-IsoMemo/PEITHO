@@ -4,19 +4,12 @@
 \alias{extract_arg.operationparam}
 \title{Extract argument value from operationparam object}
 \usage{
-\method{extract_arg}{operationparam}(
-  x,
-  path_to_folder = system.file("scripts", "peitho_files", package = "PEITHO"),
-  result_file = "results.json",
-  ...
-)
+\method{extract_arg}{operationparam}(x, result_path, ...)
 }
 \arguments{
 \item{x}{A `operationparam` object.}
 
-\item{path_to_folder}{Path to folder containing results.json (default: package's peitho_files).}
-
-\item{result_file}{Name of the results file (default: "results.json").}
+\item{result_path}{Path to the results JSON file.}
 
 \item{...}{Additional arguments (not used).}
 }
