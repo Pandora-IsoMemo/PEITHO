@@ -1,6 +1,6 @@
 #' Create a new operation parameter object
 #'
-#' A operation parameter represents a single argument for a step operation.
+#' An operation parameter represents a single argument for a step operation.
 #' It stores its position in the argument list, a value, and a type.
 #'
 #' @param step_id  The ID of the step this parameter belongs to.
