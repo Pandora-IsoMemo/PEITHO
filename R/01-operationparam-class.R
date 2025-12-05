@@ -58,7 +58,7 @@ print.operationparam <- function(x, ...) {
   cat("  step_id:  ", x$step_id, "\n", sep = "")
   cat("  position: ", x$position, "\n", sep = "")
   cat("  name:     ", x$name, "\n", sep = "")
-  cat("  value:    ", if (is.null(x$value)) "NULL" else "…", "\n", sep = "")
+  cat("  value:    ", if (is.null(x$value)) "NULL" else "...", "\n", sep = "")
   cat("  label:    ", x$label, "\n", sep = "")
   cat("  type:     ", x$type, "\n", sep = "")
   cat("  loop:     ", x$loop, "\n", sep = "")

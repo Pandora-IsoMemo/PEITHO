@@ -14,9 +14,12 @@ Depends: R (>= 3.5.0)
 Imports: 
     shiny,
     httr2,
+    jsonlite,
     rvest,
+    stats,
     stringr,
-    tibble
+    tibble,
+    utils
 Suggests: 
     testthat,
     knitr,

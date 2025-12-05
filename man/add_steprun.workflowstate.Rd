@@ -11,6 +11,8 @@
 
 \item{steprun}{A `workflowsteprun` object to add.}
 
+\item{idx}{The index at which to add the step run.}
+
 \item{...}{Additional arguments (not used).}
 }
 \value{

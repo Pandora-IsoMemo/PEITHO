@@ -19,7 +19,7 @@ new_workflowstate <- function(initial_input = NULL) {
 }
 
 truncate_one <- function(x, n = 20) {
-  if (nchar(x) > n) paste0(substr(x, 1, n), " …") else x
+  if (nchar(x) > n) paste0(substr(x, 1, n), " ...") else x
 }
 
 truncate_many <- function(vals, n = 20, collapse = ", ") {
@@ -67,6 +67,7 @@ print.workflowstate <- function(x, ...) {
 #' 
 #' @param x A `workflowstate` object.
 #' @param steprun A `workflowsteprun` object to add.
+#' @param idx The index at which to add the step run.
 #' @param ... Additional arguments (not used).
 #' @return The updated `workflowstate` object.
 #' @export

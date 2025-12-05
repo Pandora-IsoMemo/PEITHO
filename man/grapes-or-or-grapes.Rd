@@ -7,6 +7,14 @@ Returns left value if not NULL, otherwise right value.}
 \usage{
 a \%||\% b
 }
+\arguments{
+\item{a}{Left-hand side value.}
+
+\item{b}{Right-hand side value.}
+}
+\value{
+Left value if not NULL, otherwise right value.
+}
 \description{
 Null coalescing operator
 Returns left value if not NULL, otherwise right value.

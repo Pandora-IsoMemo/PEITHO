@@ -50,23 +50,23 @@ print.workflowsteprun <- function(x, ...) {
 
 #' Summary method for workflowsteprun objects
 #'
-#' @param x A `workflowsteprun` object.
+#' @param object A `workflowsteprun` object.
 #' @param ... Additional arguments (not used).
 #' @export
-summary.workflowsteprun <- function(x, ...) {
-  if (length(x$error) > 0) {
-    is_error <- !sapply(x$error, is.null)
+summary.workflowsteprun <- function(object, ...) {
+  if (length(object$error) > 0) {
+    is_error <- !sapply(object$error, is.null)
   } else {
-    is_error <- !is.null(x$error)
+    is_error <- !is.null(object$error)
   }
 
   list(
-    entry      = x$step$id,
-    name       = x$step$name,
-    label      = x$step$label,
-    result     = x$output,
+    entry      = object$step$id,
+    name       = object$step$name,
+    label      = object$step$label,
+    result     = object$output,
     errors     = if (!any(is_error)) "" else {
-      sapply(x$error[is_error], function(e) {
+      sapply(object$error[is_error], function(e) {
         if (inherits(e, "condition")) {
           conditionMessage(e)
         } else if (is.character(e)) {

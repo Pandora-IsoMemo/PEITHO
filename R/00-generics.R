@@ -18,11 +18,11 @@ run_step <- function(step, state, ...) {
   UseMethod("run_step")
 }
 
-add_steprun <- function(state, steprun, ...) {
+add_steprun <- function(x, steprun, idx, ...) {
   UseMethod("add_steprun")
 }
 
-extract_arg <- function(param, result_path, ...) {
+extract_arg <- function(x, last_result, ...) {
   UseMethod("extract_arg")
 }
 

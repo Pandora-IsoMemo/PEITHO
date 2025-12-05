@@ -43,7 +43,9 @@ print.workflowrun <- function(x, ...) {
 #' This object represents a workflow, consisting of a sequence of workflow steps,
 #' the current step index, and additional metadata.
 #' @param name    A name for the workflow.
+#' @param steps   A list of `workflowstep` objects defining the steps of the workflow.
 #' @param current The index of the current step in the workflow.
+#' @param use_peitho_folder Logical; if `TRUE`, load steps from PEITHO example folder.
 #' @param ...    Additional metadata to store with the workflow.
 #' @inheritParams extract_workflow_from_files
 #' @return A `workflow` object.

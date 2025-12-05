@@ -4,10 +4,10 @@
 \alias{summary.workflowsteprun}
 \title{Summary method for workflowsteprun objects}
 \usage{
-\method{summary}{workflowsteprun}(x, ...)
+\method{summary}{workflowsteprun}(object, ...)
 }
 \arguments{
-\item{x}{A `workflowsteprun` object.}
+\item{object}{A `workflowsteprun` object.}
 
 \item{...}{Additional arguments (not used).}
 }

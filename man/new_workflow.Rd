@@ -16,7 +16,11 @@ new_workflow(
 \arguments{
 \item{name}{A name for the workflow.}
 
+\item{steps}{A list of `workflowstep` objects defining the steps of the workflow.}
+
 \item{current}{The index of the current step in the workflow.}
+
+\item{use_peitho_folder}{Logical; if `TRUE`, load steps from PEITHO example folder.}
 
 \item{path_to_folder}{Path to folder containing `commands.json` and `inputs.txt` and `results_summary.json`.
 Default is the package's `peitho_files` folder.}
