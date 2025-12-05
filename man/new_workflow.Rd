@@ -5,18 +5,21 @@
 \title{Create a new workflow object}
 \usage{
 new_workflow(
-  steps = list(),
   name = "Untitled workflow",
+  steps = list(),
   current = if (length(steps)) 1L else NA_integer_,
+  use_peitho_folder = TRUE,
+  path_to_folder = system.file("scripts", "peitho_files", package = "PEITHO"),
   ...
 )
 }
 \arguments{
-\item{steps}{A list of `workflow_step` objects defining the steps of the workflow.}
-
 \item{name}{A name for the workflow.}
 
 \item{current}{The index of the current step in the workflow.}
+
+\item{path_to_folder}{Path to folder containing `commands.json` and `inputs.txt` and `results_summary.json`.
+Default is the package's `peitho_files` folder.}
 
 \item{...}{Additional metadata to store with the workflow.}
 }

@@ -10,6 +10,7 @@
   from = 1L,
   to = length(wf$steps),
   stop_on_error = TRUE,
+  results_file = "results_summary.json",
   ...
 )
 }
@@ -23,6 +24,8 @@
 \item{to}{An integer index of the step to end at.}
 
 \item{stop_on_error}{Logical; if `TRUE`, stop execution on the first error.}
+
+\item{results_file}{Name of the results summary file to update (default: "results_summary.json").}
 
 \item{...}{Additional arguments passed to `run_step()`.}
 }
