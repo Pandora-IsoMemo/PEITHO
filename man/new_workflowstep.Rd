@@ -30,6 +30,9 @@ This function must exist in the loaded name space.}
 
 \item{params}{A list of parameters to pass to the operation function.}
 
+\item{loop}{A character string indicating if the step should be looped over.
+Can be "yes", "no", or "auto".}
+
 \item{...}{Additional metadata to store with the step.}
 }
 \value{

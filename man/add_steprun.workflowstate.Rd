@@ -4,7 +4,7 @@
 \alias{add_steprun.workflowstate}
 \title{Add a workflow step run to the workflow state}
 \usage{
-\method{add_steprun}{workflowstate}(x, steprun, ...)
+\method{add_steprun}{workflowstate}(x, steprun, idx, ...)
 }
 \arguments{
 \item{x}{A `workflowstate` object.}
