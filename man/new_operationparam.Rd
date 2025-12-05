@@ -20,6 +20,8 @@ new_operationparam(
 
 \item{position}{Integer position of this parameter in the argument list.}
 
+\item{name}{The name of the parameter (default: `NULL` for unnamed).}
+
 \item{value}{The stored value for this parameter (default: "").}
 
 \item{label}{A human-readable label for this parameter (default: "").}

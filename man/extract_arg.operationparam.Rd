@@ -4,12 +4,12 @@
 \alias{extract_arg.operationparam}
 \title{Extract argument value from operationparam object}
 \usage{
-\method{extract_arg}{operationparam}(x, result_path, ...)
+\method{extract_arg}{operationparam}(x, last_result = list(""), ...)
 }
 \arguments{
 \item{x}{A `operationparam` object.}
 
-\item{result_path}{Path to the results JSON file.}
+\item{last_result}{The result from the previous step, used if the parameter type is "result".}
 
 \item{...}{Additional arguments (not used).}
 }

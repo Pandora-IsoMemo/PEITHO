@@ -5,6 +5,7 @@
 #'
 #' @param step_id  The ID of the step this parameter belongs to.
 #' @param position Integer position of this parameter in the argument list.
+#' @param name     The name of the parameter (default: `NULL` for unnamed).
 #' @param value    The stored value for this parameter (default: "").
 #' @param label    A human-readable label for this parameter (default: "").
 #' @param type     Type of the parameter. One of:
@@ -66,11 +67,15 @@ print.operationparam <- function(x, ...) {
 
 #' Extract argument value from operationparam object
 #' @param x A `operationparam` object.
-#' @param result_path Path to the results JSON file.
+#' @param last_result The result from the previous step, used if the parameter type is "result".
 #' @param ... Additional arguments (not used).
 #' @return A list containing the argument value, named if applicable.
 #' @export
-extract_arg.operationparam <- function(x, result_path, ...) {
+extract_arg.operationparam <- function(
+  x,
+  last_result = list(""),
+  ...
+) {
   if (x$type %in% c("input", "literal")) {
     if (x$name != "") {
       return(setNames(list(x$value), x$name))
@@ -80,41 +85,16 @@ extract_arg.operationparam <- function(x, result_path, ...) {
   }
 
   if (x$type == "result") {
-    # get result from JSON file
-    # load result json file
+    #last_result <- get_last_result_from_file(x$step_id)
 
-    if (file.exists(result_path)) {
-      result_list <- jsonlite::fromJSON(result_path, simplifyVector = FALSE)
-    } else {
-      result_list <- list()
-    }
-    
-    last_step_id <- as.integer(x$step_id) - 1L
-    if (!any(last_step_id %in% sapply(result_list, function(res) res$entry))) {
-      stop(
-        "Result for previous step '", last_step_id, "' not found in results JSON.",
-        call. = FALSE
-      )
-    }
-
-    res_indx <- which(sapply(result_list, function(res) res$entry) == last_step_id)
-
-    # get results value <- SHOULD THIS BE DONE LATER?
-    if (result_list[[res_indx]][["errors"]] != "") {
-      stop(
-        "Stopping workflow because of error during step '", x$step_id, "': ",
-        result_list[[res_indx]][["errors"]]
-      )
-    }
-
-    last_result <- result_list[[res_indx]][["result"]]
     # check if result is character or list of characters
     if (
       !is.character(last_result) &&
         (is.list(last_result) && !all(sapply(last_result, is.character)))
     ) {
       stop(
-        "Stopping workflow because result of step '", x$step_id, "' was not character or list of characters."
+        "Stopping workflow because result of step '", x$step_id,
+        "' was not character or list of characters."
       )
     }
 
@@ -128,4 +108,35 @@ extract_arg.operationparam <- function(x, result_path, ...) {
   }
 
   stop("Unknown operationparam type '", x$type, "'.", call. = FALSE)
+}
+
+get_last_result_from_file <- function(
+  step_id,
+  result_path = system.file("scripts", "peitho_files", "results_summary.json", package = "PEITHO")
+) {
+  if (file.exists(result_path)) {
+    result_list <- jsonlite::fromJSON(result_path, simplifyVector = FALSE)
+  } else {
+    result_list <- list()
+  }
+
+  last_step_id <- as.integer(step_id) - 1L
+  if (!any(last_step_id %in% sapply(result_list, function(res) res$entry))) {
+    stop(
+      "Result for previous step '", last_step_id, "' not found in results JSON.",
+      call. = FALSE
+    )
+  }
+
+  res_indx <- which(sapply(result_list, function(res) res$entry) == last_step_id)
+
+  # get results value <- SHOULD THIS BE DONE LATER?
+  if (result_list[[res_indx]][["errors"]] != "") {
+    stop(
+      "Stopping workflow because of error during step '", step_id, "': ",
+      result_list[[res_indx]][["errors"]]
+    )
+  }
+
+  result_list[[res_indx]][["result"]]
 }
