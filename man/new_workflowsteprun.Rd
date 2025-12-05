@@ -9,7 +9,8 @@ new_workflowsteprun(step, args, output = NULL, error = NULL, ...)
 \arguments{
 \item{step}{A `workflowstep` object representing the step definition.}
 
-\item{args}{A list of arguments that were passed to the step's operation.}
+\item{args}{A list of arguments that were passed to the step's operation.
+Contains actual values used during execution (e.g. results of previous steps).}
 
 \item{output}{The output produced by the step, if successful.}
 

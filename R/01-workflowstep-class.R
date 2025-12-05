@@ -7,6 +7,7 @@
 #' and any additional metadata.
 #' @param step   A `workflowstep` object representing the step definition.
 #' @param args   A list of arguments that were passed to the step's operation.
+#'  Contains actual values used during execution (e.g. results of previous steps).
 #' @param output The output produced by the step, if successful.
 #' @param error  An error object if the step failed, otherwise `NULL`.
 #' @param ...    Additional metadata to store with the step run.
@@ -23,7 +24,7 @@ new_workflowsteprun <- function(step, args, output = NULL, error = NULL, ...) {
   structure(
     list(
       step   = step,   # the workflowstep definition at run time
-      #args   = args,   # actual arguments passed to the function
+      args   = args,   # actual arguments passed to the function
       output = output, # result (if no error)
       error  = error,  # condition object (if any)
       meta   = list(...)
@@ -41,6 +42,7 @@ print.workflowsteprun <- function(x, ...) {
   cat("<workflowsteprun>\n")
   cat("  step id:   ", x$step$id, "  (", x$step$name, ")\n", sep = "")
   cat("  operation: ", x$step$operation, "\n", sep = "")
+  cat("  args:      ", paste(names(x$args), collapse = ", "), "\n", sep = "")
   cat("  has error: ", !is.null(x$error), "\n", sep = "")
   cat("  available fields: ", paste(names(x), collapse = ", "), "\n", sep = "")
   invisible(x)
@@ -52,12 +54,18 @@ print.workflowsteprun <- function(x, ...) {
 #' @param ... Additional arguments (not used).
 #' @export
 summary.workflowsteprun <- function(x, ...) {
+  if (length(x$error) > 0) {
+    is_error <- !sapply(x$error, is.null)
+  } else {
+    is_error <- !is.null(x$error)
+  }
+
   list(
     entry      = x$step$id,
     name       = x$step$name,
     label      = x$step$label,
-    result     = if (!is.null(x$error)) NULL else x$output,
-    errors     = if (!is.null(x$error)) conditionMessage(x$error) else ""
+    result     = x$output,
+    errors     = if (!any(is_error)) "" else sapply(x$error[is_error], conditionMessage)
   )
 }
 
@@ -232,7 +240,7 @@ run_step.workflowstep <- function(
     loop_values <- args[[loop_index]]
     runs <- lapply(loop_values, function(v) {
       args[[loop_index]] <- v
-      run_with_error(fn, args)
+      run_with_error(fn, args) # <--- RUN FUNCTION HERE, loop run
     })
     results <- lapply(runs, `[[`, "output")
     errors  <- lapply(runs, `[[`, "error")
@@ -245,7 +253,7 @@ run_step.workflowstep <- function(
       error  = errors
     )
   } else {
-    run <- run_with_error(fn, args)
+    run <- run_with_error(fn, args) # <--- RUN FUNCTION HERE, single run
     steprun <- new_workflowsteprun(
       step   = step,
       args   = args,
