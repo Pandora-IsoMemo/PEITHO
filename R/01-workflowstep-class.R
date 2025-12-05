@@ -104,9 +104,6 @@ new_workflowstep <- function(
   name            = NULL,
   label           = NULL,
   comments        = "",
-  #prompt   = "",
-  #source_external = "",
-  #result_name     = "",             # whether to include last result as input
   params          = list(),          # free-form list for step-specific parameters
   loop            = "",              # loop variable name (if any)
   ...
@@ -128,9 +125,6 @@ new_workflowstep <- function(
       label           = label,
       comments        = comments,
       operation       = operation,
-      #prompt          = prompt,
-      #source_external = source_external,
-      #result_name     = result_name,
       params          = params,
       loop            = loop,
       dots            = list(...)     # extension point
@@ -178,6 +172,7 @@ run_with_error <- function(fn, args) {
 #' with the result or error from the step execution.
 #' @param step  A `workflowstep` object representing the step to execute.
 #' @param state A `workflowstate` object representing the current state of the workflow.
+#' @param result_path Path to the results summary JSON file.
 #' @param env   An environment to look up the operation function. Default is the parent frame.
 #' @param ...   Additional arguments (not used).
 #' @return A `workflowsteprun` object recording the execution of the step.
@@ -185,8 +180,7 @@ run_with_error <- function(fn, args) {
 run_step.workflowstep <- function(
   step,
   state, # possibly we'll need last results from here later
-  path_to_folder,
-  result_path = system.file("scripts", "peitho_files", "results.json", package = "PEITHO"),
+  result_path = system.file("scripts", "peitho_files", "results_summary.json", package = "PEITHO"),
   env = parent.frame(),  # where to look up operation
   ...
 ) {
@@ -231,7 +225,10 @@ run_step.workflowstep <- function(
 
   # if loop_param and loop_arg disagree, throw error
   if (!identical(which(is_param_config_loop), which(unname(is_arg_list)))) {
-    stop("Mismatch between 'loop' setting in operationparam and actual argument value.", call. = FALSE)
+    stop(
+      "Mismatch between 'loop' setting in operationparam and actual argument value.",
+      call. = FALSE
+    )
   }
 
   # 3) actually call the function, if needed than in a loop
@@ -261,10 +258,6 @@ run_step.workflowstep <- function(
       error  = run$error
     )
   }
-
-  # # 5) update state -> shifted to parent function
-  # state <- add_steprun(state, steprun)
-  # state
 
   steprun
 }

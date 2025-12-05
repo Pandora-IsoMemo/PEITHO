@@ -29,7 +29,7 @@ new_WebText <- function(
     errors     = errors
   )
 
-  class(x) <- "WebText"
+  class(x) <- c("WebText", "list")
   validate_WebText(x)
 }
 

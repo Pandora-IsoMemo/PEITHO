@@ -7,8 +7,7 @@
 \method{run_step}{workflowstep}(
   step,
   state,
-  path_to_folder,
-  result_path = system.file("scripts", "peitho_files", "results.json", package =
+  result_path = system.file("scripts", "peitho_files", "results_summary.json", package =
     "PEITHO"),
   env = parent.frame(),
   ...
@@ -18,6 +17,8 @@
 \item{step}{A `workflowstep` object representing the step to execute.}
 
 \item{state}{A `workflowstate` object representing the current state of the workflow.}
+
+\item{result_path}{Path to the results summary JSON file.}
 
 \item{env}{An environment to look up the operation function. Default is the parent frame.}
 
