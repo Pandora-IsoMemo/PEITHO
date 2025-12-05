@@ -65,7 +65,17 @@ summary.workflowsteprun <- function(x, ...) {
     name       = x$step$name,
     label      = x$step$label,
     result     = x$output,
-    errors     = if (!any(is_error)) "" else sapply(x$error[is_error], conditionMessage)
+    errors     = if (!any(is_error)) "" else {
+      sapply(x$error[is_error], function(e) {
+        if (inherits(e, "condition")) {
+          conditionMessage(e)
+        } else if (is.character(e)) {
+          e
+        } else {
+          as.character(e)
+        }
+      })
+    }
   )
 }
 
@@ -95,6 +105,8 @@ resolve_operation <- function(op_name, env) {
 #' @param label          A label for the step, used in UIs. Defaults to the same as `name`.
 #' @param comments       A character string with comments or description for the step.
 #' @param params         A list of parameters to pass to the operation function.
+#' @param loop           A character string indicating if the step should be looped over.
+#'                       Can be "yes", "no", or "auto".
 #' @param ...            Additional metadata to store with the step.
 #' @return A `workflowstep` object.
 #' @export
@@ -172,15 +184,13 @@ run_with_error <- function(fn, args) {
 #' with the result or error from the step execution.
 #' @param step  A `workflowstep` object representing the step to execute.
 #' @param state A `workflowstate` object representing the current state of the workflow.
-#' @param result_path Path to the results summary JSON file.
 #' @param env   An environment to look up the operation function. Default is the parent frame.
 #' @param ...   Additional arguments (not used).
 #' @return A `workflowsteprun` object recording the execution of the step.
 #' @export
 run_step.workflowstep <- function(
   step,
-  state, # possibly we'll need last results from here later
-  result_path = system.file("scripts", "peitho_files", "results_summary.json", package = "PEITHO"),
+  state,
   env = parent.frame(),  # where to look up operation
   ...
 ) {
@@ -201,7 +211,7 @@ run_step.workflowstep <- function(
     if (!inherits(param, "operationparam")) {
       stop("All entries in 'params' must be of class 'operationparam'.", call. = FALSE)
     }
-    arg_list <- extract_arg(param, result_path = result_path)
+    arg_list <- extract_arg(param, last_result = as.list(state$last_result))
     args <- c(args, arg_list)
   }
 

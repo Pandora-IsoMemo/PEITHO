@@ -4,21 +4,12 @@
 \alias{run_step.workflowstep}
 \title{Run a workflow step}
 \usage{
-\method{run_step}{workflowstep}(
-  step,
-  state,
-  result_path = system.file("scripts", "peitho_files", "results_summary.json", package =
-    "PEITHO"),
-  env = parent.frame(),
-  ...
-)
+\method{run_step}{workflowstep}(step, state, env = parent.frame(), ...)
 }
 \arguments{
 \item{step}{A `workflowstep` object representing the step to execute.}
 
 \item{state}{A `workflowstate` object representing the current state of the workflow.}
-
-\item{result_path}{Path to the results summary JSON file.}
 
 \item{env}{An environment to look up the operation function. Default is the parent frame.}
 
