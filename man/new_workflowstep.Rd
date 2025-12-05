@@ -6,34 +6,29 @@
 \usage{
 new_workflowstep(
   id,
+  operation,
   name = NULL,
   label = NULL,
-  operation = NULL,
+  comments = "",
   params = list(),
-  include_last = TRUE,
-  source_external = "None",
+  loop = "",
   ...
 )
 }
 \arguments{
 \item{id}{An integer identifier for the step.}
 
-\item{name}{A human-readable name for the step. Defaults to "Step <id>".}
-
-\item{label}{A label for the step, used in UIs. Defaults to the same as `name`.}
-
 \item{operation}{A character string specifying the name of the function to execute for
 this step, e.g. "strsplit".
 This function must exist in the loaded name space.}
 
+\item{name}{A human-readable name for the step. Defaults to "Step <id>".}
+
+\item{label}{A label for the step, used in UIs. Defaults to the same as `name`.}
+
+\item{comments}{A character string with comments or description for the step.}
+
 \item{params}{A list of parameters to pass to the operation function.}
-
-\item{include_last}{A logical indicating whether to include the last result
-from the workflow state as an input to this step's operation.
-Default is `TRUE`.}
-
-\item{source_external}{A character string indicating the source of external data for this step.
-Default is `"None"`.}
 
 \item{...}{Additional metadata to store with the step.}
 }

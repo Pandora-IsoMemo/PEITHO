@@ -4,7 +4,15 @@
 \alias{run_step.workflowstep}
 \title{Run a workflow step}
 \usage{
-\method{run_step}{workflowstep}(step, state, env = parent.frame(), ...)
+\method{run_step}{workflowstep}(
+  step,
+  state,
+  path_to_folder,
+  result_path = system.file("scripts", "peitho_files", "results.json", package =
+    "PEITHO"),
+  env = parent.frame(),
+  ...
+)
 }
 \arguments{
 \item{step}{A `workflowstep` object representing the step to execute.}
@@ -16,7 +24,7 @@
 \item{...}{Additional arguments (not used).}
 }
 \value{
-The updated `workflowstate` object after executing the step.
+A `workflowsteprun` object recording the execution of the step.
 }
 \description{
 This function executes a single workflow step, updating the workflow state

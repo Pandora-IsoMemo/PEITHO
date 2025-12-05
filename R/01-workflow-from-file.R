@@ -58,7 +58,7 @@ get_inputs <- function(
   input_list
 }
 
-get_results <- function(path_to_folder, result_file = "results.json") {
+get_results <- function(path_to_folder, result_file = "results_summary.json") {
   read_json_if_exists(file.path(path_to_folder, result_file))
 }
 
@@ -105,7 +105,7 @@ make_param_from_arg <- function(
 
     if (!any(varname %in% sapply(result_list, function(res) res$name))) {
       stop(
-        "Variable '", varname, "' not found in results.json.",
+        "Variable '", varname, "' not found in results file.",
         call. = FALSE
       )
     }
@@ -177,8 +177,8 @@ strip_outer_quotes <- function(x) {
 
 #' Extract workflow steps from files in a folder
 #'
-#' @param path_to_folder Path to folder containing `commands.json` and optionally `inputs.txt` or
-#'   `inputs.json` and `results.json`. Default is the package's `peitho_files` folder.
+#' @param path_to_folder Path to folder containing `commands.json` and `inputs.txt` and `results_summary.json`.
+#'  Default is the package's `peitho_files` folder.
 #' @return A list of `workflowstep` objects.
 #' @export
 extract_workflow_from_files <- function(
@@ -186,9 +186,20 @@ extract_workflow_from_files <- function(
 ) {
   # if folder not found return empty list and warn
   if (!dir.exists(path_to_folder)) {
-    warning("PEITHO files not found. No folder '", path_to_folder, "'.")
+    warning("PEITHO files not found. No folder '", path_to_folder, "'. Returning empty workflow.")
     return(list())
   }
+
+  # check if all files exist
+  if (!file.exists(file.path(path_to_folder, "commands.json"))) {
+    warning("commands.json not found in folder '", path_to_folder, "'. Returning empty workflow.")
+    return(list())
+  }
+  if (!file.exists(file.path(path_to_folder, "inputs.json")) && !file.exists(file.path(path_to_folder, "inputs.txt"))) {
+    warning("inputs.txt not found in folder '", path_to_folder, "'. Returning empty workflow.")
+    return(list())
+  }
+
   commands_list <- get_commands(path_to_folder = path_to_folder)
 
   steps <- lapply(seq_along(commands_list), function(step_i) {
