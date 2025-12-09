@@ -5,8 +5,7 @@ test_that("new_WebText creates valid WebText object", {
     text_blocks = c("Some text", "More text"),
     fetched_at = as.POSIXct("2025-11-14 12:00:00"),
     status_code = 200L,
-    warnings = character(),
-    errors = character()
+    warnings = character()
   )
   expect_true(is_WebText(obj))
   expect_equal(obj$url, "https://example.com")
@@ -16,7 +15,6 @@ test_that("new_WebText creates valid WebText object", {
   expect_s3_class(obj, "WebText")
   expect_true(inherits(obj$fetched_at, "POSIXct"))
   expect_type(obj$warnings, "character")
-  expect_type(obj$errors, "character")
 })
 
 test_that("validate_WebText catches invalid input", {

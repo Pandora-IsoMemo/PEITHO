@@ -21,13 +21,17 @@ peitho_user_agent <- function() {
 #' @param user_agent An optional character string specifying the User-Agent
 #'   header for the HTTP request. If `NULL`, a default User-Agent
 #'   string is used.
+#' @param return_text_blocks_only A logical indicating whether to return
+#'   only the extracted text blocks as a character vector (`TRUE`),
+#'   or a full `WebText` object with metadata (`FALSE`). Default is `TRUE`.
 #' @return A `WebText` object containing the extracted text and metadata.
 #' @export
 fetch_WebText <- function(
   url,
   css_selector = "h1, h2, h3, p, li",
   timeout_sec  = 10,
-  user_agent   = NULL
+  user_agent   = NULL,
+  return_text_blocks_only = TRUE
 ) {
   # allow user to set default user agent via options()
   if (is.null(user_agent)) {
@@ -56,44 +60,48 @@ fetch_WebText <- function(
     }
   )
 
-  if (!is.null(resp)) {
-    status_code <- httr2::resp_status(resp)
+  if (is.null(resp)) stop(err_msgs)
 
-    if (status_code >= 400) {
-      err_msgs <- c(err_msgs, paste("HTTP error", status_code))
-    } else {
-      # Parse HTML
-      html <- tryCatch(
-        httr2::resp_body_html(resp),
-        error = function(e) {
-          err_msgs <<- c(err_msgs, paste("Failed to parse HTML:", e$message))
-          NULL
-        }
-      )
+  status_code <- httr2::resp_status(resp)
 
-      if (!is.null(html)) {
-        # Title
-        title_node <- rvest::html_element(html, "title")
-        if (!is.na(title_node) && !is.null(title_node)) {
-          title <- rvest::html_text2(title_node)
-        }
-
-        # Text nodes
-        nodes <- rvest::html_elements(html, css_selector)
-        if (length(nodes) == 0L) {
-          warn_msgs <- c(
-            warn_msgs,
-            paste("No elements matched CSS selector:", css_selector)
-          )
-        }
-
-        text_blocks <- rvest::html_text2(nodes)
-        text_blocks <- stringr::str_squish(text_blocks)
-        text_blocks <- text_blocks[nzchar(text_blocks)]
-        text_blocks <- unique(text_blocks)
-      }
-    }
+  if (status_code >= 400) {
+    err_msgs <- c(err_msgs, paste("HTTP error", status_code))
+    stop(err_msgs)
   }
+
+  # Parse HTML
+  html <- tryCatch(
+    httr2::resp_body_html(resp),
+    error = function(e) {
+      err_msgs <<- c(err_msgs, paste("Failed to parse HTML:", e$message))
+      NULL
+    }
+  )
+
+  if (is.null(html)) stop(err_msgs)
+
+  # Title
+  title_node <- rvest::html_element(html, "title")
+  if (!is.na(title_node) && !is.null(title_node)) {
+    title <- rvest::html_text2(title_node)
+  }
+
+  # Text nodes
+  nodes <- rvest::html_elements(html, css_selector)
+  if (length(nodes) == 0L) {
+    warn_msgs <- c(
+      warn_msgs,
+      paste("No elements matched CSS selector:", css_selector)
+    )
+    warning(paste(warn_msgs, collapse = "\n"))
+  }
+
+  text_blocks <- rvest::html_text2(nodes)
+  text_blocks <- stringr::str_squish(text_blocks)
+  text_blocks <- text_blocks[nzchar(text_blocks)]
+  text_blocks <- unique(text_blocks)
+
+  if (return_text_blocks_only) return(text_blocks)
 
   new_WebText(
     url         = url,
@@ -101,8 +109,7 @@ fetch_WebText <- function(
     text_blocks = text_blocks,
     fetched_at  = Sys.time(),
     status_code = as.integer(status_code),
-    warnings    = warn_msgs,
-    errors      = err_msgs
+    warnings    = warn_msgs
   )
 }
 
