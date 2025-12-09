@@ -19,8 +19,8 @@ new_workflowstep(
 \item{id}{An integer identifier for the step.}
 
 \item{operation}{A character string specifying the name of the function to execute for
-this step, e.g. "strsplit".
-This function must exist in the loaded name space.}
+this step, e.g. "strsplit". This function must exist in the loaded 
+name space or in a custom script environment.}
 
 \item{name}{A human-readable name for the step. Defaults to "Step <id>".}
 

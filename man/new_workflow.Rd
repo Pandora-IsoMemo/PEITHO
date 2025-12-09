@@ -10,6 +10,7 @@ new_workflow(
   current = if (length(steps)) 1L else NA_integer_,
   use_peitho_folder = TRUE,
   path_to_folder = system.file("scripts", "peitho_files", package = "PEITHO"),
+  script = NULL,
   ...
 )
 }
@@ -24,6 +25,9 @@ new_workflow(
 
 \item{path_to_folder}{Path to folder containing `commands.json` and `inputs.txt` and `results_summary.json`.
 Default is the package's `peitho_files` folder.}
+
+\item{script}{An optional R script file defining custom functions for the workflow,
+stored in the `dots` field.}
 
 \item{...}{Additional metadata to store with the workflow.}
 }

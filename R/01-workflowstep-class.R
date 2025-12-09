@@ -99,8 +99,8 @@ resolve_operation <- function(op_name, env) {
 #' including its unique identifier, name, operation, parameters, and other metadata.
 #' @param id             An integer identifier for the step.
 #' @param operation      A character string specifying the name of the function to execute for
-#'                       this step, e.g. "strsplit".
-#'                       This function must exist in the loaded name space.
+#'                       this step, e.g. "strsplit". This function must exist in the loaded 
+#'                       name space or in a custom script environment.
 #' @param name           A human-readable name for the step. Defaults to "Step <id>".
 #' @param label          A label for the step, used in UIs. Defaults to the same as `name`.
 #' @param comments       A character string with comments or description for the step.
@@ -112,21 +112,16 @@ resolve_operation <- function(op_name, env) {
 #' @export
 new_workflowstep <- function(
   id,
-  operation,                         # operation name, must exist in name space
+  operation,                     # function name (incl. custom name in script), exist in name space
   name            = NULL,
   label           = NULL,
   comments        = "",
-  params          = list(),          # free-form list for step-specific parameters
-  loop            = "",              # loop variable name (if any)
+  params          = list(),      # free-form list for step-specific parameters
+  loop            = "",          # loop variable name (if any)
   ...
 ) {
-  if (is.null(name)) {
-    name <- paste("Step", id)
-  }
-
-  if (is.null(label)) {
-    label <- name
-  }
+  if (is.null(name)) name <- paste("Step", id)
+  if (is.null(label)) label <- name
 
   resolve_operation(operation, env = parent.frame())
 

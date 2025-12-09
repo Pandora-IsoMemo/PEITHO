@@ -186,17 +186,17 @@ extract_workflow_from_files <- function(
 ) {
   # if folder not found return empty list and warn
   if (!dir.exists(path_to_folder)) {
-    warning("PEITHO files not found. No folder '", path_to_folder, "'. Returning empty workflow.")
+    logWarn("PEITHO files not found. No folder '", path_to_folder, "'. Returning empty workflow.")
     return(list())
   }
 
   # check if all files exist
   if (!file.exists(file.path(path_to_folder, "commands.json"))) {
-    warning("commands.json not found in folder '", path_to_folder, "'. Returning empty workflow.")
+    logWarn("commands.json not found in folder '", path_to_folder, "'. Returning empty workflow.")
     return(list())
   }
   if (!file.exists(file.path(path_to_folder, "inputs.json")) && !file.exists(file.path(path_to_folder, "inputs.txt"))) {
-    warning("inputs.txt not found in folder '", path_to_folder, "'. Returning empty workflow.")
+    logWarn("inputs.txt not found in folder '", path_to_folder, "'. Returning empty workflow.")
     return(list())
   }
 

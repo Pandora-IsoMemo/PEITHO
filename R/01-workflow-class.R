@@ -46,7 +46,9 @@ print.workflowrun <- function(x, ...) {
 #' @param steps   A list of `workflowstep` objects defining the steps of the workflow.
 #' @param current The index of the current step in the workflow.
 #' @param use_peitho_folder Logical; if `TRUE`, load steps from PEITHO example folder.
-#' @param ...    Additional metadata to store with the workflow.
+#' @param script  An optional R script file defining custom functions for the workflow,
+#'                stored in the `dots` field.
+#' @param ...     Additional metadata to store with the workflow.
 #' @inheritParams extract_workflow_from_files
 #' @return A `workflow` object.
 #' @export
@@ -56,6 +58,7 @@ new_workflow <- function(
   current = if (length(steps)) 1L else NA_integer_,
   use_peitho_folder = TRUE,
   path_to_folder = system.file("scripts", "peitho_files", package = "PEITHO"),
+  script = NULL, # e.g. "functions.R"
   ...
 ) {
   # 1) Decide where steps come from
@@ -64,12 +67,12 @@ new_workflow <- function(
       stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
     }
     if (length(steps)) {
-      warning("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.", call. = FALSE)
+      logWarn("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.", call. = FALSE)
     }
     steps <- extract_workflow_from_files(path_to_folder = path_to_folder)
   } else {
     if (length(steps) == 0L) {
-      warning("No steps provided for workflow.", call. = FALSE)
+      logWarn("No steps provided for workflow.", call. = FALSE)
     }
     # no special meaning for path_to_folder when not using PEITHO files
     path_to_folder <- NULL
@@ -94,6 +97,12 @@ new_workflow <- function(
     current <- max(1L, min(as.integer(current), length(steps)))
   }
 
+  if (!is.null(script)) {
+    script_path <- file.path(path_to_folder, script)
+  } else {
+    script_path <- NULL
+  }
+
   # 4) Build workflow object
   structure(
     list(
@@ -101,6 +110,7 @@ new_workflow <- function(
       steps          = steps,
       current        = current,
       path_to_folder = path_to_folder,
+      script         = script_path,
       dots           = list(...)
     ),
     class = c("workflow", "list")
@@ -139,6 +149,7 @@ print.workflow <- function(x, ...) {
     }
   }
   cat("  path_to_folder: ", x$path_to_folder, "\n", sep = "")
+  cat("  script:        ", x$script %||% "NULL", "\n", sep = "")
   if (length(x$dots)) cat("  dots:   ", length(x$dots), "\n", sep = "")
   cat("  available fields: ", paste(names(x), collapse = ", "), "\n", sep = "")
 
@@ -192,7 +203,7 @@ print.workflow <- function(x, ...) {
 #     if (index >= 1L && index <= length(x$steps)) {
 #       x$current <- index
 #     } else {
-#       warning("Index out of range; 'workflow$current' unchanged.", call. = FALSE)
+#       logWarn("Index out of range; 'workflow$current' unchanged.", call. = FALSE)
 #     }
 #     return(x)
 #   }
@@ -203,12 +214,12 @@ print.workflow <- function(x, ...) {
 #     if (length(idx) == 1L) {
 #       x$current <- idx
 #     } else {
-#       warning("No step with matching 'id'; 'workflow$current' unchanged.", call. = FALSE)
+#       logWarn("No step with matching 'id'; 'workflow$current' unchanged.", call. = FALSE)
 #     }
 #     return(x)
 #   }
 
-#   warning("Provide either 'index' or 'id' to goto_step().", call. = FALSE)
+#   logWarn("Provide either 'index' or 'id' to goto_step().", call. = FALSE)
 #   x
 # }
 
@@ -220,6 +231,7 @@ print.workflow <- function(x, ...) {
 #' @param to An integer index of the step to end at.
 #' @param stop_on_error Logical; if `TRUE`, stop execution on the first error.
 #' @param results_file Name of the results summary file to update (default: "results_summary.json").
+#' @param env An environment to look up operation functions. Default is the parent frame.
 #' @param ... Additional arguments passed to `run.workflowstep()`.
 #' @return A list containing the final workflow, state, and results of each step.
 #' @export
@@ -230,10 +242,11 @@ run.workflow <- function(
   to    = length(object$steps),
   stop_on_error = TRUE,
   results_file = "results_summary.json",
+  env = parent.frame(),
   ...
 ) {
   if (length(object$steps) == 0L) {
-    warning("Workflow has no steps.")
+    logWarn("Workflow has no steps.")
     return(
       list(
         workflow = object,
@@ -241,6 +254,23 @@ run.workflow <- function(
         results  = list()
       )
     )
+  }
+
+  script_path <- object$script
+  if (!is.null(script_path)) {
+    if (!file.exists(script_path)) {
+      stop("Custom script file not found: ", script_path, call. = FALSE)
+    }
+
+    if (!is_running_online()) {
+      logInfo("Loading custom script for workflow: ", script_path)
+      script_env <- new.env(parent = env)
+      sys.source(script_path, envir = script_env)
+
+      env <- script_env  # use this env for all steps
+    } else {
+      logWarn("Running online; skipping loading custom script: ", script_path)
+    }
   }
 
   if (length(state) == 0L) {
@@ -266,8 +296,8 @@ run.workflow <- function(
     i <- idxs[j]
     step <- object$steps[[i]]
 
-    # run the step
-    steprun <- run(step, state, ...)
+    # run the step, with env explicitly passed
+    steprun <- run(step, state, env = env, ...)
 
     # update workflow state and append steprun
     state <- add_steprun(state, steprun, idx = i)
