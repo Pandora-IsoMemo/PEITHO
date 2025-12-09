@@ -93,7 +93,7 @@ fetch_WebText <- function(
       warn_msgs,
       paste("No elements matched CSS selector:", css_selector)
     )
-    warning(paste(warn_msgs, collapse = "\n"))
+    logWarn(paste(warn_msgs, collapse = "\n"))
   }
 
   text_blocks <- rvest::html_text2(nodes)

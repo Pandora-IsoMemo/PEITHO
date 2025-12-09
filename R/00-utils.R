@@ -9,3 +9,7 @@
 #' @return Left value if not NULL, otherwise right value.
 #' @export
 `%||%` <- function(a, b) if (!is.null(a)) a else b
+
+is_running_online <- function() {
+  as.logical(Sys.getenv("IS_SHINYPROXY") != "", unset = "FALSE")
+}
