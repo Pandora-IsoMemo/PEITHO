@@ -145,101 +145,72 @@ print.workflow <- function(x, ...) {
   invisible(x)
 }
 
-#' Accessor functions ------------------------------------------------------
+# Accessor functions (some added later) ----------------------------------------
 
-#' Get the current step of the workflow
-#'
-#' @param x A `workflow` object.
-#' @param ... Additional arguments (not used).
-#' @return The current `workflow_step` object, or `NULL` if no current step.
-#' @export
-current_step.workflow <- function(x, ...) {
-  if (length(x$steps) == 0L || is.na(x$current)) {
-    return(NULL)
-  }
-  x$steps[[x$current]]
-}
+# current_step.workflow <- function(x, ...) {
+#   if (length(x$steps) == 0L || is.na(x$current)) {
+#     return(NULL)
+#   }
+#   x$steps[[x$current]]
+# }
 
-#' Move to the next step in the workflow
-#'
-#' @param x A `workflow` object.
-#' @param wrap Logical; if `TRUE`, wrap around to the first step when at the end.
-#' @param ... Additional arguments (not used).
-#' @return The updated `workflow` object with the current step advanced.
-#' @export
-next_step.workflow <- function(x, wrap = FALSE, ...) {
-  if (length(x$steps) == 0L || is.na(x$current)) {
-    return(x)
-  }
+# next_step.workflow <- function(x, wrap = FALSE, ...) {
+#   if (length(x$steps) == 0L || is.na(x$current)) {
+#     return(x)
+#   }
 
-  if (x$current < length(x$steps)) {
-    x$current <- x$current + 1L
-  } else if (wrap) {
-    x$current <- 1L
-  } # else stay at last
+#   if (x$current < length(x$steps)) {
+#     x$current <- x$current + 1L
+#   } else if (wrap) {
+#     x$current <- 1L
+#   } # else stay at last
 
-  x
-}
+#   x
+# }
 
-#' Move to the previous step in the workflow
-#'
-#' @param x A `workflow` object.
-#' @param wrap Logical; if `TRUE`, wrap around to the last step when at the beginning.
-#' @param ... Additional arguments (not used).
-#' @return The updated `workflow` object with the current step moved back.
-#' @export
-previous_step.workflow <- function(x, wrap = FALSE, ...) {
-  if (length(x$steps) == 0L || is.na(x$current)) {
-    return(x)
-  }
+# previous_step.workflow <- function(x, wrap = FALSE, ...) {
+#   if (length(x$steps) == 0L || is.na(x$current)) {
+#     return(x)
+#   }
 
-  if (x$current > 1L) {
-    x$current <- x$current - 1L
-  } else if (wrap) {
-    x$current <- length(x$steps)
-  } # else stay at first
+#   if (x$current > 1L) {
+#     x$current <- x$current - 1L
+#   } else if (wrap) {
+#     x$current <- length(x$steps)
+#   } # else stay at first
 
-  x
-}
+#   x
+# }
 
+# goto_step.workflow <- function(x, index = NULL, id = NULL, ...) {
+#   if (length(x$steps) == 0L || is.na(x$current)) {
+#     return(x)
+#   }
 
-#' Go to a specific step in the workflow
-#'
-#' @param x A `workflow` object.
-#' @param index An integer index of the step to go to.
-#' @param id An integer id of the step to go to.
-#' @param ... Additional arguments (not used).
-#' @return The updated `workflow` object with the current step set.
-#' @export
-goto_step.workflow <- function(x, index = NULL, id = NULL, ...) {
-  if (length(x$steps) == 0L || is.na(x$current)) {
-    return(x)
-  }
+#   if (!is.null(index)) {
+#     index <- as.integer(index)
+#     if (index >= 1L && index <= length(x$steps)) {
+#       x$current <- index
+#     } else {
+#       warning("Index out of range; 'workflow$current' unchanged.", call. = FALSE)
+#     }
+#     return(x)
+#   }
 
-  if (!is.null(index)) {
-    index <- as.integer(index)
-    if (index >= 1L && index <= length(x$steps)) {
-      x$current <- index
-    } else {
-      warning("Index out of range; 'workflow$current' unchanged.", call. = FALSE)
-    }
-    return(x)
-  }
+#   if (!is.null(id)) {
+#     ids <- vapply(x$steps, function(s) s$id, integer(1))
+#     idx <- which(ids == as.integer(id))
+#     if (length(idx) == 1L) {
+#       x$current <- idx
+#     } else {
+#       warning("No step with matching 'id'; 'workflow$current' unchanged.", call. = FALSE)
+#     }
+#     return(x)
+#   }
 
-  if (!is.null(id)) {
-    ids <- vapply(x$steps, function(s) s$id, integer(1))
-    idx <- which(ids == as.integer(id))
-    if (length(idx) == 1L) {
-      x$current <- idx
-    } else {
-      warning("No step with matching 'id'; 'workflow$current' unchanged.", call. = FALSE)
-    }
-    return(x)
-  }
-
-  warning("Provide either 'index' or 'id' to goto_step().", call. = FALSE)
-  x
-}
+#   warning("Provide either 'index' or 'id' to goto_step().", call. = FALSE)
+#   x
+# }
 
 #' Run the entire workflow
 #'
