@@ -243,29 +243,29 @@ goto_step.workflow <- function(x, index = NULL, id = NULL, ...) {
 
 #' Run the entire workflow
 #'
-#' @param wf A `workflow` object.
+#' @param object A `workflow` object.
 #' @param state A `workflowstate` object representing the initial state.
 #' @param from An integer index of the step to start from.
 #' @param to An integer index of the step to end at.
 #' @param stop_on_error Logical; if `TRUE`, stop execution on the first error.
 #' @param results_file Name of the results summary file to update (default: "results_summary.json").
-#' @param ... Additional arguments passed to `run_step()`.
+#' @param ... Additional arguments passed to `run.workflowstep()`.
 #' @return A list containing the final workflow, state, and results of each step.
 #' @export
-run_workflow.workflow <- function(
-  wf,
+run.workflow <- function(
+  object,
   state = list(),
   from  = 1L,
-  to    = length(wf$steps),
+  to    = length(object$steps),
   stop_on_error = TRUE,
   results_file = "results_summary.json",
   ...
 ) {
-  if (length(wf$steps) == 0L) {
+  if (length(object$steps) == 0L) {
     warning("Workflow has no steps.")
     return(
       list(
-        workflow = wf,
+        workflow = object,
         state    = state,
         results  = list()
       )
@@ -275,7 +275,7 @@ run_workflow.workflow <- function(
   if (length(state) == 0L) {
     state <- ""
     # get input param from first step
-    for (p in wf$steps[[1]]$params) {
+    for (p in object$steps[[1]]$params) {
       if (p$type == "input") {
         state <- p$value
         break
@@ -288,33 +288,33 @@ run_workflow.workflow <- function(
   }
 
   from <- max(1L, as.integer(from))
-  to   <- min(length(wf$steps), as.integer(to))
+  to   <- min(length(object$steps), as.integer(to))
   idxs <- seq(from, to)
 
   for (j in seq_along(idxs)) {
     i <- idxs[j]
-    step <- wf$steps[[i]]
+    step <- object$steps[[i]]
 
     # run the step
-    steprun <- run_step(step, state, ...)
+    steprun <- run(step, state, ...)
 
     # update workflow state and append steprun
     state <- add_steprun(state, steprun, idx = i)
     # save summary to results file
     steprun_summary <- summary(steprun)
 
-    if (!is.null(wf$path_to_folder)) {
-      if (!file.exists(file.path(wf$path_to_folder, results_file))) {
+    if (!is.null(object$path_to_folder)) {
+      if (!file.exists(file.path(object$path_to_folder, results_file))) {
         # create empty results file
         jsonlite::write_json(
           list(),
-          file.path(wf$path_to_folder, results_file), auto_unbox = TRUE, pretty = TRUE
+          file.path(object$path_to_folder, results_file), auto_unbox = TRUE, pretty = TRUE
         )
       }
       update_json_summary(
         steprun_summary,
         idx = i,
-        path_to_folder = wf$path_to_folder,
+        path_to_folder = object$path_to_folder,
         results_file = results_file
       )
     }
@@ -327,7 +327,7 @@ run_workflow.workflow <- function(
     }
   }
 
-  new_workflowrun(wf, state)
+  new_workflowrun(object, state)
 }
 
 

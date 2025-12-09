@@ -65,26 +65,20 @@ print.operationparam <- function(x, ...) {
   invisible(x)
 }
 
-#' Extract argument value from operationparam object
-#' @param x A `operationparam` object.
-#' @param last_result The result from the previous step, used if the parameter type is "result".
-#' @param ... Additional arguments (not used).
-#' @return A list containing the argument value, named if applicable.
-#' @export
-extract_arg.operationparam <- function(
-  x,
+extract_arg_list <- function(
+  operationparam,
   last_result = list(""),
   ...
 ) {
-  if (x$type %in% c("input", "literal")) {
-    if (x$name != "") {
-      return(setNames(list(x$value), x$name))
+  if (operationparam$type %in% c("input", "literal")) {
+    if (operationparam$name != "") {
+      return(setNames(list(operationparam$value), operationparam$name))
     } else {
-      return(list(x$value))
+      return(list(operationparam$value))
     }
   }
 
-  if (x$type == "result") {
+  if (operationparam$type == "result") {
     #last_result <- get_last_result_from_file(x$step_id)
 
     # check if result is character or list of characters
@@ -93,21 +87,21 @@ extract_arg.operationparam <- function(
         (is.list(last_result) && !all(sapply(last_result, is.character)))
     ) {
       stop(
-        "Stopping workflow because result of step '", x$step_id,
+        "Stopping workflow because result of step '", operationparam$step_id,
         "' was not character or list of characters."
       )
     }
 
     arg_value <- last_result
 
-    if (x$name != "") {
-      return(setNames(list(arg_value), x$name))
+    if (operationparam$name != "") {
+      return(setNames(list(arg_value), operationparam$name))
     } else {
       return(list(arg_value))
     }
   }
 
-  stop("Unknown operationparam type '", x$type, "'.", call. = FALSE)
+  stop("Unknown operationparam type '", operationparam$type, "'.", call. = FALSE)
 }
 
 get_last_result_from_file <- function(

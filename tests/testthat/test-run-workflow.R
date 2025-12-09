@@ -17,10 +17,10 @@ step2 <- new_workflowstep(
 
 # Test running a workflow with two steps
 
-test_that("run_workflow.workflow executes all steps and returns results", {
+test_that("run.workflow executes all steps and returns results", {
   wf <- new_workflow(name = "Test Workflow", steps = list(step1, step2), use_peitho_folder = FALSE)
   state <- new_workflowstate(initial_input = "hallo, test")
-  result <- run_workflow.workflow(wf, state)
+  result <- run.workflow(wf, state)
   expect_type(result, "list")
   expect_s3_class(result$workflow, "workflow")
   expect_s3_class(result$state, "workflowstate")
@@ -31,13 +31,13 @@ test_that("run_workflow.workflow executes all steps and returns results", {
 
 # Test workflow with error in step
 
-test_that("run_workflow.workflow handles step error gracefully when stop_on_error = FALSE", {
+test_that("run.workflow handles step error gracefully when stop_on_error = FALSE", {
   error_fn <- function() stop("fail")
   assign("error_fn", error_fn, envir = .GlobalEnv)
   step_err <- new_workflowstep(id = 3, operation = "error_fn")
   wf <- new_workflow(name = "Workflow with error", steps = list(step1, step_err, step2), use_peitho_folder = FALSE)
   state <- new_workflowstate(initial_input = "hallo, test")
-  result <- run_workflow.workflow(wf, state, stop_on_error = FALSE)
+  result <- run.workflow(wf, state, stop_on_error = FALSE)
   expect_type(result, "list")
   expect_s3_class(result$workflow, "workflow")
   expect_s3_class(result$state, "workflowstate")
@@ -48,10 +48,10 @@ test_that("run_workflow.workflow handles step error gracefully when stop_on_erro
 
 # Test workflow with no steps
 
-test_that("run_workflow.workflow returns empty results for workflow with no steps", {
+test_that("run.workflow returns empty results for workflow with no steps", {
   wf <- new_workflow(name = "Empty Workflow", steps = list(), use_peitho_folder = FALSE)
   state <- new_workflowstate(initial_input = "hallo, test")
-  result <- run_workflow.workflow(wf, state)
+  result <- run.workflow(wf, state)
   expect_type(result, "list")
   expect_s3_class(result$workflow, "workflow")
   expect_s3_class(result$state, "workflowstate")

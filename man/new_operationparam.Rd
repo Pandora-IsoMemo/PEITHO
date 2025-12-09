@@ -42,6 +42,6 @@ new_operationparam(
 A `operationparam` object.
 }
 \description{
-A operation parameter represents a single argument for a step operation.
+An operation parameter represents a single argument for a step operation.
 It stores its position in the argument list, a value, and a type.
 }

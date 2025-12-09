@@ -182,14 +182,14 @@ run_with_error <- function(fn, args) {
 #'
 #' This function executes a single workflow step, updating the workflow state
 #' with the result or error from the step execution.
-#' @param step  A `workflowstep` object representing the step to execute.
+#' @param object  A `workflowstep` object representing the step to execute.
 #' @param state A `workflowstate` object representing the current state of the workflow.
 #' @param env   An environment to look up the operation function. Default is the parent frame.
 #' @param ...   Additional arguments (not used).
 #' @return A `workflowsteprun` object recording the execution of the step.
 #' @export
-run_step.workflowstep <- function(
-  step,
+run.workflowstep <- function(
+  object,
   state,
   env = parent.frame(),  # where to look up operation
   ...
@@ -199,10 +199,10 @@ run_step.workflowstep <- function(
   }
   # 1) resolve the function
   # for a package you might use: env = asNamespace("PEITHO")
-  fn <- resolve_operation(step$operation, env)
+  fn <- resolve_operation(object$operation, env)
 
   # 2) assemble arguments
-  params <- step$params
+  params <- object$params
   if (!is.list(params)) params <- list()
 
   args <- list()
@@ -211,7 +211,7 @@ run_step.workflowstep <- function(
     if (!inherits(param, "operationparam")) {
       stop("All entries in 'params' must be of class 'operationparam'.", call. = FALSE)
     }
-    arg_list <- extract_arg(param, last_result = as.list(state$last_result))
+    arg_list <- extract_arg_list(param, last_result = as.list(state$last_result))
     args <- c(args, arg_list)
   }
 
@@ -254,7 +254,7 @@ run_step.workflowstep <- function(
 
     # return list of results/errors
     steprun <- new_workflowsteprun(
-      step   = step,
+      step   = object,
       args   = args,
       output = results,
       error  = errors
@@ -262,7 +262,7 @@ run_step.workflowstep <- function(
   } else {
     run <- run_with_error(fn, args) # <--- RUN FUNCTION HERE, single run
     steprun <- new_workflowsteprun(
-      step   = step,
+      step   = object,
       args   = args,
       output = run$output,
       error  = run$error
