@@ -12,6 +12,7 @@ new_workflowstep(
   comments = "",
   params = list(),
   loop = "",
+  env = parent.frame(),
   ...
 )
 }
@@ -32,6 +33,8 @@ name space or in a custom script environment.}
 
 \item{loop}{A character string indicating if the step should be looped over.
 Can be "yes", "no", or "auto".}
+
+\item{env}{An environment to look up the operation function. Default is the parent frame.}
 
 \item{...}{Additional metadata to store with the step.}
 }

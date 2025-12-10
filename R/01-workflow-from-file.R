@@ -13,17 +13,14 @@ read_json_if_exists <- function(path) {
   jsonlite::fromJSON(path, simplifyVector = FALSE)
 }
 
-get_commands <- function(path_to_folder, command_file = "commands.json") {
-  read_json_if_exists(file.path(path_to_folder, command_file))
-}
+
 
 get_inputs <- function(
   path_to_folder,
-  #input_file  = "inputs.json",
-  input_file  = "inputs.txt",
+  inputs_file,
   pattern = "@#\\*I\\*#@"
 ) {
-  input_path <- file.path(path_to_folder, input_file)
+  input_path <- file.path(path_to_folder, inputs_file)
 
   # load input.json or input.txt
   if (grepl("\\.json$", input_path)) {
@@ -58,10 +55,6 @@ get_inputs <- function(
   input_list
 }
 
-get_results <- function(path_to_folder, result_file = "results_summary.json") {
-  read_json_if_exists(file.path(path_to_folder, result_file))
-}
-
 is_input_tag <- function(x) {
   grepl("^@#\\*I\\*#@.*@#\\*I\\*#@$", x)
 }
@@ -76,12 +69,13 @@ make_param_from_arg <- function(
   step_i,
   arg_i,
   cmd_loop,
-  path_to_folder
+  path_to_folder,
+  inputs_file,
+  results_file
 ) {
   if (is_input_tag(arg)) {
-    input_list <- get_inputs(path_to_folder = path_to_folder)
-
     varname <- extract_tag_varname(arg, "^@#\\*I\\*#@(.*)@#\\*I\\*#@$")
+    input_list <- get_inputs(path_to_folder = path_to_folder, inputs_file = inputs_file)
 
     if (!varname %in% names(input_list)) {
       stop(
@@ -99,16 +93,15 @@ make_param_from_arg <- function(
       loop     = cmd_loop %||% "no"
     )
   } else if (is_result_tag(arg)) {
-    result_list <- get_results(path_to_folder = path_to_folder)
-
     varname <- extract_tag_varname(arg, "^@#\\*L\\*#@(.*)@#\\*L\\*#@$")
 
-    if (!any(varname %in% sapply(result_list, function(res) res$name))) {
-      stop(
-        "Variable '", varname, "' not found in results file.",
-        call. = FALSE
-      )
-    }
+    # result_list <- read_json_if_exists(path = file.path(path_to_folder, results_file))
+    # if (!any(varname %in% sapply(result_list, function(res) res$name))) {
+    #   stop(
+    #     "Variable '", varname, "' not found in results file.",
+    #     call. = FALSE
+    #   )
+    # }
     new_operationparam(
       step_id = step_i,
       position = arg_i,
@@ -175,36 +168,90 @@ strip_outer_quotes <- function(x) {
   }
 }
 
+load_workflow_script_env <- function(script_path, parent_env) {
+  if (is.null(script_path)) return(parent_env)
+  if (!file.exists(script_path)) {
+    stop("Custom script file not found: ", script_path, call. = FALSE)
+  }
+  if (!is_running_online()) {
+    logInfo("Loading custom script for workflow: %s", script_path)
+    script_env <- new.env(parent = parent_env)
+    sys.source(script_path, envir = script_env)
+    return(script_env)
+  } else {
+    logWarn("Running online; skipping loading custom script: %s", script_path)
+    return(parent_env)
+  }
+}
+
 #' Extract workflow steps from files in a folder
 #'
-#' @param path_to_folder Path to folder containing `commands.json` and `inputs.txt` and `results_summary.json`.
+#' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
 #'  Default is the package's `peitho_files` folder.
 #' @return A list of `workflowstep` objects.
 #' @export
-extract_workflow_from_files <- function(
-  path_to_folder = system.file("scripts", "peitho_files", package = "PEITHO")
-) {
+extract_workflow_from_files <- function(workflow_file_paths) {
   # if folder not found return empty list and warn
-  if (!dir.exists(path_to_folder)) {
-    logWarn("PEITHO files not found. No folder '", path_to_folder, "'. Returning empty workflow.")
+  if (!dir.exists(workflow_file_paths$path_to_folder)) {
+    logWarn(
+      "PEITHO files not found. No folder '%s'. Returning empty workflow.",
+      workflow_file_paths$path_to_folder
+    )
     return(list())
   }
 
   # check if all files exist
-  if (!file.exists(file.path(path_to_folder, "commands.json"))) {
-    logWarn("commands.json not found in folder '", path_to_folder, "'. Returning empty workflow.")
+  if (!file.exists(workflow_file_paths$inputs_path)) {
+    logWarn(
+      "%s not found in folder '%s'. Returning empty workflow.",
+      basename(workflow_file_paths$inputs_path),
+      workflow_file_paths$path_to_folder
+    )
     return(list())
   }
-  if (!file.exists(file.path(path_to_folder, "inputs.json")) && !file.exists(file.path(path_to_folder, "inputs.txt"))) {
-    logWarn("inputs.txt not found in folder '", path_to_folder, "'. Returning empty workflow.")
+  if (!file.exists(workflow_file_paths$commands_path)) {
+    logWarn(
+      "%s not found in folder '%s'. Returning empty workflow.",
+      basename(workflow_file_paths$commands_path),
+      workflow_file_paths$path_to_folder
+    )
     return(list())
   }
+  if (!file.exists(workflow_file_paths$results_path)) {
+    logWarn(
+      "%s not found in folder '%s'. Creating empty results file.",
+      basename(workflow_file_paths$results_path),
+      workflow_file_paths$path_to_folder
+    )
+    jsonlite::write_json(
+      list(),
+      workflow_file_paths$results_path,
+      auto_unbox = TRUE,
+      pretty = TRUE
+    )
+  }
+  if (!file.exists(workflow_file_paths$functions_path)) {
+    logInfo(
+      "%s not found in folder '%s'. Using global environment for operations.",
+      basename(workflow_file_paths$functions_path),
+      workflow_file_paths$path_to_folder
+    )
+    env <- parent.frame()
+  } else {
+    env <- load_workflow_script_env(
+      script_path = workflow_file_paths$functions_path,
+      parent_env = parent.frame()
+    )
+  }
 
-  commands_list <- get_commands(path_to_folder = path_to_folder)
+  logDebug("Loading commands from %s", workflow_file_paths$commands_path)
+  commands_list <- read_json_if_exists(path = workflow_file_paths$commands_path)
 
+  logDebug("Extracting %d workflow steps from commands", length(commands_list))
   steps <- lapply(seq_along(commands_list), function(step_i) {
     cmd <- commands_list[[step_i]]
 
+    logDebug("Processing command %s for step %d", cmd$command, step_i)
     parsed   <- parse_args(cmd$args)
     args_vec <- parsed$values
     args_names <- parsed$names
@@ -212,6 +259,7 @@ extract_workflow_from_files <- function(
     # create params
     params <- vector("list", length(args_vec))
     for (arg_i in seq_along(args_vec)) {
+      logDebug("  Processing argument %d: %s", arg_i, args_vec[[arg_i]])
       arg_name <- args_names[arg_i]
       if (!nzchar(arg_name)) arg_name <- NULL
 
@@ -221,7 +269,9 @@ extract_workflow_from_files <- function(
         arg_i    = arg_i,
         step_i   = step_i,
         cmd_loop = cmd$loop,
-        path_to_folder = path_to_folder
+        path_to_folder = workflow_file_paths$path_to_folder,
+        inputs_file = basename(workflow_file_paths$inputs_path),
+        results_file = basename(workflow_file_paths$results_path)
       )
     }
 
@@ -233,7 +283,8 @@ extract_workflow_from_files <- function(
       comments        = cmd$comments %||% "",
       operation       = cmd$command,
       params          = params %||% list(),
-      loop            = cmd$loop %||% "no"
+      loop            = cmd$loop %||% "no",
+      env             = env
     )
   })
 

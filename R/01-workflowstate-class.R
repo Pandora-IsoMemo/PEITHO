@@ -11,6 +11,7 @@ new_workflowstate <- function(initial_input = NULL) {
   structure(
     list(
       initial_input = initial_input,
+      errors        = NULL,            # all errors encountered
       last_result   = initial_input,   # last step’s result
       stepruns      = list()           # list of workflowsteprun objects
     ),
@@ -18,13 +19,35 @@ new_workflowstate <- function(initial_input = NULL) {
   )
 }
 
-truncate_one <- function(x, n = 20) {
-  if (nchar(x) > n) paste0(substr(x, 1, n), " ...") else x
+# helper for truncating
+truncate_one <- function(x, n_char) {
+  if (nchar(x) > n_char) paste0(substr(x, 1, n_char), " ...") else x
 }
 
-truncate_many <- function(vals, n = 20, collapse = ", ") {
+truncate_many <- function(vals, n_char, n_items, collapse = ", ") {
   vals <- as.character(vals)
-  paste(vapply(vals, truncate_one, character(1), n = n), collapse = collapse)
+  if (length(vals) > n_items) {
+    vals <- c(vals[1:n_items], paste0("... (", length(vals) - n_items, " more items)"))
+  }
+  paste(vapply(vals, truncate_one, character(1), n_char = n_char), collapse = collapse)
+}
+
+trunc <- function(val, n_char = 40, n_items = 5) {
+  if (is.null(val)) return("NULL")
+
+  # lists of characters
+  if (is.list(val) && all(vapply(val, is.character, logical(1)))) {
+    return(truncate_many(unlist(val), n_char = n_char, n_items = n_items))
+  }
+
+  # character vectors
+  if (is.character(val) && length(val) > 1) {
+    return(truncate_many(val, n_char = n_char, n_items = n_items))
+  }
+
+  # everything else → treat as scalar
+  val <- as.character(val)
+  truncate_one(val, n_char = n_char)
 }
 
 
@@ -34,30 +57,18 @@ truncate_many <- function(vals, n = 20, collapse = ", ") {
 #' @param ... Additional arguments (not used).
 #' @export
 print.workflowstate <- function(x, ...) {
-  # helper for truncating
-  trunc <- function(val, n = 20) {
-    if (is.null(val)) return("NULL")
-
-    # lists of characters
-    if (is.list(val) && all(vapply(val, is.character, logical(1)))) {
-      return(truncate_many(unlist(val), n = n))
-    }
-
-    # character vectors
-    if (is.character(val) && length(val) > 1) {
-      return(truncate_many(val, n = n))
-    }
-
-    # everything else → treat as scalar
-    val <- as.character(val)
-    truncate_one(val, n = n)
-  }
-
+  # in which step errors occurred?
+  is_error <- sapply(x$stepruns, function(sr) sr$has_error)
   cat("<workflowstate>\n")
+  cat("  stepruns:      ", length(x$stepruns), "\n", sep = "")
+  cat("  has error:    ", any(is_error), "\n", sep = "")
+  if (any(is_error)) {
+    cat("  error in steps:", paste(which(is_error), collapse = ", "), "\n", sep = " ")
+    cat("                 (use summary() to see error details)\n")
+    cat("  first error:   ", trunc(x$stepruns[[which(is_error)[1]]]$error), "\n", sep = "")
+  }
   cat("  initial_input: ", trunc(x$initial_input), "\n", sep = "")
   cat("  last_result:   ", trunc(x$last_result), "\n", sep = "")
-  cat("  stepruns:      ", length(x$stepruns), "\n", sep = "")
-  cat("  available fields: ", paste(names(x), collapse = ", "), "\n", sep = "")
   invisible(x)
 }
 
@@ -99,8 +110,8 @@ add_steprun.workflowstate <- function(x, steprun, idx, ...) {
   } else {
     x$stepruns[[length(x$stepruns) + 1L]] <- steprun
   }
-
-  x$last_result <- if (is.null(steprun$error)) steprun$output else x$last_result
+  x$last_result <- if (!steprun$has_error) steprun$output else x$last_result
+  x$errors <- if (steprun$has_error) c(x$errors, steprun$error) else x$errors
   x
 }
 

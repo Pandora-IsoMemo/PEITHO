@@ -4,12 +4,10 @@
 \alias{extract_workflow_from_files}
 \title{Extract workflow steps from files in a folder}
 \usage{
-extract_workflow_from_files(
-  path_to_folder = system.file("scripts", "peitho_files", package = "PEITHO")
-)
+extract_workflow_from_files(workflow_file_paths)
 }
 \arguments{
-\item{path_to_folder}{Path to folder containing `commands.json` and `inputs.txt` and `results_summary.json`.
+\item{workflow_file_paths}{A list of file paths for workflow files (see `workflow_file_paths()`).
 Default is the package's `peitho_files` folder.}
 }
 \value{

@@ -27,6 +27,11 @@ new_workflowsteprun <- function(step, args, output = NULL, error = NULL, ...) {
       args   = args,   # actual arguments passed to the function
       output = output, # result (if no error)
       error  = error,  # condition object (if any)
+      has_error = if (is.list(error)) {
+        any(!sapply(error, is.null))
+      } else {
+        !is.null(error)
+      },
       meta   = list(...)
     ),
     class = c("workflowsteprun", "list")
@@ -43,8 +48,8 @@ print.workflowsteprun <- function(x, ...) {
   cat("  step id:   ", x$step$id, "  (", x$step$name, ")\n", sep = "")
   cat("  operation: ", x$step$operation, "\n", sep = "")
   cat("  args:      ", paste(names(x$args), collapse = ", "), "\n", sep = "")
-  cat("  has error: ", !is.null(x$error), "\n", sep = "")
-  cat("  available fields: ", paste(names(x), collapse = ", "), "\n", sep = "")
+  cat("  has error: ", x$has_error, "\n", sep = "")
+  cat("  available fields: $", paste(names(x), collapse = ", $"), "\n", sep = "")
   invisible(x)
 }
 
@@ -80,6 +85,7 @@ summary.workflowsteprun <- function(object, ...) {
 }
 
 resolve_operation <- function(op_name, env) {
+  logDebug("Resolving operation function: %s", op_name)
   if (!is.character(op_name) || length(op_name) != 1L || !nzchar(op_name)) {
     stop("'operation' must be a non-empty character string.", call. = FALSE)
   }
@@ -107,6 +113,7 @@ resolve_operation <- function(op_name, env) {
 #' @param params         A list of parameters to pass to the operation function.
 #' @param loop           A character string indicating if the step should be looped over.
 #'                       Can be "yes", "no", or "auto".
+#' @param env            An environment to look up the operation function. Default is the parent frame.
 #' @param ...            Additional metadata to store with the step.
 #' @return A `workflowstep` object.
 #' @export
@@ -118,12 +125,13 @@ new_workflowstep <- function(
   comments        = "",
   params          = list(),      # free-form list for step-specific parameters
   loop            = "",          # loop variable name (if any)
+  env             = parent.frame(),  # where to look up operation
   ...
 ) {
   if (is.null(name)) name <- paste("Step", id)
   if (is.null(label)) label <- name
 
-  resolve_operation(operation, env = parent.frame())
+  resolve_operation(operation, env = env)
 
   structure(
     list(
@@ -162,7 +170,7 @@ print.workflowstep <- function(x, ...) {
     cat("  params:\n")
     str(x$params, indent.str = "    ")
   }
-  cat("  available fields: ", paste(names(x), collapse = ", "), "\n", sep = "")
+  cat("  available fields: $", paste(names(x), collapse = ", $"), "\n", sep = "")
   invisible(x)
 }
 
@@ -202,6 +210,7 @@ run.workflowstep <- function(
 
   args <- list()
 
+  logDebug("Extract arguments for operation '%s'", object$operation)
   for (param in params) {
     if (!inherits(param, "operationparam")) {
       stop("All entries in 'params' must be of class 'operationparam'.", call. = FALSE)
@@ -212,6 +221,7 @@ run.workflowstep <- function(
 
   # find lists among args that need to be looped over
   # (for now we only support looping over a single argument)
+  logDebug("Check for looping over arguments")
   is_arg_list <- logical(length(args))
   is_param_config_loop <- logical(length(args))
   for (idx in seq_along(args)) {
@@ -238,6 +248,7 @@ run.workflowstep <- function(
 
   # 3) actually call the function, if needed than in a loop
   if (any(is_param_config_loop)) {
+    logDebug("Running operation with looping over argument index %d", which(is_param_config_loop))
     loop_index <- which(is_param_config_loop)[1]
     loop_values <- args[[loop_index]]
     runs <- lapply(loop_values, function(v) {
@@ -255,6 +266,7 @@ run.workflowstep <- function(
       error  = errors
     )
   } else {
+    logDebug("Running operation without looping")
     run <- run_with_error(fn, args) # <--- RUN FUNCTION HERE, single run
     steprun <- new_workflowsteprun(
       step   = object,
