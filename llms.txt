@@ -40,6 +40,9 @@ NEWS.md](https://pandora-isomemo.github.io/PEITHO/NEWS.md)
   : Print method for workflowstep objects
 - [`print(`*`<workflowsteprun>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/print.workflowsteprun.md)
   : Print method for workflowsteprun objects
+- [`run()`](https://pandora-isomemo.github.io/PEITHO/reference/run.md) :
+  Run a workflow step This is a generic function to run a workflow step
+  or an entire workflow.
 - [`run(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/run.workflow.md)
   : Run the entire workflow
 - [`run(`*`<workflowstep>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/run.workflowstep.md)
@@ -48,6 +51,8 @@ NEWS.md](https://pandora-isomemo.github.io/PEITHO/NEWS.md)
   : Start Application
 - [`summary(`*`<workflowsteprun>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/summary.workflowsteprun.md)
   : Summary method for workflowsteprun objects
+- [`update()`](https://pandora-isomemo.github.io/PEITHO/reference/update.md)
+  : Update a workflow state after running a step
 - [`update(`*`<workflowstate>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/update.workflowstate.md)
   : Add a workflow step run to the workflow state
 - [`workflow_file_paths()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_file_paths.md)
