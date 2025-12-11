@@ -1,0 +1,7 @@
+{
+  "path_to_folder": "scripts/peitho_files/example_workflow",
+  "inputs": "inputs.json",
+  "commands": "commands.json",
+  "results": "results.json",
+  "functions": "functions.R"
+}

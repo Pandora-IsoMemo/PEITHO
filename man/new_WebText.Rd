@@ -11,8 +11,7 @@ new_WebText(
   text_blocks,
   fetched_at = Sys.time(),
   status_code = NA_integer_,
-  warnings = character(),
-  errors = character()
+  warnings = character()
 )
 }
 \arguments{
@@ -28,8 +27,6 @@ from the page.}
 \item{status_code}{Integer. The HTTP status code of the request.}
 
 \item{warnings}{Character vector. Any warnings encountered during fetching or parsing.}
-
-\item{errors}{Character vector. Any errors encountered during fetching or parsing.}
 }
 \value{
 An object of class `WebText`.
