@@ -1,4 +1,4 @@
-update <- function(x, steprun, idx, ...) {
+update <- function(object, steprun, idx, ...) {
   UseMethod("update")
 }
 
