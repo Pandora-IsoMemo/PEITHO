@@ -330,7 +330,7 @@ run.workflow <- function(
   logDebug("Running workflow from step %d to %d", from, to)
 
   for (j in seq_along(idxs)) {
-    logDebug("Running step %d of %d", j, length(idxs))
+    logInfo("Running step %d of %d", j, length(idxs))
     i <- idxs[j]
     step <- object$steps[[i]]
 

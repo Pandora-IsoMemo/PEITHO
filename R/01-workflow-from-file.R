@@ -243,7 +243,7 @@ extract_workflow_from_files <- function(workflow_file_paths) {
   steps <- lapply(seq_along(commands_list), function(step_i) {
     cmd <- commands_list[[step_i]]
 
-    logDebug("Processing command %s for step %d", cmd$command, step_i)
+    logInfo("Parsing command %s for step %d", cmd$command, step_i)
     parsed   <- parse_args(cmd$args)
     args_vec <- parsed$values
     args_names <- parsed$names

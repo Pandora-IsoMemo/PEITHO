@@ -16,5 +16,5 @@
 ^docs$
 ^pkgdown$
 ^\.github$
-^inst/scripts
+^inst/scripts/drafts
 ^tests/testthat/testdata_large/
