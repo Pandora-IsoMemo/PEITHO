@@ -85,7 +85,7 @@ summary.workflowsteprun <- function(object, ...) {
 }
 
 resolve_operation <- function(op_name, env) {
-  logDebug("Resolving operation function: %s", op_name)
+  logDebug("  Resolving operation function: %s", op_name)
   if (!is.character(op_name) || length(op_name) != 1L || !nzchar(op_name)) {
     stop("'operation' must be a non-empty character string.", call. = FALSE)
   }
@@ -217,7 +217,7 @@ run.workflowstep <- function(
 
   args <- list()
 
-  logDebug("Extract arguments for operation '%s'", object$operation)
+  logDebug("  Extract arguments for operation '%s'", object$operation)
   for (param in params) {
     if (!inherits(param, "operationparam")) {
       stop("All entries in 'params' must be of class 'operationparam'.", call. = FALSE)
@@ -232,7 +232,7 @@ run.workflowstep <- function(
 
   # find lists among args that need to be looped over
   # (for now we only support looping over a single argument)
-  logDebug("Check for looping over arguments")
+  logDebug("  Check for looping over arguments")
   is_arg_list <- detect_list_args(args)
 
   is_param_config_loop <- detect_param_config_loop(params, is_arg_list)
@@ -250,7 +250,7 @@ run.workflowstep <- function(
 
   # 3) actually call the function, if needed then in a loop
   if (any(is_arg_list)) {
-    logDebug("Running operation with looping over argument index %d", which(is_arg_list))
+    logDebug("  Running operation with looping over argument index %d", which(is_arg_list))
     loop_index <- which(is_arg_list)[1]
     loop_values <- args[[loop_index]]
 
@@ -269,7 +269,7 @@ run.workflowstep <- function(
       error  = errors
     )
   } else {
-    logDebug("Running operation without looping")
+    logDebug("  Running operation without looping")
     run <- run_with_error(fn, args) # <--- RUN FUNCTION HERE, single run
     steprun <- new_workflowsteprun(
       step   = object,
