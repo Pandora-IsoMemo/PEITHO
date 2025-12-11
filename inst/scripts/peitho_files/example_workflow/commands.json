@@ -7,8 +7,7 @@
     "command": "simple_split",
     "args": "x=@#*I*#@web_addresses@#*I*#@, pattern=\\n",
     "loop": "no",
-    "prompt": "",
-    "errors": ""
+    "prompt": ""
   },
   {
     "entry": 2,
@@ -18,7 +17,6 @@
     "command": "fetch_WebText",
     "args": "url=@#*L*#@Split1@#*L*#@",
     "loop": "auto",
-    "prompt": "",
-    "errors": ""
+    "prompt": ""
   }
 ]
