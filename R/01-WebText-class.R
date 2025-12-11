@@ -7,7 +7,6 @@
 #' @param fetched_at POSIXct. The timestamp when the content was fetched.
 #' @param status_code Integer. The HTTP status code of the request.
 #' @param warnings Character vector. Any warnings encountered during fetching or parsing.
-#' @param errors Character vector. Any errors encountered during fetching or parsing.
 #' @return An object of class `WebText`.
 #' @export
 new_WebText <- function(
@@ -16,8 +15,7 @@ new_WebText <- function(
   text_blocks,
   fetched_at  = Sys.time(),
   status_code = NA_integer_,
-  warnings    = character(),
-  errors      = character()
+  warnings    = character()
 ) {
   x <- list(
     url        = url,
@@ -25,11 +23,10 @@ new_WebText <- function(
     text       = text_blocks,
     fetched_at = fetched_at,
     status_code = status_code,
-    warnings   = warnings,
-    errors     = errors
+    warnings   = warnings
   )
 
-  class(x) <- "WebText"
+  class(x) <- c("WebText", "list")
   validate_WebText(x)
 }
 
@@ -41,7 +38,6 @@ validate_WebText <- function(x) {
   stopifnot(inherits(x$fetched_at, "POSIXct"), length(x$fetched_at) == 1)
   stopifnot(is.integer(x$status_code), length(x$status_code) == 1)
   stopifnot(is.character(x$warnings))
-  stopifnot(is.character(x$errors))
   invisible(x)
 }
 
@@ -60,10 +56,6 @@ print.WebText <- function(x, ...) {
   if (length(x$warnings) > 0) {
     cat(" Warnings: ", length(x$warnings), "\n", sep = "")
     cat(" (first warning): ", x$warnings[1], "\n", sep = "")
-  }
-  if (length(x$errors) > 0) {
-    cat(" Errors: ", length(x$errors), "\n", sep = "")
-    cat(" (first error): ", x$errors[1], "\n", sep = "")
   }
 
   cat("\nPreview:\n")
