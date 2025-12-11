@@ -11,8 +11,7 @@ new_WebText(
   text_blocks,
   fetched_at = Sys.time(),
   status_code = NA_integer_,
-  warnings = character(),
-  errors = character()
+  warnings = character()
 )
 ```
 
@@ -42,10 +41,6 @@ new_WebText(
 - warnings:
 
   Character vector. Any warnings encountered during fetching or parsing.
-
-- errors:
-
-  Character vector. Any errors encountered during fetching or parsing.
 
 ## Value
 

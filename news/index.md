@@ -1,5 +1,16 @@
 # Changelog
 
+## PEITHO 25.12.0
+
+### New Features
+
+- Introduced a comprehensive workflow management system:
+  - Define, execute, and track multi-step workflows
+  - New core classes: `workflow`, `workflowstep`, `workflowstate`,
+    `workflowsteprun`, `operationparam`
+  - Robust workflow execution with error handling and result tracking
+  - Support for file-based workflow configuration via JSON files
+
 ## PEITHO 25.11.0
 
 ### New Features

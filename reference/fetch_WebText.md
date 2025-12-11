@@ -11,7 +11,8 @@ fetch_WebText(
   url,
   css_selector = "h1, h2, h3, p, li",
   timeout_sec = 10,
-  user_agent = NULL
+  user_agent = NULL,
+  return_text_blocks_only = TRUE
 )
 ```
 
@@ -35,6 +36,12 @@ fetch_WebText(
 
   An optional character string specifying the User-Agent header for the
   HTTP request. If \`NULL\`, a default User-Agent string is used.
+
+- return_text_blocks_only:
+
+  A logical indicating whether to return only the extracted text blocks
+  as a character vector (\`TRUE\`), or a full \`WebText\` object with
+  metadata (\`FALSE\`). Default is \`TRUE\`.
 
 ## Value
 
