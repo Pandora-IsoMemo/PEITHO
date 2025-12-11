@@ -76,20 +76,20 @@ print.workflowstate <- function(x, ...) {
 #' 
 #' This function appends a `workflowsteprun` object to the list of executed step runs
 #' 
-#' @param x A `workflowstate` object.
+#' @param object A `workflowstate` object.
 #' @param steprun A `workflowsteprun` object to add.
 #' @param idx The index at which to add the step run.
 #' @param ... Additional arguments (not used).
 #' @return The updated `workflowstate` object.
 #' @export
-add_steprun.workflowstate <- function(x, steprun, idx, ...) {
-  if (!inherits(x, "workflowstate")) {
+update.workflowstate <- function(object, steprun, idx, ...) {
+  if (!inherits(object, "workflowstate")) {
     stop("Argument 'state' must be of class 'workflowstate'.")
   }
   if (!inherits(steprun, "workflowsteprun")) {
     stop("Argument 'steprun' must be of class 'workflowsteprun'.")
   }
-  if (length(x$initial_input) == 0 && idx == 1L) {
+  if (length(object$initial_input) == 0 && idx == 1L) {
     # set input param from first step if not set
     for (p in steprun$step$params) {
       if (p$type == "input") {
@@ -98,20 +98,19 @@ add_steprun.workflowstate <- function(x, steprun, idx, ...) {
       }
     }
 
-    x$initial_input <- initial_input
+    object$initial_input <- initial_input
   }
 
-  if (idx <= length(x$stepruns)) {
-    x$stepruns[[idx]] <- steprun
+  if (idx <= length(object$stepruns)) {
+    object$stepruns[[idx]] <- steprun
     # remove all later stepruns
-    if (length(x$stepruns) > idx) {
-      x$stepruns <- x$stepruns[1:idx]
+    if (length(object$stepruns) > idx) {
+      object$stepruns <- object$stepruns[1:idx]
     }
   } else {
-    x$stepruns[[length(x$stepruns) + 1L]] <- steprun
+    object$stepruns[[length(object$stepruns) + 1L]] <- steprun
   }
-  x$last_result <- if (!steprun$has_error) steprun$output else x$last_result
-  x$errors <- if (steprun$has_error) c(x$errors, steprun$error) else x$errors
-  x
+  object$last_result <- if (!steprun$has_error) steprun$output else object$last_result
+  object$errors <- if (steprun$has_error) c(object$errors, steprun$error) else object$errors
+  object
 }
-

@@ -79,8 +79,6 @@ extract_arg_list <- function(
   }
 
   if (operationparam$type == "result") {
-    #last_result <- get_last_result_from_file(x$step_id)
-
     # check if result is character or list of characters
     if (
       !is.character(last_result) &&
@@ -104,33 +102,3 @@ extract_arg_list <- function(
   stop("Unknown operationparam type '", operationparam$type, "'.", call. = FALSE)
 }
 
-get_last_result_from_file <- function(
-  step_id,
-  result_path = system.file("scripts", "peitho_files", "results_summary.json", package = "PEITHO")
-) {
-  if (file.exists(result_path)) {
-    result_list <- jsonlite::fromJSON(result_path, simplifyVector = FALSE)
-  } else {
-    result_list <- list()
-  }
-
-  last_step_id <- as.integer(step_id) - 1L
-  if (!any(last_step_id %in% sapply(result_list, function(res) res$entry))) {
-    stop(
-      "Result for previous step '", last_step_id, "' not found in results JSON.",
-      call. = FALSE
-    )
-  }
-
-  res_indx <- which(sapply(result_list, function(res) res$entry) == last_step_id)
-
-  # get results value <- SHOULD THIS BE DONE LATER?
-  if (result_list[[res_indx]][["errors"]] != "") {
-    stop(
-      "Stopping workflow because of error during step '", step_id, "': ",
-      result_list[[res_indx]][["errors"]]
-    )
-  }
-
-  result_list[[res_indx]][["result"]]
-}

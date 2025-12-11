@@ -81,6 +81,16 @@ workflow_file_paths <- function(
 #' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
 #' @param ...     Additional metadata to store with the workflow.
 #' @return A `workflow` object.
+#' @examples
+#' # Create a workflow from files in a folder
+#' wf_paths <- workflow_file_paths(path = "path/to/folder")
+#' wf <- new_workflow(name = "My Workflow", use_peitho_folder = TRUE, workflow_file_paths = wf_paths)
+#'
+#' # Create a workflow from a list of steps
+#' step1 <- new_workflowstep(id = 1, name = "Step 1", operation = "toupper", params = list(new_operationparam("x", "literal", "hello")))
+#' step2 <- new_workflowstep(id = 2, name = "Step 2", operation = "tolower", params = list(new_operationparam("x", "literal", "WORLD")))
+#' wf2 <- new_workflow(name = "Manual Workflow", steps = list(step1, step2), use_peitho_folder = FALSE)
+#'
 #' @export
 new_workflow <- function(
   name    = "Untitled workflow",
@@ -317,7 +327,7 @@ run.workflow <- function(
     steprun <- run(step, state, env = env, ...)
 
     # update workflow state and append steprun
-    state <- add_steprun(state, steprun, idx = i)
+    state <- update(state, steprun, idx = i)
     # save summary to results file and handle errors
     steprun_summary <- summary(steprun)
 

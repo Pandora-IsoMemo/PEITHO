@@ -1,3 +1,5 @@
+# Helper functions for workflow extraction from files
+
 normalize_varname <- function(x) {
   x <- trimws(x)
   gsub(" ", "_", x)
@@ -12,8 +14,6 @@ read_json_if_exists <- function(path) {
   if (!file.exists(path)) return(list())
   jsonlite::fromJSON(path, simplifyVector = FALSE)
 }
-
-
 
 get_inputs <- function(
   path_to_folder,
@@ -95,13 +95,6 @@ make_param_from_arg <- function(
   } else if (is_result_tag(arg)) {
     varname <- extract_tag_varname(arg, "^@#\\*L\\*#@(.*)@#\\*L\\*#@$")
 
-    # result_list <- read_json_if_exists(path = file.path(path_to_folder, results_file))
-    # if (!any(varname %in% sapply(result_list, function(res) res$name))) {
-    #   stop(
-    #     "Variable '", varname, "' not found in results file.",
-    #     call. = FALSE
-    #   )
-    # }
     new_operationparam(
       step_id = step_i,
       position = arg_i,

@@ -1,5 +1,5 @@
-add_steprun <- function(x, steprun, idx, ...) {
-  UseMethod("add_steprun")
+update <- function(x, steprun, idx, ...) {
+  UseMethod("update")
 }
 
 run <- function(object, state, ...) {
