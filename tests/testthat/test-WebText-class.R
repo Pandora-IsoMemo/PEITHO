@@ -18,7 +18,15 @@ test_that("new_WebText creates valid WebText object", {
 })
 
 test_that("validate_WebText catches invalid input", {
-  bad_obj <- list(url = 123, title = TRUE, text = "notalist", fetched_at = "notdate", status_code = "notint", warnings = 1, errors = 2)
+  bad_obj <- list(
+    url = 123,
+    title = TRUE,
+    text = "notalist",
+    fetched_at = "notdate",
+    status_code = "notint",
+    warnings = 1,
+    errors = 2
+  )
   class(bad_obj) <- "WebText"
   expect_error(validate_WebText(bad_obj))
 })

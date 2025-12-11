@@ -10,8 +10,10 @@ test_that("fetch_WebText returns valid WebText object for example.com", {
 
 test_that("fetch_WebText handles invalid URL gracefully", {
   expect_error(
-    fetch_WebText("http://nonexistent.domain.example",
-    return_text_blocks_only = FALSE)
+    fetch_WebText(
+      "http://nonexistent.domain.example",
+      return_text_blocks_only = FALSE
+    )
   )
 })
 

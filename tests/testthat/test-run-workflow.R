@@ -35,7 +35,11 @@ test_that("run.workflow handles step error gracefully when stop_on_error = FALSE
   error_fn <- function() stop("fail")
   assign("error_fn", error_fn, envir = .GlobalEnv)
   step_err <- new_workflowstep(id = 3, operation = "error_fn")
-  wf <- new_workflow(name = "Workflow with error", steps = list(step1, step_err, step2), use_peitho_folder = FALSE)
+  wf <- new_workflow(
+    name = "Workflow with error",
+    steps = list(step1, step_err, step2),
+    use_peitho_folder = FALSE
+  )
   state <- new_workflowstate(initial_input = "hallo, test")
   result <- run.workflow(wf, state, stop_on_error = FALSE)
   expect_type(result, "list")

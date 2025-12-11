@@ -18,7 +18,7 @@ test_that("new_workflowstep sets name and label correctly", {
     operation = "strsplit",
     name = "Custom Name",
     label = "Custom Label"
-)
+  )
   expect_equal(step2$name, "Custom Name")
   expect_equal(step2$label, "Custom Label")
 })
@@ -28,7 +28,7 @@ test_that("new_workflowstep stores params", {
     id = 6,
     operation = "strsplit",
     params = list(x = "hallo, test", split = ", ")
-)
+  )
   expect_equal(step$params$x, "hallo, test")
   expect_equal(step$params$split, ", ")
 })
@@ -83,5 +83,9 @@ test_that("run.workflowstep errors if state is not workflowstate", {
   param1 <- new_operationparam(3, 1, "x", "foo")
   step <- new_workflowstep(id = 3, operation = "strsplit", params = list(param1))
   not_state <- list()
-  expect_error(run.workflowstep(step, not_state, path_to_folder = tempdir()), "must be a 'workflowstate' object")
+  expect_error(run.workflowstep(
+    step,
+    not_state,
+    path_to_folder = tempdir()
+  ), "must be a 'workflowstate' object")
 })

@@ -5,7 +5,7 @@ create_test_files <- function(
   inputs = NULL,
   results = NULL,
   functions = NULL,
-  commands_name = "commands.json",
+  commands_name = "commands.json", # names should be the same as used in workflow_file_paths()
   inputs_name = "inputs.json",
   results_name = "results_summary.json",
   functions_name = "functions.R"
@@ -13,13 +13,22 @@ create_test_files <- function(
   tmpdir <- tempfile("workflowtest_")
   dir.create(tmpdir)
   if (!is.null(commands)) {
-    write(jsonlite::toJSON(commands, auto_unbox = TRUE, pretty = TRUE), file.path(tmpdir, commands_name))
+    write(
+      jsonlite::toJSON(commands, auto_unbox = TRUE, pretty = TRUE),
+      file.path(tmpdir, commands_name)
+    )
   }
   if (!is.null(inputs)) {
-    write(jsonlite::toJSON(inputs, auto_unbox = TRUE, pretty = TRUE), file.path(tmpdir, inputs_name))
+    write(
+      jsonlite::toJSON(inputs, auto_unbox = TRUE, pretty = TRUE),
+      file.path(tmpdir, inputs_name)
+    )
   }
   if (!is.null(results)) {
-    write(jsonlite::toJSON(results, auto_unbox = TRUE, pretty = TRUE), file.path(tmpdir, results_name))
+    write(
+      jsonlite::toJSON(results, auto_unbox = TRUE, pretty = TRUE),
+      file.path(tmpdir, results_name)
+    )
   }
   if (!is.null(functions)) {
     write(functions, file.path(tmpdir, functions_name))
@@ -27,20 +36,26 @@ create_test_files <- function(
   tmpdir
 }
 
-test_that("extract_workflow_from_files returns correct steps and param types from commands.json and inputs.json", {
+test_that("extract_workflow_from_files correctly returns from commands.json and inputs.json", {
   commands <- list(
-    list(name = "Step 1", command = "strsplit", args = "x = @#*I*#@myinput@#*I*#@, pattern= ', '", label = "First Step", loop = "no"),
-    list(name = "Step 2", command = "toupper", args = "x = \"hello world\"", label = "Second Step", loop = "no")
+    list(
+      name = "Step 1",
+      command = "strsplit",
+      args = "x = @#*I*#@myinput@#*I*#@, pattern= ', '",
+      label = "First Step",
+      loop = "no"
+    ),
+    list(
+      name = "Step 2",
+      command = "toupper",
+      args = "x = \"hello world\"",
+      label = "Second Step",
+      loop = "no"
+    )
   )
   inputs <- list(myinput = "foo, bar")
   tmpdir <- create_test_files(commands = commands, inputs = inputs)
-  wf_paths <- workflow_file_paths(
-    path = tmpdir,
-    inputs = "inputs.json",
-    commands = "commands.json",
-    results = "results_summary.json",
-    functions = "functions.R"
-  )
+  wf_paths <- workflow_file_paths(path = tmpdir)
   steps <- extract_workflow_from_files(workflow_file_paths = wf_paths)
   expect_type(steps, "list")
   expect_length(steps, 2)
@@ -62,13 +77,7 @@ test_that("extract_workflow_from_files returns correct steps and param types fro
 
 test_that("extract_workflow_from_files returns empty list if commands.json missing", {
   tmpdir <- create_test_files()
-  wf_paths <- workflow_file_paths(
-    path = tmpdir,
-    inputs = "inputs.json",
-    commands = "commands.json",
-    results = "results_summary.json",
-    functions = "functions.R"
-  )
+  wf_paths <- workflow_file_paths(path = tmpdir)
   steps <- extract_workflow_from_files(workflow_file_paths = wf_paths)
   expect_type(steps, "list")
   expect_length(steps, 0)
@@ -76,18 +85,16 @@ test_that("extract_workflow_from_files returns empty list if commands.json missi
 })
 
 test_that("extract_workflow_from_files returns empty list if inputs.json is missing", {
-  commands <- list(
-    list(name = "Step 1", command = "strsplit", args = "x = @#*I*#@myinput@#*I*#@, pattern = ', '", label = "First Step", loop = "no")
-  )
+  commands <- list(list(
+    name = "Step 1",
+    command = "strsplit",
+    args = "x = @#*I*#@myinput@#*I*#@, pattern = ', '",
+    label = "First Step",
+    loop = "no"
+  ))
   # Provide an empty inputs.json file
   tmpdir <- create_test_files(commands = commands)
-  wf_paths <- workflow_file_paths(
-    path = tmpdir,
-    inputs = "inputs.json",
-    commands = "commands.json",
-    results = "results_summary.json",
-    functions = "functions.R"
-  )
+  wf_paths <- workflow_file_paths(path = tmpdir)
   steps <- extract_workflow_from_files(workflow_file_paths = wf_paths)
   expect_type(steps, "list")
   expect_length(steps, 0)
@@ -96,16 +103,23 @@ test_that("extract_workflow_from_files returns empty list if inputs.json is miss
 
 test_that("extract_workflow_from_files supports custom file names", {
   commands <- list(
-    list(name = "Step 1", command = "strsplit", args = "x = @#*I*#@myinput@#*I*#@, pattern = ', '", label = "First Step", loop = "no")
+    list(
+      name = "Step 1",
+      command = "strsplit",
+      args = "x = @#*I*#@myinput@#*I*#@, pattern = ', '",
+      label = "First Step",
+      loop = "no"
+    )
   )
   inputs <- list(myinput = "foo, bar")
-  tmpdir <- create_test_files(commands = commands, inputs = inputs, commands_name = "custom_commands.json")
+  tmpdir <- create_test_files(
+    commands = commands,
+    inputs = inputs,
+    commands_name = "custom_commands.json"
+  )
   wf_paths <- workflow_file_paths(
     path = tmpdir,
-    inputs = "inputs.json",
-    commands = "custom_commands.json",
-    results = "results_summary.json",
-    functions = "functions.R"
+    commands = "custom_commands.json"
   )
   steps <- extract_workflow_from_files(workflow_file_paths = wf_paths)
   expect_type(steps, "list")
@@ -114,19 +128,19 @@ test_that("extract_workflow_from_files supports custom file names", {
   unlink(tmpdir, recursive = TRUE)
 })
 
-test_that("extract_workflow_from_files parses args as named list and supports multiple param types", {
+test_that("extract_workflow_from_files parses args as named list", {
   commands <- list(
-    list(name = "Step 1", command = "strsplit", args = "x = 'foo, bar', pattern = ', ', n = 2", label = "First Step", loop = "no")
+    list(
+      name = "Step 1",
+      command = "strsplit",
+      args = "x = 'foo, bar', pattern = ', ', n = 2",
+      label = "First Step",
+      loop = "no"
+    )
   )
   inputs <- list(myinput = "foo, bar")
   tmpdir <- create_test_files(commands = commands, inputs = inputs)
-  wf_paths <- workflow_file_paths(
-    path = tmpdir,
-    inputs = "inputs.json",
-    commands = "commands.json",
-    results = "results_summary.json",
-    functions = "functions.R"
-  )
+  wf_paths <- workflow_file_paths(path = tmpdir)
   steps <- extract_workflow_from_files(workflow_file_paths = wf_paths)
   expect_type(steps, "list")
   expect_length(steps, 1)
@@ -137,4 +151,3 @@ test_that("extract_workflow_from_files parses args as named list and supports mu
   expect_equal(steps[[1]]$params[[3]]$value, "2")
   unlink(tmpdir, recursive = TRUE)
 })
-
