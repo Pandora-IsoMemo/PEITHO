@@ -4,14 +4,15 @@
 \alias{run.workflowstep}
 \title{Run a workflow step}
 \usage{
-\method{run}{workflowstep}(object, state, env = parent.frame(), ...)
+\method{run}{workflowstep}(object, state, env = NULL, ...)
 }
 \arguments{
 \item{object}{A `workflowstep` object representing the step to execute.}
 
 \item{state}{A `workflowstate` object representing the current state of the workflow.}
 
-\item{env}{An environment to look up the operation function. Default is the parent frame.}
+\item{env}{An environment to look up the operation function. Defaults to the step's
+own env or the caller's env.}
 
 \item{...}{Additional arguments (not used).}
 }

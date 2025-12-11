@@ -272,7 +272,8 @@ print.workflow <- function(x, ...) {
 #' @param state A `workflowstate` object representing the initial state.
 #' @param from An integer index of the step to start from.
 #' @param to An integer index of the step to end at.
-#' @param env An environment to look up operation functions. Default is the parent frame.
+#' @param env An environment to look up operation functions. Defaults to `NULL`, which uses
+#'  each step's own env or the caller's env.
 #' @param ... Additional arguments passed to `run.workflowstep()`.
 #' @return A list containing the final workflow, state, and results of each step.
 #' @export
@@ -281,7 +282,7 @@ run.workflow <- function(
   state = list(),
   from  = 1L,
   to    = length(object$steps),
-  env = parent.frame(),
+  env = NULL,
   ...
 ) {
   # for now we always stop on error!!!
@@ -316,7 +317,12 @@ run.workflow <- function(
     state <- new_workflowstate(initial_input = state)
   }
 
-  env <- load_workflow_script_env(object$workflow_file_paths$functions_path, parent_env = env)
+  # env is stored in workflowstep or passed, else use parent frame
+  # no need to load functions here again, as each step has its own env
+  # env <- load_workflow_script_env(
+  #   object$workflow_file_paths$functions_path,
+  #   parent_env = env
+  # )
 
   from <- max(1L, as.integer(from))
   to   <- min(length(object$steps), as.integer(to))

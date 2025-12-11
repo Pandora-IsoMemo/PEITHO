@@ -143,6 +143,7 @@ new_workflowstep <- function(
       operation       = operation,
       params          = params,
       loop            = loop,
+      env             = env,
       dots            = list(...)     # extension point
     ),
     class = c("workflowstep", "list")
@@ -188,18 +189,23 @@ run_with_error <- function(fn, args) {
 #' with the result or error from the step execution.
 #' @param object  A `workflowstep` object representing the step to execute.
 #' @param state A `workflowstate` object representing the current state of the workflow.
-#' @param env   An environment to look up the operation function. Default is the parent frame.
+#' @param env   An environment to look up the operation function. Defaults to the step's
+#'  own env or the caller's env.
 #' @param ...   Additional arguments (not used).
 #' @return A `workflowsteprun` object recording the execution of the step.
 #' @export
 run.workflowstep <- function(
   object,
   state,
-  env = parent.frame(),  # where to look up operation
+  env = NULL,  # where to look up operation
   ...
 ) {
   if (!inherits(state, "workflowstate")) {
     stop("'state' must be a 'workflowstate' object.", call. = FALSE)
+  }
+  # default env: use step-specific env if present, else caller’s env
+  if (is.null(env)) {
+    env <- if (!is.null(object$env)) object$env else parent.frame()
   }
   # 1) resolve the function
   # for a package you might use: env = asNamespace("PEITHO")

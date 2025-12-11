@@ -24,8 +24,7 @@ test_that("validate_WebText catches invalid input", {
     text = "notalist",
     fetched_at = "notdate",
     status_code = "notint",
-    warnings = 1,
-    errors = 2
+    warnings = 1
   )
   class(bad_obj) <- "WebText"
   expect_error(validate_WebText(bad_obj))

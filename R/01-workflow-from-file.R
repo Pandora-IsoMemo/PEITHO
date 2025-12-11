@@ -70,8 +70,7 @@ make_param_from_arg <- function(
   arg_i,
   cmd_loop,
   path_to_folder,
-  inputs_file,
-  results_file
+  inputs_file
 ) {
   if (is_input_tag(arg)) {
     varname <- extract_tag_varname(arg, "^@#\\*I\\*#@(.*)@#\\*I\\*#@$")
@@ -263,8 +262,7 @@ extract_workflow_from_files <- function(workflow_file_paths) {
         step_i   = step_i,
         cmd_loop = cmd$loop,
         path_to_folder = workflow_file_paths$path_to_folder,
-        inputs_file = basename(workflow_file_paths$inputs_path),
-        results_file = basename(workflow_file_paths$results_path)
+        inputs_file = basename(workflow_file_paths$inputs_path)
       )
     }
 

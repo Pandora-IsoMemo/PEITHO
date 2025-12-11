@@ -9,7 +9,7 @@
   state = list(),
   from = 1L,
   to = length(object$steps),
-  env = parent.frame(),
+  env = NULL,
   ...
 )
 }
@@ -22,7 +22,8 @@
 
 \item{to}{An integer index of the step to end at.}
 
-\item{env}{An environment to look up operation functions. Default is the parent frame.}
+\item{env}{An environment to look up operation functions. Defaults to `NULL`, which uses
+each step's own env or the caller's env.}
 
 \item{...}{Additional arguments passed to `run.workflowstep()`.}
 }
