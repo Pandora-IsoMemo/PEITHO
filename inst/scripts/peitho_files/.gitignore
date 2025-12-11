@@ -1,4 +1,5 @@
-# Ignore everything in this directory
-*
+# Ignore result files in this and sub-directory
+results*.json
+
 # Except this file
 !.gitignore

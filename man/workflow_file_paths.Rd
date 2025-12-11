@@ -5,11 +5,12 @@
 \title{Helper to get file paths for PEITHO workflow files}
 \usage{
 workflow_file_paths(
-  path = system.file("scripts", "peitho_files", package = "PEITHO"),
-  inputs = "inputs.json",
-  commands = "commands.json",
-  results = "results_summary.json",
-  functions = "functions.R"
+  path = "",
+  inputs = "",
+  commands = "",
+  results = "",
+  functions = "",
+  config_path = system.file("config", "config.json", package = "PEITHO")
 )
 }
 \arguments{
@@ -19,9 +20,11 @@ workflow_file_paths(
 
 \item{commands}{Name of the commands file (default: "commands.json").}
 
-\item{results}{Name of the results summary file (default: "results_summary.json").}
+\item{results}{Name of the results summary file (default: "results.json").}
 
 \item{functions}{Name of the R script file containing custom functions (default: "functions.R").}
+
+\item{config_path}{Path to configuration JSON file (default: package's config.json).}
 }
 \value{
 A list with full paths to the specified files.

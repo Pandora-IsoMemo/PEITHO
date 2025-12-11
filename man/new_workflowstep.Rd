@@ -20,7 +20,7 @@ new_workflowstep(
 \item{id}{An integer identifier for the step.}
 
 \item{operation}{A character string specifying the name of the function to execute for
-this step, e.g. "strsplit". This function must exist in the loaded 
+this step, e.g. "strsplit". This function must exist in the loaded
 name space or in a custom script environment.}
 
 \item{name}{A human-readable name for the step. Defaults to "Step <id>".}
@@ -34,7 +34,8 @@ name space or in a custom script environment.}
 \item{loop}{A character string indicating if the step should be looped over.
 Can be "yes", "no", or "auto".}
 
-\item{env}{An environment to look up the operation function. Default is the parent frame.}
+\item{env}{An environment to look up the operation function. Default is the parent
+frame.}
 
 \item{...}{Additional metadata to store with the step.}
 }

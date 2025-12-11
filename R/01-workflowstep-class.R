@@ -105,7 +105,7 @@ resolve_operation <- function(op_name, env) {
 #' including its unique identifier, name, operation, parameters, and other metadata.
 #' @param id             An integer identifier for the step.
 #' @param operation      A character string specifying the name of the function to execute for
-#'                       this step, e.g. "strsplit". This function must exist in the loaded 
+#'                       this step, e.g. "strsplit". This function must exist in the loaded
 #'                       name space or in a custom script environment.
 #' @param name           A human-readable name for the step. Defaults to "Step <id>".
 #' @param label          A label for the step, used in UIs. Defaults to the same as `name`.
@@ -113,7 +113,8 @@ resolve_operation <- function(op_name, env) {
 #' @param params         A list of parameters to pass to the operation function.
 #' @param loop           A character string indicating if the step should be looped over.
 #'                       Can be "yes", "no", or "auto".
-#' @param env            An environment to look up the operation function. Default is the parent frame.
+#' @param env            An environment to look up the operation function. Default is the parent
+#'                       frame.
 #' @param ...            Additional metadata to store with the step.
 #' @return A `workflowstep` object.
 #' @export
@@ -222,22 +223,13 @@ run.workflowstep <- function(
   # find lists among args that need to be looped over
   # (for now we only support looping over a single argument)
   logDebug("Check for looping over arguments")
-  is_arg_list <- logical(length(args))
-  is_param_config_loop <- logical(length(args))
-  for (idx in seq_along(args)) {
-    is_arg_list[idx] <- is.list(args[[idx]]) && length(args[[idx]]) > 1L
-    if (is_arg_list[idx]) {
-      is_param_config_loop[idx] <- params[[idx]]$loop %in% c("yes", "auto")
-    } else {
-      is_param_config_loop[idx] <- params[[idx]]$loop == "yes"
-    }
-  }
+  is_arg_list <- detect_list_args(args)
 
+  is_param_config_loop <- detect_param_config_loop(params, is_arg_list)
   # if multiple args to loop over, throw error
   if (sum(is_arg_list) > 1 || sum(is_param_config_loop) > 1) {
     stop("Looping over multiple arguments is not supported.", call. = FALSE)
   }
-
   # if loop_param and loop_arg disagree, throw error
   if (!identical(which(is_param_config_loop), which(unname(is_arg_list)))) {
     stop(
@@ -246,11 +238,12 @@ run.workflowstep <- function(
     )
   }
 
-  # 3) actually call the function, if needed than in a loop
-  if (any(is_param_config_loop)) {
-    logDebug("Running operation with looping over argument index %d", which(is_param_config_loop))
-    loop_index <- which(is_param_config_loop)[1]
+  # 3) actually call the function, if needed then in a loop
+  if (any(is_arg_list)) {
+    logDebug("Running operation with looping over argument index %d", which(is_arg_list))
+    loop_index <- which(is_arg_list)[1]
     loop_values <- args[[loop_index]]
+
     runs <- lapply(loop_values, function(v) {
       args[[loop_index]] <- v
       run_with_error(fn, args) # <--- RUN FUNCTION HERE, loop run
@@ -277,4 +270,20 @@ run.workflowstep <- function(
   }
 
   steprun
+}
+
+# helpers ----------------------------------------------------------------------
+
+detect_list_args <- function(args) {
+  vapply(args, function(x) is.list(x) && length(x) > 1L, logical(1))
+}
+
+detect_param_config_loop <- function(params, is_arg_list) {
+  mapply(function(param, is_list) {
+    if (is_list) {
+      param$loop %in% c("yes", "auto")
+    } else {
+      param$loop == "yes"
+    }
+  }, params, is_arg_list)
 }
