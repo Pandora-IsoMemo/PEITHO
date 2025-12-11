@@ -31,7 +31,7 @@ test_that("run.workflow executes all steps and returns results", {
 
 # Test workflow with error in step
 
-test_that("run.workflow handles step error gracefully when stop_on_error = FALSE", {
+test_that("run.workflow stops on error", {
   error_fn <- function() stop("fail")
   assign("error_fn", error_fn, envir = .GlobalEnv)
   step_err <- new_workflowstep(id = 3, operation = "error_fn")
@@ -41,12 +41,7 @@ test_that("run.workflow handles step error gracefully when stop_on_error = FALSE
     use_peitho_folder = FALSE
   )
   state <- new_workflowstate(initial_input = "hallo, test")
-  result <- run.workflow(wf, state, stop_on_error = FALSE)
-  expect_type(result, "list")
-  expect_s3_class(result$workflow, "workflow")
-  expect_s3_class(result$state, "workflowstate")
-  expect_length(result$state$stepruns, 3)
-  expect_true(!is.null(result$state$stepruns[[2]]$error))
+  expect_error(run.workflow(wf, state), "No parameters")
   rm(error_fn, envir = .GlobalEnv)
 })
 

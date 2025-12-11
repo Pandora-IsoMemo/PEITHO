@@ -9,7 +9,6 @@
   state = list(),
   from = 1L,
   to = length(object$steps),
-  stop_on_error = TRUE,
   env = parent.frame(),
   ...
 )
@@ -22,8 +21,6 @@
 \item{from}{An integer index of the step to start from.}
 
 \item{to}{An integer index of the step to end at.}
-
-\item{stop_on_error}{Logical; if `TRUE`, stop execution on the first error.}
 
 \item{env}{An environment to look up operation functions. Default is the parent frame.}
 

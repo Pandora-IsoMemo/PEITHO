@@ -220,6 +220,10 @@ run.workflowstep <- function(
     args <- c(args, arg_list)
   }
 
+  if (length(args) == 0L) {
+    stop("No parameters found for workflow step.", call. = FALSE)
+  }
+
   # find lists among args that need to be looped over
   # (for now we only support looping over a single argument)
   logDebug("Check for looping over arguments")

@@ -92,16 +92,6 @@ workflow_file_paths <- function(
 #' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
 #' @param ...     Additional metadata to store with the workflow.
 #' @return A `workflow` object.
-#' @examples
-#' # Create a workflow from files in a folder
-#' wf_paths <- workflow_file_paths(path = "path/to/folder")
-#' wf <- new_workflow(name = "My Workflow", use_peitho_folder = TRUE, workflow_file_paths = wf_paths)
-#'
-#' # Create a workflow from a list of steps
-#' step1 <- new_workflowstep(id = 1, name = "Step 1", operation = "toupper", params = list(new_operationparam("x", "literal", "hello")))
-#' step2 <- new_workflowstep(id = 2, name = "Step 2", operation = "tolower", params = list(new_operationparam("x", "literal", "WORLD")))
-#' wf2 <- new_workflow(name = "Manual Workflow", steps = list(step1, step2), use_peitho_folder = FALSE)
-#'
 #' @export
 new_workflow <- function(
   name    = "Untitled workflow",
@@ -122,13 +112,13 @@ new_workflow <- function(
       stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
     }
     if (length(steps)) {
-      logWarn("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.", call. = FALSE)
+      logWarn("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.")
     }
     steps <- extract_workflow_from_files(workflow_file_paths = workflow_file_paths)
   } else {
     logDebug("Creating workflow from provided steps...")
     if (length(steps) == 0L) {
-      logWarn("No steps provided for workflow.", call. = FALSE)
+      logWarn("No steps provided for workflow.")
     }
     # if not use PEITHO folder, clear file paths
     workflow_file_paths <- list()
@@ -256,7 +246,7 @@ print.workflow <- function(x, ...) {
 #     if (index >= 1L && index <= length(x$steps)) {
 #       x$current <- index
 #     } else {
-#       logWarn("Index out of range; 'workflow$current' unchanged.", call. = FALSE)
+#       logWarn("Index out of range; 'workflow$current' unchanged.")
 #     }
 #     return(x)
 #   }
@@ -267,12 +257,12 @@ print.workflow <- function(x, ...) {
 #     if (length(idx) == 1L) {
 #       x$current <- idx
 #     } else {
-#       logWarn("No step with matching 'id'; 'workflow$current' unchanged.", call. = FALSE)
+#       logWarn("No step with matching 'id'; 'workflow$current' unchanged.")
 #     }
 #     return(x)
 #   }
 
-#   logWarn("Provide either 'index' or 'id' to goto_step().", call. = FALSE)
+#   logWarn("Provide either 'index' or 'id' to goto_step().")
 #   x
 # }
 
@@ -282,7 +272,6 @@ print.workflow <- function(x, ...) {
 #' @param state A `workflowstate` object representing the initial state.
 #' @param from An integer index of the step to start from.
 #' @param to An integer index of the step to end at.
-#' @param stop_on_error Logical; if `TRUE`, stop execution on the first error.
 #' @param env An environment to look up operation functions. Default is the parent frame.
 #' @param ... Additional arguments passed to `run.workflowstep()`.
 #' @return A list containing the final workflow, state, and results of each step.
@@ -292,10 +281,15 @@ run.workflow <- function(
   state = list(),
   from  = 1L,
   to    = length(object$steps),
-  stop_on_error = TRUE,
   env = parent.frame(),
   ...
 ) {
+  # for now we always stop on error!!!
+  stop_on_error <- TRUE
+
+  if (!inherits(object, "workflow")) {
+    stop("Argument 'object' must be of class 'workflow'.")
+  }
   if (length(object$steps) == 0L) {
     logWarn("Workflow has no steps.")
     return(
