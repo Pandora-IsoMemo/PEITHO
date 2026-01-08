@@ -34,6 +34,6 @@ split_strings <- function(strings, separator) {
   ))
 }
 
-simple_split <- function(x, pattern, ...) {
-  strsplit(x, pattern, ...)[[1]]
+simple_split <- function(x, split, ...) {
+  strsplit(x, split, ...)[[1]]
 }
