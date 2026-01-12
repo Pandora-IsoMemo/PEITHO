@@ -1,3 +1,14 @@
+# PEITHO 26.01.0
+
+## Updates
+
+- Extended the example `workflow` in the `commands.json` file to include a more complex scenario:
+  - After splitting web adresses and fetching urls, the workflow is now also
+    - unlisting the results
+    - pasting the content of the fetched URLs into a single string
+    - examplarily substituting the pattern "e" into the string "HALLO" and
+    - performing a split operation at the pattern "HALLO" on the resulting string.
+  - This showcases the flexibility of the workflow system and its ability to chain multiple operations together.
 
 # PEITHO 25.12.0
 

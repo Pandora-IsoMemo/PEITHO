@@ -165,15 +165,14 @@ load_workflow_script_env <- function(script_path, parent_env) {
   if (!file.exists(script_path)) {
     stop("Custom script file not found: ", script_path, call. = FALSE)
   }
-  if (!is_running_online()) {
-    logInfo("Loading custom script for workflow: %s", script_path)
-    script_env <- new.env(parent = parent_env)
-    sys.source(script_path, envir = script_env)
-    return(script_env)
-  } else {
+  if (is_running_online()) {
     logWarn("Running online; skipping loading custom script: %s", script_path)
     return(parent_env)
   }
+  logInfo("Loading custom script for workflow: %s", script_path)
+  script_env <- new.env(parent = parent_env)
+  sys.source(script_path, envir = script_env)
+  return(script_env)
 }
 
 #' Extract workflow steps from files in a folder
