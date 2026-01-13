@@ -72,7 +72,7 @@ extract_arg_list <- function(
 ) {
   if (operationparam$type %in% c("input", "literal")) {
     if (operationparam$name != "") {
-      return(setNames(list(operationparam$value), operationparam$name))
+      return(stats::setNames(list(operationparam$value), operationparam$name))
     } else {
       return(list(operationparam$value))
     }
@@ -93,7 +93,7 @@ extract_arg_list <- function(
     arg_value <- last_result
 
     if (operationparam$name != "") {
-      return(setNames(list(arg_value), operationparam$name))
+      return(stats::setNames(list(arg_value), operationparam$name))
     } else {
       return(list(arg_value))
     }

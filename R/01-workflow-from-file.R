@@ -166,10 +166,10 @@ load_workflow_script_env <- function(script_path, parent_env) {
     stop("Custom script file not found: ", script_path, call. = FALSE)
   }
   if (is_running_online()) {
-    logWarn("Running online; skipping loading custom script: %s", script_path)
+    PEITHO:::logWarn("Running online; skipping loading custom script: %s", script_path)
     return(parent_env)
   }
-  logInfo("Loading custom script for workflow: %s", script_path)
+  PEITHO:::logInfo("Loading custom script for workflow: %s", script_path)
   script_env <- new.env(parent = parent_env)
   sys.source(script_path, envir = script_env)
   return(script_env)
@@ -184,7 +184,7 @@ load_workflow_script_env <- function(script_path, parent_env) {
 extract_workflow_from_files <- function(workflow_file_paths) {
   # if folder not found return empty list and warn
   if (!dir.exists(workflow_file_paths$path_to_folder)) {
-    logWarn(
+    PEITHO:::logWarn(
       "PEITHO files not found. No folder '%s'. Returning empty workflow.",
       workflow_file_paths$path_to_folder
     )
@@ -193,7 +193,7 @@ extract_workflow_from_files <- function(workflow_file_paths) {
 
   # check if all files exist
   if (!file.exists(workflow_file_paths$inputs_path)) {
-    logWarn(
+    PEITHO:::logWarn(
       "%s not found in folder '%s'. Returning empty workflow.",
       basename(workflow_file_paths$inputs_path),
       workflow_file_paths$path_to_folder
@@ -201,7 +201,7 @@ extract_workflow_from_files <- function(workflow_file_paths) {
     return(list())
   }
   if (!file.exists(workflow_file_paths$commands_path)) {
-    logWarn(
+    PEITHO:::logWarn(
       "%s not found in folder '%s'. Returning empty workflow.",
       basename(workflow_file_paths$commands_path),
       workflow_file_paths$path_to_folder
@@ -209,7 +209,7 @@ extract_workflow_from_files <- function(workflow_file_paths) {
     return(list())
   }
   if (!file.exists(workflow_file_paths$results_path)) {
-    logWarn(
+    PEITHO:::logWarn(
       "%s not found in folder '%s'. Creating empty results file.",
       basename(workflow_file_paths$results_path),
       workflow_file_paths$path_to_folder
@@ -222,7 +222,7 @@ extract_workflow_from_files <- function(workflow_file_paths) {
     )
   }
   if (!file.exists(workflow_file_paths$functions_path)) {
-    logInfo(
+    PEITHO:::logInfo(
       "%s not found in folder '%s'. Using global environment for operations.",
       basename(workflow_file_paths$functions_path),
       workflow_file_paths$path_to_folder
@@ -235,14 +235,14 @@ extract_workflow_from_files <- function(workflow_file_paths) {
     )
   }
 
-  logDebug("Loading commands from %s", workflow_file_paths$commands_path)
+  PEITHO:::logDebug("Loading commands from %s", workflow_file_paths$commands_path)
   commands_list <- read_json_if_exists(path = workflow_file_paths$commands_path)
 
-  logDebug("Extracting %d workflow steps from commands", length(commands_list))
+  PEITHO:::logDebug("Extracting %d workflow steps from commands", length(commands_list))
   steps <- lapply(seq_along(commands_list), function(step_i) {
     cmd <- commands_list[[step_i]]
 
-    logInfo("Parsing command %s for step %d", cmd$command, step_i)
+    PEITHO:::logInfo("Parsing command %s for step %d", cmd$command, step_i)
     parsed   <- parse_args(cmd$args)
     args_vec <- parsed$values
     args_names <- parsed$names
@@ -250,7 +250,7 @@ extract_workflow_from_files <- function(workflow_file_paths) {
     # create params
     params <- vector("list", length(args_vec))
     for (arg_i in seq_along(args_vec)) {
-      logDebug("  Processing argument %d: %s", arg_i, args_vec[[arg_i]])
+      PEITHO:::logDebug("  Processing argument %d: %s", arg_i, args_vec[[arg_i]])
       arg_name <- args_names[arg_i]
       if (!nzchar(arg_name)) arg_name <- NULL
 
