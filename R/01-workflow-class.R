@@ -199,7 +199,31 @@ print.workflow <- function(x, ...) {
   invisible(x)
 }
 
-# Accessor functions (some added later) ----------------------------------------
+#' Save workflow as a ZIP file
+#'
+#' @param x A `workflow` object.
+#' @param file Path to the output ZIP file.
+#' @param ... Additional arguments (not used).
+#' @export
+save_as_zip.workflow <- function(
+  x,
+  file,
+  ...
+) {
+  build_download_zip(
+    zipfile = file,
+    package_name = "PEITHO",
+    include_paths = c(
+      x$workflow_file_paths$inputs_path,
+      x$workflow_file_paths$commands_path,
+      x$workflow_file_paths$results_path,
+      x$workflow_file_paths$functions_path
+    ),
+    include_root = x$workflow_file_paths$path_to_folder
+  )
+}
+
+# Accessor functions (some will be added added later) ------------------------
 
 # current_step.workflow <- function(x, ...) {
 #   if (length(x$steps) == 0L || is.na(x$current)) {

@@ -4,6 +4,7 @@ utils::globalVariables(
   c()
 )
 
+#' @importFrom DataTools build_download_zip
 #' @importFrom futile.logger DEBUG flog.debug flog.info flog.threshold flog.warn INFO
 #' @importFrom httr2 request req_perform req_timeout req_user_agent resp_status resp_body_html
 #' @importFrom jsonlite fromJSON toJSON write_json

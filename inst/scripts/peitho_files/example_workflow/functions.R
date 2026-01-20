@@ -1,3 +1,5 @@
+library(dplyr)
+
 # FUNCTION: split strings
 
 split_strings <- function(strings, separator) {
