@@ -1,14 +1,11 @@
 # PEITHO 26.01.0
 
-## Updates
+## New Features
 
-- Extended the example `workflow` in the `commands.json` file to include a more complex scenario:
-  - After splitting web adressess and fetching urls, the workflow is now also
-    - unlisting the results
-    - pasting the content of the fetched URLs into a single string
-    - examplarily substituting the pattern "e" into the string "HALLO" and
-    - performing a split operation at the pattern "HALLO" on the resulting string.
-  - This showcases the flexibility of the workflow system and its ability to chain multiple operations together.
+- Implemented export and import of workflows as zip bundles, enabling workflow sharing and reuse.
+- Added `save_as_zip()` generic and workflow method for exporting workflows as zip files.
+- Enhanced the example workflow with multi-step data processing (including unlist, paste, substitute, and split operations).
+- Added a comprehensive vignette demonstrating workflow import/export capabilities.
 
 # PEITHO 25.12.0
 
