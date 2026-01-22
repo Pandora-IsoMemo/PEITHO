@@ -42,6 +42,10 @@
   : Run the entire workflow
 - [`run(`*`<workflowstep>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/run.workflowstep.md)
   : Run a workflow step
+- [`save_as_zip()`](https://pandora-isomemo.github.io/PEITHO/reference/save_as_zip.md)
+  : Save an object as a ZIP file
+- [`save_as_zip(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/save_as_zip.workflow.md)
+  : Save workflow as a ZIP file
 - [`startApplication()`](https://pandora-isomemo.github.io/PEITHO/reference/startApplication.md)
   : Start Application
 - [`summary(`*`<workflowsteprun>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/summary.workflowsteprun.md)

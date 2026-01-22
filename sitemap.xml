@@ -1,6 +1,8 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://pandora-isomemo.github.io/PEITHO/404.html</loc></url>
 <url><loc>https://pandora-isomemo.github.io/PEITHO/LICENSE.html</loc></url>
+<url><loc>https://pandora-isomemo.github.io/PEITHO/articles/index.html</loc></url>
+<url><loc>https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_basics.html</loc></url>
 <url><loc>https://pandora-isomemo.github.io/PEITHO/authors.html</loc></url>
 <url><loc>https://pandora-isomemo.github.io/PEITHO/index.html</loc></url>
 <url><loc>https://pandora-isomemo.github.io/PEITHO/news/index.html</loc></url>
@@ -24,6 +26,8 @@
 <url><loc>https://pandora-isomemo.github.io/PEITHO/reference/run.html</loc></url>
 <url><loc>https://pandora-isomemo.github.io/PEITHO/reference/run.workflow.html</loc></url>
 <url><loc>https://pandora-isomemo.github.io/PEITHO/reference/run.workflowstep.html</loc></url>
+<url><loc>https://pandora-isomemo.github.io/PEITHO/reference/save_as_zip.html</loc></url>
+<url><loc>https://pandora-isomemo.github.io/PEITHO/reference/save_as_zip.workflow.html</loc></url>
 <url><loc>https://pandora-isomemo.github.io/PEITHO/reference/startApplication.html</loc></url>
 <url><loc>https://pandora-isomemo.github.io/PEITHO/reference/summary.workflowsteprun.html</loc></url>
 <url><loc>https://pandora-isomemo.github.io/PEITHO/reference/update.html</loc></url>

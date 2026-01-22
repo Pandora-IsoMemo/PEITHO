@@ -6,13 +6,14 @@
 
 ## Citation
 
-Runge A (2025). *PEITHO: What the Package Does (Title Case)*. R package
-version 25.12.0, <https://pandora-isomemo.github.io/PEITHO/>.
+Runge A (2026). *PEITHO: Workflow Management and Reproducible Analysis
+in R*. R package version 26.01.0,
+<https://pandora-isomemo.github.io/PEITHO/>.
 
     @Manual{,
-      title = {PEITHO: What the Package Does (Title Case)},
+      title = {PEITHO: Workflow Management and Reproducible Analysis in R},
       author = {Antonia Runge},
-      year = {2025},
-      note = {R package version 25.12.0},
+      year = {2026},
+      note = {R package version 26.01.0},
       url = {https://pandora-isomemo.github.io/PEITHO/},
     }

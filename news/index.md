@@ -1,5 +1,19 @@
 # Changelog
 
+## PEITHO 26.01.0
+
+### New Features
+
+- Implemented export and import of workflows as zip bundles, enabling
+  workflow sharing and reuse (#13).
+- Added
+  [`save_as_zip()`](https://pandora-isomemo.github.io/PEITHO/reference/save_as_zip.md)
+  generic and workflow method for exporting workflows as zip files.
+- Enhanced the example workflow with multi-step data processing
+  (including unlist, paste, substitute, and split operations).
+- Added a comprehensive vignette demonstrating workflow import/export
+  capabilities.
+
 ## PEITHO 25.12.0
 
 ### New Features

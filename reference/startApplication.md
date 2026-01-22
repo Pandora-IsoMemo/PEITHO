@@ -6,8 +6,8 @@ Start Application
 
 ``` r
 startApplication(
-  port = getOption("shiny.port"),
-  launch.browser = getOption("shiny.launch.browser", interactive())
+  port = base::getOption("shiny.port"),
+  launch.browser = base::getOption("shiny.launch.browser", base::interactive())
 )
 ```
 
