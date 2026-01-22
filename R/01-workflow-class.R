@@ -423,3 +423,4 @@ update_json_summary <- function(
     file.path(path_to_folder, results_file), auto_unbox = TRUE, pretty = TRUE
   )
 }
+
