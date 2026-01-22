@@ -1,11 +1,10 @@
 Package: PEITHO
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Workflow Management and Reproducible Analysis in R
 Version: 26.01.0
 Date: 2026-01-12
 Authors@R: c(person("Antonia", "Runge", email = "antonia.runge@inwt-statistics.de", role = c("aut", "cre")))
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: PEITHO provides a flexible workflow management system for reproducible data analysis pipelines in R. Users can define, execute, export, and import multi-step workflows using configuration files or interactive tools. The package supports web text fetching, data processing, and integration with custom R scripts. Workflows and their results can be shared as zip bundles, enabling collaboration and reuse. Designed for both interactive and automated use, PEITHO helps streamline complex analysis tasks and ensures reproducibility.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
@@ -13,6 +12,7 @@ RoxygenNote: 7.3.2
 Depends: R (>= 4.1.0)
 Imports: 
     shiny,
+    DataTools (>= 26.01.0),
     httr2,
     futile.logger,
     jsonlite,

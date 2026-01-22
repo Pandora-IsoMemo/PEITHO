@@ -106,7 +106,7 @@ new_workflow <- function(
     PEITHO:::logDebug("Loading workflow from PEITHO folder...")
     if (length(workflow_file_paths) == 0L) {
       PEITHO:::logDebug("Using default PEITHO workflow file paths...")
-      workflow_file_paths <- workflow_file_paths()
+      workflow_file_paths <- PEITHO:::workflow_file_paths()
     }
     if (!dir.exists(workflow_file_paths$path_to_folder)) {
       stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
@@ -114,7 +114,7 @@ new_workflow <- function(
     if (length(steps)) {
       PEITHO:::logWarn("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.")
     }
-    steps <- extract_workflow_from_files(workflow_file_paths = workflow_file_paths)
+    steps <- PEITHO:::extract_workflow_from_files(workflow_file_paths = workflow_file_paths)
   } else {
     PEITHO:::logDebug("Creating workflow from provided steps...")
     if (length(steps) == 0L) {
@@ -126,9 +126,9 @@ new_workflow <- function(
 
   # 2) Validate steps are workflowstep objects
   if (length(steps)) {
-    ok <- vapply(steps, inherits, logical(1), what = "workflowstep")
+    ok <- base::vapply(steps, inherits, logical(1), what = "workflowstep")
     if (!all(ok)) {
-      stop("All elements of 'steps' must be of class 'workflowstep'.", call. = FALSE)
+      base::stop("All elements of 'steps' must be of class 'workflowstep'.", call. = FALSE)
     }
   }
 
@@ -210,7 +210,7 @@ save_as_zip.workflow <- function(
   file,
   ...
 ) {
-  build_download_zip(
+  DataTools::build_download_zip(
     zipfile = file,
     package_name = "PEITHO",
     include_paths = c(
