@@ -223,7 +223,7 @@ save_as_zip.workflow <- function(
   )
 }
 
-# Accessor functions (some will be added added later) ------------------------
+# Accessor functions (some will be added later) ------------------------
 
 # current_step.workflow <- function(x, ...) {
 #   if (length(x$steps) == 0L || is.na(x$current)) {

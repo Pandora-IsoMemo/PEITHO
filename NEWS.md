@@ -3,7 +3,7 @@
 ## Updates
 
 - Extended the example `workflow` in the `commands.json` file to include a more complex scenario:
-  - After splitting web adresses and fetching urls, the workflow is now also
+  - After splitting web adressess and fetching urls, the workflow is now also
     - unlisting the results
     - pasting the content of the fetched URLs into a single string
     - examplarily substituting the pattern "e" into the string "HALLO" and

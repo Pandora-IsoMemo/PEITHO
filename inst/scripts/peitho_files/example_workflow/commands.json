@@ -41,8 +41,8 @@
   },
   {
     "entry": 5,
-    "name": "substitude_content",
-    "label": "substitude_content",
+    "name": "substitute_content",
+    "label": "substitute_content",
     "comments": "",
     "command": "gsub",
     "args": "pattern=\"e\", replacement=\"HALLO\", x=@#*L*#@paste_content@#*L*#@",
@@ -55,7 +55,7 @@
     "label": "split_content",
     "comments": "",
     "command": "simple_split",
-    "args": "x=@#*L*#@substitude_content@#*L*#@, split=\"HALLO\"",
+    "args": "x=@#*L*#@substitute_content@#*L*#@, split=\"HALLO\"",
     "loop": "auto",
     "prompt": ""
   }
