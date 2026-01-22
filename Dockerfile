@@ -4,6 +4,8 @@ RUN echo "options(repos = c(getOption('repos'), PANDORA = 'https://Pandora-IsoMe
 
 ADD . .
 
+RUN apt-get update && apt-get install -y pandoc
+
 RUN installPackage
 
 # Expose ports

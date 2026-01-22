@@ -4,10 +4,10 @@
 #' @param launch.browser If true, the system's default web browser will be launched
 #'
 #' @export
-startApplication <- function(port = getOption("shiny.port"),
-                             launch.browser = getOption("shiny.launch.browser", interactive())) {
+startApplication <- function(port = base::getOption("shiny.port"),
+                             launch.browser = base::getOption("shiny.launch.browser", base::interactive())) {
   shiny::runApp(
-    system.file("app", package = "PEITHO"),
+    base::system.file("app", package = "PEITHO"),
     port = port,
     host = "0.0.0.0",
     launch.browser = launch.browser

@@ -18,3 +18,5 @@
 ^\.github$
 ^inst/scripts/drafts
 ^tests/testthat/testdata_large/
+^doc$
+^Meta$
