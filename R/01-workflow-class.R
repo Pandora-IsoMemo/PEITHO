@@ -103,22 +103,22 @@ new_workflow <- function(
 ) {
   # 1) Decide where steps come from
   if (use_peitho_folder) {
-    logDebug("Loading workflow from PEITHO folder...")
+    PEITHO:::logDebug("Loading workflow from PEITHO folder...")
     if (length(workflow_file_paths) == 0L) {
-      logDebug("Using default PEITHO workflow file paths...")
-      workflow_file_paths <- workflow_file_paths()
+      PEITHO:::logDebug("Using default PEITHO workflow file paths...")
+      workflow_file_paths <- PEITHO:::workflow_file_paths()
     }
     if (!dir.exists(workflow_file_paths$path_to_folder)) {
       stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
     }
     if (length(steps)) {
-      logWarn("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.")
+      PEITHO:::logWarn("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.")
     }
-    steps <- extract_workflow_from_files(workflow_file_paths = workflow_file_paths)
+    steps <- PEITHO:::extract_workflow_from_files(workflow_file_paths = workflow_file_paths)
   } else {
-    logDebug("Creating workflow from provided steps...")
+    PEITHO:::logDebug("Creating workflow from provided steps...")
     if (length(steps) == 0L) {
-      logWarn("No steps provided for workflow.")
+      PEITHO:::logWarn("No steps provided for workflow.")
     }
     # if not use PEITHO folder, clear file paths
     workflow_file_paths <- list()
@@ -126,9 +126,9 @@ new_workflow <- function(
 
   # 2) Validate steps are workflowstep objects
   if (length(steps)) {
-    ok <- vapply(steps, inherits, logical(1), what = "workflowstep")
+    ok <- base::vapply(steps, inherits, logical(1), what = "workflowstep")
     if (!all(ok)) {
-      stop("All elements of 'steps' must be of class 'workflowstep'.", call. = FALSE)
+      base::stop("All elements of 'steps' must be of class 'workflowstep'.", call. = FALSE)
     }
   }
 
@@ -199,7 +199,31 @@ print.workflow <- function(x, ...) {
   invisible(x)
 }
 
-# Accessor functions (some added later) ----------------------------------------
+#' Save workflow as a ZIP file
+#'
+#' @param x A `workflow` object.
+#' @param file Path to the output ZIP file.
+#' @param ... Additional arguments (not used).
+#' @export
+save_as_zip.workflow <- function(
+  x,
+  file,
+  ...
+) {
+  DataTools::build_download_zip(
+    zipfile = file,
+    package_name = "PEITHO",
+    include_paths = c(
+      x$workflow_file_paths$inputs_path,
+      x$workflow_file_paths$commands_path,
+      x$workflow_file_paths$results_path,
+      x$workflow_file_paths$functions_path
+    ),
+    include_root = x$workflow_file_paths$path_to_folder
+  )
+}
+
+# Accessor functions (some will be added later) ------------------------
 
 # current_step.workflow <- function(x, ...) {
 #   if (length(x$steps) == 0L || is.na(x$current)) {
@@ -246,7 +270,7 @@ print.workflow <- function(x, ...) {
 #     if (index >= 1L && index <= length(x$steps)) {
 #       x$current <- index
 #     } else {
-#       logWarn("Index out of range; 'workflow$current' unchanged.")
+#       PEITHO:::logWarn("Index out of range; 'workflow$current' unchanged.")
 #     }
 #     return(x)
 #   }
@@ -257,12 +281,12 @@ print.workflow <- function(x, ...) {
 #     if (length(idx) == 1L) {
 #       x$current <- idx
 #     } else {
-#       logWarn("No step with matching 'id'; 'workflow$current' unchanged.")
+#       PEITHO:::logWarn("No step with matching 'id'; 'workflow$current' unchanged.")
 #     }
 #     return(x)
 #   }
 
-#   logWarn("Provide either 'index' or 'id' to goto_step().")
+#   PEITHO:::logWarn("Provide either 'index' or 'id' to goto_step().")
 #   x
 # }
 
@@ -292,7 +316,7 @@ run.workflow <- function(
     stop("Argument 'object' must be of class 'workflow'.")
   }
   if (length(object$steps) == 0L) {
-    logWarn("Workflow has no steps.")
+    PEITHO:::logWarn("Workflow has no steps.")
     return(
       list(
         workflow = object,
@@ -327,10 +351,10 @@ run.workflow <- function(
   from <- max(1L, as.integer(from))
   to   <- min(length(object$steps), as.integer(to))
   idxs <- seq(from, to)
-  logDebug("Running workflow from step %d to %d", from, to)
+  PEITHO:::logDebug("Running workflow from step %d to %d", from, to)
 
   for (j in seq_along(idxs)) {
-    logInfo("Running step %d of %d", j, length(idxs))
+    PEITHO:::logInfo("Running step %d of %d", j, length(idxs))
     i <- idxs[j]
     step <- object$steps[[i]]
 

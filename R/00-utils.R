@@ -11,5 +11,5 @@
 `%||%` <- function(a, b) if (!is.null(a)) a else b
 
 is_running_online <- function() {
-  as.logical(Sys.getenv("IS_SHINYPROXY") != "", unset = "FALSE")
+  base::as.logical(base::Sys.getenv("IS_SHINYPROXY") != "", unset = "FALSE")
 }

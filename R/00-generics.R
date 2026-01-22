@@ -22,3 +22,15 @@ update <- function(object, steprun, idx, ...) {
 run <- function(object, state, ...) {
   UseMethod("run")
 }
+
+#' Save an object as a ZIP file
+#'
+#' This is a generic function to save various objects as ZIP files.
+#' @param x The object to save.
+#' @param file The path to the output ZIP file.
+#' @param ... Additional arguments (not used).
+#' @return None. The object is saved to the specified ZIP file.
+#' @export
+save_as_zip <- function(x, file, ...) {
+  UseMethod("save_as_zip")
+}

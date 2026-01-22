@@ -45,12 +45,15 @@ vignettes/*.pdf
 # src files
 src/*
 
-# profiling script
+# profiling script and doc files
 RScripts/profileApp.R
 inst/doc
 /doc/
 /Meta/
 docs
+
+# imported workflow files
+inst/scripts/peitho_files/imported/
 
 .DS_Store
 
