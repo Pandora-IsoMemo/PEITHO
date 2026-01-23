@@ -1,3 +1,10 @@
+# PEITHO 26.01.1
+
+## New Features
+
+- Added `import_workflow()` to streamline workflow import from zip files.
+- Updated vignettes and examples to use the new import pattern.
+
 # PEITHO 26.01.0
 
 ## New Features
