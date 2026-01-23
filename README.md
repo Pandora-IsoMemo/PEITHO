@@ -8,7 +8,7 @@
 
 https://pandora-isomemo.github.io/PEITHO/
 
-### Release notes (Changelog):
+### Release notes (Changelog)
 
 See the latest release notes in [NEWS.md](./NEWS.md)
 
