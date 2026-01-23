@@ -100,10 +100,7 @@ with basic R knowledge, but no advanced R expertise is required.</p>
 path, or use the example workflow included with PEITHO by passing an
 empty string as the path:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create a workflow object from files</span></span>
-<span><span class="co"># - Set a custom path to the workflow directory, or</span></span>
-<span><span class="co"># - Use the example included with PEITHO by leaving path empty</span></span>
-<span><span class="va">my_wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_workflow.html">new_workflow</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">my_wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_workflow.html">new_workflow</a></span><span class="op">(</span></span>
 <span>  workflow_file_paths <span class="op">=</span> <span class="fu"><a href="../reference/workflow_file_paths.html">workflow_file_paths</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -113,8 +110,7 @@ empty string as the path:</p>
 <p>You can export the current workflow setup (all relevant files) as a
 zip archive (here with the <code>.peitho</code> extension):</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Save the workflow as a zip file</span></span>
-<span><span class="va">zipfile_path</span> <span class="op">&lt;-</span> <span class="st">"./my_workflow.peitho"</span></span>
+<code class="sourceCode R"><span><span class="va">zipfile_path</span> <span class="op">&lt;-</span> <span class="st">"./my_workflow.peitho"</span></span>
 <span><span class="fu"><a href="../reference/save_as_zip.html">save_as_zip</a></span><span class="op">(</span><span class="va">my_wf</span>, file <span class="op">=</span> <span class="va">zipfile_path</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -123,55 +119,52 @@ zip archive (here with the <code>.peitho</code> extension):</p>
 <p>To execute the workflow, use the <code><a href="../reference/run.html">run()</a></code> function. You can
 specify which steps to run (e.g., from step 1 to 5):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Run the workflow from step 1 to 5</span></span>
-<span><span class="va">my_run_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_wf</span>, from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">my_run_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_wf</span>, from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
 <p>After running, you can inspect the results:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># See how many outputs were produced (e.g., 3 outputs from 3 URLs)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_run_1</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_run_1</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Print the first 100 characters of each result</span></span>
 <span><span class="fu">PEITHO</span><span class="fu">:::</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">trunc</a></span><span class="op">(</span><span class="va">my_run_1</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span>, n_char <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="importing-and-modifying-a-workflow-from-a-zip-file">Importing and Modifying a Workflow from a Zip File<a class="anchor" aria-label="anchor" href="#importing-and-modifying-a-workflow-from-a-zip-file"></a>
 </h2>
-<p>You can import a workflow from a zip file. Optionally, you can modify
-the workflow steps (e.g., in <code>commands.json</code> or
-<code>inputs.json</code>) before running it:</p>
+<p>To import a workflow from a zip file, first define the directory
+where the workflow files will be extracted. You may also modify the
+workflow steps (for example, by editing <code>commands.json</code> or
+<code>inputs.json</code> in the extracted folder) before running it.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Define the directory to extract the workflow files to</span></span>
-<span><span class="va">extract_dir</span> <span class="op">&lt;-</span> <span class="st">"./inst/scripts/peitho_files/imported"</span></span>
+<code class="sourceCode R"><span><span class="va">extract_dir</span> <span class="op">&lt;-</span> <span class="st">"./inst/scripts/peitho_files/imported"</span></span>
 <span></span>
-<span><span class="co"># Import the workflow bundle from the zip file and extract the files into the extract_dir folder</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">import_bundle_zip</span><span class="op">(</span></span>
 <span>  zipfile <span class="op">=</span> <span class="va">zipfile_path</span>,</span>
 <span>  extract_dir <span class="op">=</span> <span class="va">extract_dir</span>,</span>
 <span>  keep_dir <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>After importing, you can set up a new workflow object using the
-extracted files:</p>
+<p>Once imported, set up a new workflow object using the extracted
+files:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create a workflow from the imported files</span></span>
-<span><span class="va">my_wf_imported</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_workflow.html">new_workflow</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">my_wf_imported</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_workflow.html">new_workflow</a></span><span class="op">(</span></span>
 <span>  workflow_file_paths <span class="op">=</span> <span class="fu"><a href="../reference/workflow_file_paths.html">workflow_file_paths</a></span><span class="op">(</span>path <span class="op">=</span> <span class="va">extract_dir</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>You can now run the imported (and possibly modified) workflow:</p>
+<p>You can now run the imported (and possibly modified) workflow and
+inspect the results as before:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Run the imported workflow from step 1 to 4</span></span>
-<span><span class="va">my_run_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_wf_imported</span>, from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">my_run_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_wf_imported</span>, from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># See results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_run_2</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span><span class="op">)</span></span>
 <span><span class="fu">PEITHO</span><span class="fu">:::</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">trunc</a></span><span class="op">(</span><span class="va">my_run_2</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span>, n_char <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
-<p>PEITHO’s workflow system allows you to: - Load and execute multi-step
-workflows from configuration files - Export workflows as zip files for
-sharing or backup - Import and modify workflows from zip files - Inspect
-and print results from workflow execution</p>
+<p>PEITHO’s workflow system allows you to:</p>
+<ul>
+<li>Load and execute multi-step workflows from configuration files</li>
+<li>Export workflows as zip files for sharing or backup</li>
+<li>Import and modify workflows from zip files</li>
+<li>Inspect and print results from workflow execution</li>
+</ul>
 <p>This makes it easy to share, reuse, and adapt complex analysis
 pipelines in a reproducible way.</p>
 </div>
