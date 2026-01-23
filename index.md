@@ -2,12 +2,12 @@
 
 ### Documenation
 
-- <https://pandora-isomemo.github.io/PEITHO/>
+<https://pandora-isomemo.github.io/PEITHO/>
 
 ### Release notes (Changelog):
 
-[See the latest release notes in
-NEWS.md](https://pandora-isomemo.github.io/PEITHO/NEWS.md)
+See the latest release notes in
+[NEWS.md](https://pandora-isomemo.github.io/PEITHO/NEWS.md)
 
 ## How to use this Package
 
