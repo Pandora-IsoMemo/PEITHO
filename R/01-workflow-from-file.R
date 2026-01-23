@@ -160,16 +160,18 @@ strip_outer_quotes <- function(x) {
   }
 }
 
-load_workflow_script_env <- function(script_path, parent_env) {
+load_workflow_script_env <- function(script_path, parent_env, show_functions_path = TRUE) {
   if (is.null(script_path)) return(parent_env)
   if (!file.exists(script_path)) {
     stop("Custom script file not found: ", script_path, call. = FALSE)
   }
   if (is_running_online()) {
-    PEITHO:::logWarn("Running online; skipping loading custom script: %s", script_path)
+    PEITHO:::logWarn("Running online; skipping loading custom script.")
     return(parent_env)
   }
-  PEITHO:::logInfo("Loading custom script for workflow: %s", script_path)
+  if (show_functions_path) {
+    PEITHO:::logInfo("Loading custom script for workflow: %s", script_path)
+  }
   script_env <- new.env(parent = parent_env)
   sys.source(script_path, envir = script_env)
   return(script_env)
@@ -179,9 +181,10 @@ load_workflow_script_env <- function(script_path, parent_env) {
 #'
 #' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
 #'  Default is the package's `peitho_files` folder.
+#' @param show_functions_path Logical, whether to show the path of the loaded script file.
 #' @return A list of `workflowstep` objects.
 #' @export
-extract_workflow_from_files <- function(workflow_file_paths) {
+extract_workflow_from_files <- function(workflow_file_paths, show_functions_path = TRUE) {
   # if folder not found return empty list and warn
   if (!dir.exists(workflow_file_paths$path_to_folder)) {
     PEITHO:::logWarn(
@@ -231,7 +234,8 @@ extract_workflow_from_files <- function(workflow_file_paths) {
   } else {
     env <- load_workflow_script_env(
       script_path = workflow_file_paths$functions_path,
-      parent_env = parent.frame()
+      parent_env = parent.frame(),
+      show_functions_path = show_functions_path
     )
   }
 

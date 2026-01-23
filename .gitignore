@@ -54,6 +54,7 @@ docs
 
 # imported workflow files
 inst/scripts/peitho_files/imported/
+vignettes/examples/
 
 .DS_Store
 
