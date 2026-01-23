@@ -212,11 +212,7 @@ extract_workflow_from_files <- function(workflow_file_paths, show_functions_path
     return(list())
   }
   if (!file.exists(workflow_file_paths$results_path)) {
-    PEITHO:::logWarn(
-      "%s not found in folder '%s'. Creating empty results file.",
-      basename(workflow_file_paths$results_path),
-      workflow_file_paths$path_to_folder
-    )
+    PEITHO:::logInfo("Creating empty %s file.", basename(workflow_file_paths$results_path))
     jsonlite::write_json(
       list(),
       workflow_file_paths$results_path,
