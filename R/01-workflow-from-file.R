@@ -181,8 +181,8 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
 #'
 #' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
 #'  Default is the package's `peitho_files` folder.
-#' @return A list of `workflowstep` objects.
 #' @param show_functions_path Logical, whether to show the path of the loaded script file.
+#' @return A list of `workflowstep` objects.
 #' @export
 extract_workflow_from_files <- function(workflow_file_paths, show_functions_path = TRUE) {
   # if folder not found return empty list and warn
