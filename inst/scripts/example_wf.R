@@ -31,15 +31,9 @@ PEITHO:::trunc(my_run_1$state$last_result, n_char = 100)
 # - before importing one may change the steps in the commands.json and inputs.json files
 # in the zip to try different workflows
 extract_dir <- "./inst/scripts/peitho_files/imported"
-res <- import_bundle_zip(
+my_wf_imported <- PEITHO::import_workflow(
   zipfile = zipfile_path,
-  extract_dir = extract_dir,
-  keep_dir = TRUE
-)
-
-# setup workflow from imported files using the path to the extracted folder
-my_wf_imported <- new_workflow(
-  workflow_file_paths = workflow_file_paths(path = extract_dir)
+  extract_dir = extract_dir
 )
 
 # run the imported workflow now from step 1 to 4

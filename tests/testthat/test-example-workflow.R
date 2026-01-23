@@ -30,17 +30,11 @@ test_that("workflow can be exported, imported, and run as in example_wf.R", {
   expect_true(all(nchar(trunc_out) <= 100))
 
   # Import from zip
-  res <- DataTools::import_bundle_zip(
+  my_wf_imported <- PEITHO::import_workflow(
     zipfile = zipfile_path,
-    extract_dir = extract_dir,
-    keep_dir = TRUE
+    extract_dir = extract_dir
   )
   expect_true(dir.exists(extract_dir))
-
-  # Create workflow from imported files
-  my_wf_imported <- PEITHO::new_workflow(
-    workflow_file_paths = PEITHO::workflow_file_paths(path = extract_dir)
-  )
 
   # Run imported workflow (steps 1 to 4)
   my_run_2 <- PEITHO::run(my_wf_imported, from = 1, to = 4)

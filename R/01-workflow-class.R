@@ -114,7 +114,10 @@ new_workflow <- function(
     if (length(steps)) {
       PEITHO:::logWarn("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.")
     }
-    steps <- PEITHO:::extract_workflow_from_files(workflow_file_paths = workflow_file_paths)
+    steps <- PEITHO:::extract_workflow_from_files(
+      workflow_file_paths = workflow_file_paths,
+      show_functions_path = FALSE
+    )
   } else {
     PEITHO:::logDebug("Creating workflow from provided steps...")
     if (length(steps) == 0L) {
@@ -220,6 +223,27 @@ save_as_zip.workflow <- function(
       x$workflow_file_paths$functions_path
     ),
     include_root = x$workflow_file_paths$path_to_folder
+  )
+}
+
+#' Import workflow from a ZIP file
+#'
+#' @param zipfile Path to the input ZIP file.
+#' @param extract_dir Directory to extract the workflow files to.
+#' @return The path to the extracted workflow folder.
+#' @export
+import_workflow <- function(
+  zipfile,
+  extract_dir
+) {
+  DataTools::import_bundle_zip(
+    zipfile = zipfile,
+    extract_dir = extract_dir,
+    keep_dir = TRUE
+  )
+
+  PEITHO::new_workflow(
+    workflow_file_paths = workflow_file_paths(path = extract_dir)
   )
 }
 

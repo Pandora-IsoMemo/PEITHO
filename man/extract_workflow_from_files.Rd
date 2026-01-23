@@ -4,11 +4,13 @@
 \alias{extract_workflow_from_files}
 \title{Extract workflow steps from files in a folder}
 \usage{
-extract_workflow_from_files(workflow_file_paths)
+extract_workflow_from_files(workflow_file_paths, show_functions_path = TRUE)
 }
 \arguments{
 \item{workflow_file_paths}{A list of file paths for workflow files (see `workflow_file_paths()`).
 Default is the package's `peitho_files` folder.}
+
+\item{show_functions_path}{Logical, whether to show the path of the loaded script file.}
 }
 \value{
 A list of `workflowstep` objects.
