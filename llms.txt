@@ -1,7 +1,32 @@
 # PEITHO
 
+### Documenation
+
+- <https://pandora-isomemo.github.io/PEITHO/>
+
+### Release notes (Changelog):
+
 [See the latest release notes in
 NEWS.md](https://pandora-isomemo.github.io/PEITHO/NEWS.md)
+
+## How to use this Package
+
+Refer to the
+[vignette](https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_basics.html)
+for a description of the usage of the PEITHO package. You can find it in
+the [Documentation](#documenation) above.
+
+## Notes for developers
+
+When adding information to the *help* sites, *docstrings* or the
+*vignette* of this package, please update documentation locally as
+follows. The documentation of the main branch is build automatically via
+github action.
+
+``` r
+devtools::document() # or CTRL + SHIFT + D in RStudio
+devtools::build_site()
+```
 
 # Package index
 
@@ -11,6 +36,8 @@ NEWS.md](https://pandora-isomemo.github.io/PEITHO/NEWS.md)
   : Extract workflow steps from files in a folder
 - [`fetch_WebText()`](https://pandora-isomemo.github.io/PEITHO/reference/fetch_WebText.md)
   : Fetch and parse web text from a URL
+- [`import_workflow()`](https://pandora-isomemo.github.io/PEITHO/reference/import_workflow.md)
+  : Import workflow from a ZIP file
 - [`new_WebText()`](https://pandora-isomemo.github.io/PEITHO/reference/new_WebText.md)
   : WebText Class Represents text content fetched from a web page.
 - [`new_operationparam()`](https://pandora-isomemo.github.io/PEITHO/reference/new_operationparam.md)

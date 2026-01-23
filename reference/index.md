@@ -6,6 +6,8 @@
   : Extract workflow steps from files in a folder
 - [`fetch_WebText()`](https://pandora-isomemo.github.io/PEITHO/reference/fetch_WebText.md)
   : Fetch and parse web text from a URL
+- [`import_workflow()`](https://pandora-isomemo.github.io/PEITHO/reference/import_workflow.md)
+  : Import workflow from a ZIP file
 - [`new_WebText()`](https://pandora-isomemo.github.io/PEITHO/reference/new_WebText.md)
   : WebText Class Represents text content fetched from a web page.
 - [`new_operationparam()`](https://pandora-isomemo.github.io/PEITHO/reference/new_operationparam.md)
