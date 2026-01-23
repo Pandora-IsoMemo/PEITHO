@@ -12,7 +12,7 @@ import_workflow(zipfile, extract_dir)
 \item{extract_dir}{Directory to extract the workflow files to.}
 }
 \value{
-The path to the extracted workflow folder.
+A `workflow` object created from the extracted files.
 }
 \description{
 Import workflow from a ZIP file

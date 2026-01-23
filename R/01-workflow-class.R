@@ -230,7 +230,7 @@ save_as_zip.workflow <- function(
 #'
 #' @param zipfile Path to the input ZIP file.
 #' @param extract_dir Directory to extract the workflow files to.
-#' @return The path to the extracted workflow folder.
+#' @return A `workflow` object created from the extracted files.
 #' @export
 import_workflow <- function(
   zipfile,
