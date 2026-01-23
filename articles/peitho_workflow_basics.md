@@ -34,19 +34,19 @@ empty string as the path:
 my_wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 ```
 
-    ## WARN [2026-01-23 08:20:42] results.json not found in folder '/home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow'. Creating empty results file.
+    ## WARN [2026-01-23 08:22:47] results.json not found in folder '/home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow'. Creating empty results file.
 
-    ## INFO [2026-01-23 08:20:42] Parsing command simple_split for step 1
+    ## INFO [2026-01-23 08:22:47] Parsing command simple_split for step 1
 
-    ## INFO [2026-01-23 08:20:42] Parsing command fetch_WebText for step 2
+    ## INFO [2026-01-23 08:22:47] Parsing command fetch_WebText for step 2
 
-    ## INFO [2026-01-23 08:20:42] Parsing command unlist for step 3
+    ## INFO [2026-01-23 08:22:47] Parsing command unlist for step 3
 
-    ## INFO [2026-01-23 08:20:42] Parsing command paste for step 4
+    ## INFO [2026-01-23 08:22:47] Parsing command paste for step 4
 
-    ## INFO [2026-01-23 08:20:42] Parsing command gsub for step 5
+    ## INFO [2026-01-23 08:22:47] Parsing command gsub for step 5
 
-    ## INFO [2026-01-23 08:20:42] Parsing command simple_split for step 6
+    ## INFO [2026-01-23 08:22:47] Parsing command simple_split for step 6
 
 ## Exporting a Workflow as a Zip File
 
@@ -58,7 +58,7 @@ zipfile_path <- "./examples/my_workflow.peitho"
 save_as_zip(my_wf, file = zipfile_path)
 ```
 
-    ## INFO [2026-01-23 08:20:42] Creating directory './examples' for saving zip file.
+    ## INFO [2026-01-23 08:22:47] Creating directory './examples' for saving zip file.
 
 ## Running a Workflow
 
@@ -70,15 +70,15 @@ function. You can specify which steps to run (e.g., from step 1 to 5):
 my_run_1 <- run(my_wf, from = 1, to = 5)
 ```
 
-    ## INFO [2026-01-23 08:20:42] Running step 1 of 5
+    ## INFO [2026-01-23 08:22:47] Running step 1 of 5
 
-    ## INFO [2026-01-23 08:20:42] Running step 2 of 5
+    ## INFO [2026-01-23 08:22:47] Running step 2 of 5
 
-    ## INFO [2026-01-23 08:20:45] Running step 3 of 5
+    ## INFO [2026-01-23 08:22:49] Running step 3 of 5
 
-    ## INFO [2026-01-23 08:20:46] Running step 4 of 5
+    ## INFO [2026-01-23 08:22:49] Running step 4 of 5
 
-    ## INFO [2026-01-23 08:20:46] Running step 5 of 5
+    ## INFO [2026-01-23 08:22:50] Running step 5 of 5
 
 After running, you can inspect the results:
 
@@ -110,17 +110,17 @@ my_wf_imported <- PEITHO::import_workflow(
 )
 ```
 
-    ## INFO [2026-01-23 08:20:46] Parsing command simple_split for step 1
+    ## INFO [2026-01-23 08:22:50] Parsing command simple_split for step 1
 
-    ## INFO [2026-01-23 08:20:46] Parsing command fetch_WebText for step 2
+    ## INFO [2026-01-23 08:22:50] Parsing command fetch_WebText for step 2
 
-    ## INFO [2026-01-23 08:20:46] Parsing command unlist for step 3
+    ## INFO [2026-01-23 08:22:50] Parsing command unlist for step 3
 
-    ## INFO [2026-01-23 08:20:46] Parsing command paste for step 4
+    ## INFO [2026-01-23 08:22:50] Parsing command paste for step 4
 
-    ## INFO [2026-01-23 08:20:46] Parsing command gsub for step 5
+    ## INFO [2026-01-23 08:22:50] Parsing command gsub for step 5
 
-    ## INFO [2026-01-23 08:20:46] Parsing command simple_split for step 6
+    ## INFO [2026-01-23 08:22:50] Parsing command simple_split for step 6
 
 You can now run the imported (and possibly modified) workflow and
 inspect the results as before:
@@ -129,13 +129,13 @@ inspect the results as before:
 my_run_2 <- run(my_wf_imported, from = 1, to = 4)
 ```
 
-    ## INFO [2026-01-23 08:20:46] Running step 1 of 4
+    ## INFO [2026-01-23 08:22:50] Running step 1 of 4
 
-    ## INFO [2026-01-23 08:20:46] Running step 2 of 4
+    ## INFO [2026-01-23 08:22:50] Running step 2 of 4
 
-    ## INFO [2026-01-23 08:20:49] Running step 3 of 4
+    ## INFO [2026-01-23 08:22:52] Running step 3 of 4
 
-    ## INFO [2026-01-23 08:20:49] Running step 4 of 4
+    ## INFO [2026-01-23 08:22:52] Running step 4 of 4
 
 ``` r
 length(my_run_2$state$last_result)

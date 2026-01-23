@@ -100,13 +100,13 @@ path, or use the example workflow included with PEITHO by passing an
 empty string as the path:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_workflow.html">new_workflow</a></span><span class="op">(</span>workflow_file_paths <span class="op">=</span> <span class="fu"><a href="../reference/workflow_file_paths.html">workflow_file_paths</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">""</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## WARN [2026-01-23 08:20:42] results.json not found in folder '/home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow'. Creating empty results file.</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:42] Parsing command simple_split for step 1</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:42] Parsing command fetch_WebText for step 2</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:42] Parsing command unlist for step 3</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:42] Parsing command paste for step 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:42] Parsing command gsub for step 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:42] Parsing command simple_split for step 6</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-01-23 08:22:47] results.json not found in folder '/home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow'. Creating empty results file.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:47] Parsing command simple_split for step 1</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:47] Parsing command fetch_WebText for step 2</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:47] Parsing command unlist for step 3</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:47] Parsing command paste for step 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:47] Parsing command gsub for step 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:47] Parsing command simple_split for step 6</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="exporting-a-workflow-as-a-zip-file">Exporting a Workflow as a Zip File<a class="anchor" aria-label="anchor" href="#exporting-a-workflow-as-a-zip-file"></a>
@@ -116,7 +116,7 @@ zip archive (here with the <code>.peitho</code> extension):</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zipfile_path</span> <span class="op">&lt;-</span> <span class="st">"./examples/my_workflow.peitho"</span></span>
 <span><span class="fu"><a href="../reference/save_as_zip.html">save_as_zip</a></span><span class="op">(</span><span class="va">my_wf</span>, file <span class="op">=</span> <span class="va">zipfile_path</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:42] Creating directory './examples' for saving zip file.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:47] Creating directory './examples' for saving zip file.</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="running-a-workflow">Running a Workflow<a class="anchor" aria-label="anchor" href="#running-a-workflow"></a>
@@ -125,11 +125,11 @@ zip archive (here with the <code>.peitho</code> extension):</p>
 specify which steps to run (e.g., from step 1 to 5):</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_run_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_wf</span>, from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:42] Running step 1 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:42] Running step 2 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:45] Running step 3 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:46] Running step 4 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:46] Running step 5 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:47] Running step 1 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:47] Running step 2 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:49] Running step 3 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:49] Running step 4 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:50] Running step 5 of 5</span></span></code></pre>
 <p>After running, you can inspect the results:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_run_1</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span><span class="op">)</span></span></code></pre></div>
@@ -152,20 +152,20 @@ workflow steps (for example, by editing <code>commands.json</code> or
 <span>  zipfile <span class="op">=</span> <span class="va">zipfile_path</span>,</span>
 <span>  extract_dir <span class="op">=</span> <span class="st">"./examples/peitho_import"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:46] Parsing command simple_split for step 1</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:46] Parsing command fetch_WebText for step 2</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:46] Parsing command unlist for step 3</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:46] Parsing command paste for step 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:46] Parsing command gsub for step 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:46] Parsing command simple_split for step 6</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:50] Parsing command simple_split for step 1</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:50] Parsing command fetch_WebText for step 2</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:50] Parsing command unlist for step 3</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:50] Parsing command paste for step 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:50] Parsing command gsub for step 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:50] Parsing command simple_split for step 6</span></span></code></pre>
 <p>You can now run the imported (and possibly modified) workflow and
 inspect the results as before:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_run_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_wf_imported</span>, from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:46] Running step 1 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:46] Running step 2 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:49] Running step 3 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:20:49] Running step 4 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:50] Running step 1 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:50] Running step 2 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:52] Running step 3 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-01-23 08:22:52] Running step 4 of 4</span></span></code></pre>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_run_2</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 3</span></span></code></pre>
