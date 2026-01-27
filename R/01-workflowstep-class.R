@@ -222,7 +222,8 @@ run.workflowstep <- function(
     if (!inherits(param, "operationparam")) {
       stop("All entries in 'params' must be of class 'operationparam'.", call. = FALSE)
     }
-    arg_list <- extract_arg_list(param, last_result = as.list(state$last_result))
+
+    arg_list <- extract_arg_list(param, state = state)
     args <- c(args, arg_list)
   }
 
@@ -240,18 +241,26 @@ run.workflowstep <- function(
   if (sum(is_arg_list) > 1 || sum(is_param_config_loop) > 1) {
     stop("Looping over multiple arguments is not supported.", call. = FALSE)
   }
+
+  arg_list_indices    <- which(unname(is_arg_list))
+  loop_param_indices  <- which(is_param_config_loop)
+
   # if loop_param and loop_arg disagree, throw error
-  if (!identical(which(is_param_config_loop), which(unname(is_arg_list)))) {
-    stop(
-      "Mismatch between 'loop' setting in operationparam and actual argument value.",
-      call. = FALSE
+  if (!identical(loop_param_indices, arg_list_indices)) {
+    PEITHO:::logWarn(
+      "WARNING! Detected list argument(s) for operation '%s', but 'loop' is set to '%s'.",
+      object$operation,
+      params[[arg_list_indices[1]]]$loop
     )
   }
 
   # 3) actually call the function, if needed then in a loop
-  if (any(is_arg_list)) {
-    PEITHO:::logDebug("  Running operation with looping over argument index %d", which(is_arg_list))
-    loop_index <- which(is_arg_list)[1]
+  if (any(is_param_config_loop)) {
+    PEITHO:::logDebug(
+      "  Running operation: WITH LOOPING over argument index %d",
+      loop_param_indices
+    )
+    loop_index <- loop_param_indices[1]
     loop_values <- args[[loop_index]]
 
     runs <- lapply(loop_values, function(v) {
@@ -261,6 +270,16 @@ run.workflowstep <- function(
     results <- lapply(runs, `[[`, "output")
     errors  <- lapply(runs, `[[`, "error")
 
+    PEITHO:::logInfo("  %d loop iterations for operation '%s':", length(runs), object$operation)
+    max_result_length <- max(lengths(results))
+    if (max_result_length > 1L) {
+      PEITHO:::logWarn(
+        "     WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs."
+      )
+    } else {
+      PEITHO:::logInfo("     %d single results.", length(results))
+    }
+
     # return list of results/errors
     steprun <- new_workflowsteprun(
       step   = object,
@@ -269,8 +288,19 @@ run.workflowstep <- function(
       error  = errors
     )
   } else {
-    PEITHO:::logDebug("  Running operation without looping")
+    PEITHO:::logDebug("  Running operation: NO LOOPING")
+
     run <- run_with_error(fn, args) # <--- RUN FUNCTION HERE, single run
+
+    # check if result has length > 1 or not
+    is_single_result <- length(run$output) == 1L
+    PEITHO:::logInfo(
+      "  Operation '%s': %s result%s",
+      object$operation,
+      if (is_single_result) "single" else length(run$output),
+      if (is_single_result) "" else "s"
+    )
+
     steprun <- new_workflowsteprun(
       step   = object,
       args   = args,

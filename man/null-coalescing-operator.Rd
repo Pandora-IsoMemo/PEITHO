@@ -14,7 +14,7 @@ a \%||\% b
 \item{b}{Right-hand side value.}
 }
 \value{
-Left value if not NULL, otherwise right value.
+Left value if not NULL or length zero, otherwise right value.
 }
 \description{
 Null coalescing operator

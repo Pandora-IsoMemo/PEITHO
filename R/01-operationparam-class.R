@@ -67,9 +67,13 @@ print.operationparam <- function(x, ...) {
 
 extract_arg_list <- function(
   operationparam,
-  last_result = list(""),
+  state,
   ...
 ) {
+  if (!inherits(state, "workflowstate")) {
+    stop("'state' must be a 'workflowstate' object.", call. = FALSE)
+  }
+
   if (operationparam$type %in% c("input", "literal")) {
     if (operationparam$name != "") {
       return(stats::setNames(list(operationparam$value), operationparam$name))
@@ -79,20 +83,49 @@ extract_arg_list <- function(
   }
 
   if (operationparam$type == "result") {
+    ref <- operationparam$label
+
+    if (is.null(ref) || !nzchar(ref)) {
+      stop(
+        "Invalid result label: missing 'label' for step_id=",
+        operationparam$step_id, ", position=", operationparam$position,
+        call. = FALSE
+      )
+    }
+
+    # Try name lookup first (current JSON convention), then id-as-string
+    if (!is.null(state$results_by_name[[ref]])) {
+      arg_value <- state$results_by_name[[ref]]
+    } else if (!is.null(state$results_by_id[[ref]])) {
+      arg_value <- state$results_by_id[[ref]]
+    } else {
+      stop(
+        "Result '", ref, "' not found in workflow state. ",
+        "Available results_by_name: [", paste(names(state$results_by_name), collapse = ", "), "].",
+        call. = FALSE
+      )
+    }
+
+    # converting arg_value (previous result) into a list (to convert character vectors)
+    arg_value <- as.list(arg_value)
+
     # check if result is character or list of characters
-    if (
-      !is.character(last_result) &&
-        (is.list(last_result) && !all(sapply(last_result, is.character)))
-    ) {
+    if (!(
+      is.character(arg_value) ||
+        (is.list(arg_value) && all(sapply(arg_value, is.character)))
+    )) {
       stop(
         "Stopping workflow because result of step '", operationparam$step_id,
         "' was not character or list of characters."
       )
     }
 
-    arg_value <- last_result
+    # unwrap single-element lists
+    if (is.list(arg_value) && length(arg_value) == 1L) {
+      arg_value <- arg_value[[1L]]
+    }
 
-    if (operationparam$name != "") {
+    if (!is.null(operationparam$name) && nzchar(operationparam$name)) {
       return(stats::setNames(list(arg_value), operationparam$name))
     } else {
       return(list(arg_value))
