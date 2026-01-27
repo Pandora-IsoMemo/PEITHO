@@ -108,12 +108,13 @@ new_workflow <- function(
       PEITHO:::logDebug("Using default PEITHO workflow file paths...")
       workflow_file_paths <- PEITHO:::workflow_file_paths()
     }
-    if (!dir.exists(workflow_file_paths$path_to_folder)) {
-      stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
-    }
+
+    validate_workflow_file_paths(workflow_file_paths)
+
     if (length(steps)) {
       PEITHO:::logWarn("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.")
     }
+
     steps <- PEITHO:::extract_workflow_from_files(
       workflow_file_paths = workflow_file_paths,
       show_functions_path = FALSE
@@ -127,24 +128,12 @@ new_workflow <- function(
     workflow_file_paths <- list()
   }
 
-  # 2) Validate steps are workflowstep objects
-  if (length(steps)) {
-    ok <- base::vapply(steps, inherits, logical(1), what = "workflowstep")
-    if (!all(ok)) {
-      base::stop("All elements of 'steps' must be of class 'workflowstep'.", call. = FALSE)
-    }
-  }
+  # 2) Validations
+  validate_workflow_steps(steps)
+  validate_unique_step_names(steps)
 
   # 3) Determine current step
-  if (is.null(current)) {
-    # default if not specified
-    current <- if (length(steps)) 1L else NA_integer_
-  } else if (length(steps) == 0L) {
-    current <- NA_integer_
-  } else {
-    # clamp to [1, length(steps)]
-    current <- max(1L, min(as.integer(current), length(steps)))
-  }
+  current <- validate_current_index(current, length(steps))
 
   # 4) Build workflow object
   structure(
@@ -201,6 +190,71 @@ print.workflow <- function(x, ...) {
   cat("  available fields: $", paste(names(x), collapse = ", $"), "\n", sep = "")
   invisible(x)
 }
+
+# -------------------------------------------------------------------------
+# Validation helpers for workflow construction
+# -------------------------------------------------------------------------
+# These helpers centralize validations that were previously inline in new_workflow().
+# Keeping them here makes new_workflow() easier to read, and ensures consistent checks
+# for other constructors/helpers that may create/modify workflows later.
+
+validate_workflow_file_paths <- function(workflow_file_paths) {
+  # Minimal structural validation; actual file existence is checked in extract_workflow_from_files()
+  if (!is.list(workflow_file_paths)) {
+    stop("'workflow_file_paths' must be a list.", call. = FALSE)
+  }
+  if (length(workflow_file_paths) == 0L) {
+    return(invisible(TRUE))
+  }
+  if (is.null(workflow_file_paths$path_to_folder) || !nzchar(workflow_file_paths$path_to_folder)) {
+    stop("'workflow_file_paths$path_to_folder' must be a non-empty string.", call. = FALSE)
+  }
+  if (!dir.exists(workflow_file_paths$path_to_folder)) {
+    stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+validate_workflow_steps <- function(steps) {
+  if (!is.list(steps)) {
+    stop("'steps' must be a list.", call. = FALSE)
+  }
+  if (length(steps) == 0L) return(invisible(TRUE))
+
+  ok <- vapply(steps, inherits, logical(1), what = "workflowstep")
+  if (!all(ok)) {
+    stop("All elements of 'steps' must be of class 'workflowstep'.", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+validate_unique_step_names <- function(steps) {
+  if (!length(steps)) return(invisible(TRUE))
+  nms <- vapply(steps, `[[`, character(1), "name")
+
+  if (anyDuplicated(nms)) {
+    dup <- unique(nms[duplicated(nms)])
+    stop("Workflow has duplicate step names: ", paste(dup, collapse = ", "), call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+validate_current_index <- function(current, n_steps) {
+  if (is.null(current)) {
+    return(if (n_steps) 1L else NA_integer_)
+  }
+  if (n_steps == 0L) return(NA_integer_)
+
+  current <- as.integer(current)
+  if (is.na(current)) return(NA_integer_)
+
+  # clamp to [1, n_steps]
+  max(1L, min(current, n_steps))
+}
+
+# -------------------------------------------------------------------------
+# Save/load workflow as ZIP file
+# -------------------------------------------------------------------------
 
 #' Save workflow as a ZIP file
 #'
