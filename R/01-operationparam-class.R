@@ -90,7 +90,12 @@ extract_arg_list <- function(
       )
     }
 
-    arg_value <- last_result
+    # unwrap single-element lists
+    if (is.list(last_result) && length(last_result) == 1L) {
+      arg_value <- last_result[[1L]]
+    } else {
+      arg_value <- last_result
+    }
 
     if (operationparam$name != "") {
       return(stats::setNames(list(arg_value), operationparam$name))

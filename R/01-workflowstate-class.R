@@ -24,7 +24,7 @@ truncate_one <- function(x, n_char) {
   if (nchar(x) > n_char) paste0(substr(x, 1, n_char), " ...") else x
 }
 
-truncate_many <- function(vals, n_char, n_items, collapse = ", ") {
+truncate_many <- function(vals, n_char, n_items, collapse = ", \\n") {
   vals <- as.character(vals)
   if (length(vals) > n_items) {
     vals <- c(vals[1:n_items], paste0("... (", length(vals) - n_items, " more items)"))
