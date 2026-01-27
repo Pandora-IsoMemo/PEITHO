@@ -110,10 +110,10 @@ extract_arg_list <- function(
     arg_value <- as.list(arg_value)
 
     # check if result is character or list of characters
-    if (
-      !is.character(arg_value) &&
-        (is.list(arg_value) && !all(sapply(arg_value, is.character)))
-    ) {
+    if (!(
+      is.character(arg_value) ||
+        (is.list(arg_value) && all(sapply(arg_value, is.character)))
+    )) {
       stop(
         "Stopping workflow because result of step '", operationparam$step_id,
         "' was not character or list of characters."

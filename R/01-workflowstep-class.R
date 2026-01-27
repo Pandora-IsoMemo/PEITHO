@@ -241,8 +241,12 @@ run.workflowstep <- function(
   if (sum(is_arg_list) > 1 || sum(is_param_config_loop) > 1) {
     stop("Looping over multiple arguments is not supported.", call. = FALSE)
   }
+
+  arg_list_indices    <- which(unname(is_arg_list))
+  loop_param_indices  <- which(is_param_config_loop)
+
   # if loop_param and loop_arg disagree, throw error
-  if (!identical(which(is_param_config_loop), which(unname(is_arg_list)))) {
+  if (!identical(loop_param_indices, arg_list_indices)) {
     PEITHO:::logWarn(
       "WARNING! Detected list argument(s) for operation '%s', but 'loop' is set to '%s'.",
       object$operation,
@@ -254,9 +258,9 @@ run.workflowstep <- function(
   if (any(is_param_config_loop)) {
     PEITHO:::logDebug(
       "  Running operation: WITH LOOPING over argument index %d",
-      which(is_param_config_loop)
+      loop_param_indices
     )
-    loop_index <- which(is_param_config_loop)[1]
+    loop_index <- loop_param_indices[1]
     loop_values <- args[[loop_index]]
 
     runs <- lapply(loop_values, function(v) {

@@ -116,7 +116,7 @@
     "comments": "",
     "command": "paste",
     "args": "x=@#*L*#@11_paste_content@#*L*#@, collapse=\\n",
-    "loop": "auto",
+    "loop": "no",
     "prompt": ""
   },
   {
