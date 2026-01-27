@@ -222,8 +222,8 @@ run.workflowstep <- function(
     if (!inherits(param, "operationparam")) {
       stop("All entries in 'params' must be of class 'operationparam'.", call. = FALSE)
     }
-    # converting last result into a list (to convert character vectors)
-    arg_list <- extract_arg_list(param, last_result = as.list(state$last_result))
+
+    arg_list <- extract_arg_list(param, state = state)
     args <- c(args, arg_list)
   }
 

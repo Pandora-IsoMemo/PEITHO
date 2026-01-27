@@ -130,10 +130,10 @@ update.workflowstate <- function(object, steprun, idx, ...) {
     object$last_result_name <- sname
 
     # key by id
-    object$results_by_id[[paste0("id_", sid)]] <- steprun$output
+    object$results_by_id[[sid]] <- steprun$output
 
     # key by name (names should be unique once you start prefixing subflows)
-    object$results_by_name[[paste0("name_", sname)]] <- steprun$output
+    object$results_by_name[[sname]] <- steprun$output
   } # else: on error, do not update last_result or caches
 
   object$errors <- if (steprun$has_error) c(object$errors, steprun$error) else object$errors
