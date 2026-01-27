@@ -13,10 +13,6 @@
 # renaming/rewriting when combining workflows to keep step names unique and references valid.
 # Keeping this logic in one place makes future changes (name-based vs id-based refs) safe.
 
-# ---- utilities ---------------------------------------------------------------
-
-`%||%` <- function(x, y) if (is.null(x) || length(x) == 0L) y else x
-
 # ---- runtime: resolve stored results by name/id ------------------------------
 
 # NOTE: Result reference resolver (future-proofing)
