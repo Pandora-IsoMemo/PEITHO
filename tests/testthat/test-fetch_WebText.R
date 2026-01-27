@@ -1,7 +1,7 @@
 test_that("fetch_WebText returns valid WebText object for example.com", {
-  obj <- fetch_WebText("https://example.com", return_text_blocks_only = FALSE)
+  obj <- fetch_WebText("https://httpbin.org/html", return_text_blocks_only = FALSE)
   expect_true(is_WebText(obj))
-  expect_equal(obj$url, "https://example.com")
+  expect_equal(obj$url, "https://httpbin.org/html")
   expect_type(obj$text, "character")
   expect_s3_class(obj, "WebText")
   expect_true(obj$status_code >= 200)
@@ -19,7 +19,7 @@ test_that("fetch_WebText handles invalid URL gracefully", {
 
 test_that("fetch_WebText warns if CSS selector matches nothing", {
   obj <- fetch_WebText(
-    "https://example.com",
+    "https://httpbin.org/html",
     css_selector = "notarealcssselector",
     return_text_blocks_only = FALSE
   )
@@ -29,7 +29,7 @@ test_that("fetch_WebText warns if CSS selector matches nothing", {
 
 test_that("fetch_WebText can return text blocks only", {
   text_blocks <- fetch_WebText(
-    "https://example.com",
+    "https://httpbin.org/html",
     return_text_blocks_only = TRUE
   )
   expect_type(text_blocks, "character")
