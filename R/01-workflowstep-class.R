@@ -250,7 +250,7 @@ run.workflowstep <- function(
     PEITHO:::logWarn(
       "WARNING! Detected list argument(s) for operation '%s', but 'loop' is set to '%s'.",
       object$operation,
-      params[[which(unname(is_arg_list))]]$loop
+      params[[arg_list_indices[1]]]$loop
     )
   }
 
@@ -277,7 +277,7 @@ run.workflowstep <- function(
         "     WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs."
       )
     } else {
-      PEITHO:::logInfo("     %s single results.", length(results))
+      PEITHO:::logInfo("     %d single results.", length(results))
     }
 
     # return list of results/errors
