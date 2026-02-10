@@ -10,7 +10,8 @@ new_operationparam(
   name = NULL,
   value = "",
   label = "",
-  type = c("input", "result", "literal"),
+  type = c("literal", "input", "result"),
+  tag = c("", "@#\\\\*I\\\\*#@", "@#\\\\*L\\\\*#@"),
   loop = c("no", "yes", "auto"),
   ...
 )
@@ -30,6 +31,8 @@ new_operationparam(
 - "input"  : value comes from user input or external input
 - "result" : value refers to a previous step's result
 - "literal": value is used as-is (a literal argument)}
+
+\item{tag}{tag}
 
 \item{loop}{Looping behavior for this parameter. One of:
 - "no"   : do not loop

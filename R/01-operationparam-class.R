@@ -12,6 +12,7 @@
 #'   - "input"  : value comes from user input or external input
 #'   - "result" : value refers to a previous step's result
 #'   - "literal": value is used as-is (a literal argument)
+#' @param tag      tag
 #' @param loop     Looping behavior for this parameter. One of:
 #'   - "no"   : do not loop
 #'   - "yes"  : always loop
@@ -26,11 +27,13 @@ new_operationparam <- function(
   name = NULL,
   value = "",
   label = "",
-  type = c("input", "result", "literal"),
+  type = c("literal", "input", "result"),
+  tag = c("", "@#\\*I\\*#@", "@#\\*L\\*#@"),
   loop = c("no", "yes", "auto"),
   ...
 ) {
   type <- match.arg(type)
+  tag <- match.arg(tag)
   loop <- match.arg(loop)
 
   structure(
@@ -39,8 +42,9 @@ new_operationparam <- function(
       position = as.integer(position),
       name     = name,
       value    = value,
-      label    = label,
       type     = type,
+      tag      = tag,
+      label    = label,
       loop     = loop,
       dots     = list(...)
     ),

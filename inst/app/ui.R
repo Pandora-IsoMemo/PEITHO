@@ -13,9 +13,20 @@ tagList(
       sidebarLayout(
         sidebarPanel(
           width = 2,
-          actionButton("example", "Create Example")
+          actionButton("example", "Create Example"),
+          br(),
+          br(),
+          actionButton("run", "Run Example"),
+          br(),
+          br(),
+          uiOutput("progress_ui")
         ),
         mainPanel(
+          tabsetPanel(
+            tabPanel("sequence", tableOutput("wf_table")),
+            tabPanel("inputs", tableOutput("inputs_table")),
+            tabPanel("results", tableOutput("results_table"))
+          )
         ),
       )
     )

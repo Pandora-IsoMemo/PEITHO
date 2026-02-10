@@ -78,6 +78,29 @@ print.workflowstate <- function(x, ...) {
   invisible(x)
 }
 
+#' Convert a workflowstate to a data frame
+#' 
+#' This function summarizes the workflow state by converting the list of step runs
+#' into a data frame.
+#' 
+#' @param x A `workflowstate` object.
+#' @param ... Additional arguments (not used).
+#' @return A data frame summarizing the workflow state.
+#' @export
+as.data.frame.workflowstate <- function(x, ...) {
+  sr <- x$stepruns
+
+  data.frame(
+    entry     = vapply(sr, function(s) s$step$id, integer(1)),
+    name   = vapply(sr, function(s) s$step$name, character(1)),
+    label     = vapply(sr, function(s) s$step$label, character(1)),
+    has_error   = vapply(sr, function(s) s$has_error, logical(1)),
+    error       = vapply(sr, function(s) if (s$has_error) trunc(s$error) else "", character(1)),
+    output      = vapply(sr, function(s) if (!s$has_error) trunc(s$output) else "", character(1)),
+    stringsAsFactors = FALSE
+  )
+}
+
 #' Add a workflow step run to the workflow state
 #' 
 #' This function appends a `workflowsteprun` object to the list of executed step runs
