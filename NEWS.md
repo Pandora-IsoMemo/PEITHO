@@ -3,7 +3,7 @@
 ## New Features
 
 - Introduced `as.data.frame()` S3 methods for workflows, workflow runs, and workflow states, plus a new `extract_inputs()` helper.
-- Extended the Shiny app to build and execute an example workflow with progress tracking and tabular result views.
+- Extended the Shiny app to build and execute an example workflow with progress tracking and tabular result views (#21).
 
 # PEITHO 26.01.3
 
