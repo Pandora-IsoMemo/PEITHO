@@ -6,11 +6,14 @@
 \usage{
 startApplication(
   port = getOption("shiny.port"),
+  host = "0.0.0.0",
   launch.browser = getOption("shiny.launch.browser", interactive())
 )
 }
 \arguments{
 \item{port}{port}
+
+\item{host}{host}
 
 \item{launch.browser}{If true, the system's default web browser will be launched}
 }

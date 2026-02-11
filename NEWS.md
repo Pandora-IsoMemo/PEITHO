@@ -1,3 +1,9 @@
+# PEITHO 26.02.1
+
+## Bug Fixes
+
+- Fixed missing argument `host` in `startApplication()` function, allowing specification of the host address when starting the Shiny app.
+
 # PEITHO 26.02.0
 
 ## New Features
