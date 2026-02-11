@@ -13,5 +13,5 @@ extract_inputs(wfr)
 A named list of input values.
 }
 \description{
-This function extracts all input values used in the workflow run.
+This function extracts user input values used in the workflow run.
 }

@@ -54,7 +54,7 @@ as.data.frame.workflowrun <- function(x, ...) {
 
 #' Extract input values from a workflow run
 #'
-#' This function extracts all input values used in the workflow run.
+#' This function extracts user input values used in the workflow run.
 #'
 #' @param wfr A `workflowrun` object.
 #' @return A named list of input values.
