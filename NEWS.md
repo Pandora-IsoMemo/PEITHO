@@ -1,3 +1,28 @@
+# PEITHO 26.02.0
+
+## New Features
+
+- Introduced `as.data.frame()` S3 methods for workflows, workflow runs, and workflow states, plus a new `extract_inputs()` helper.
+- Extended the Shiny app to build and execute an example workflow with progress tracking and tabular result views (#21).
+
+# PEITHO 26.01.3
+
+## New Features
+
+- Extended the example workflow to demonstrate **sub-workflows**, allowing sequential execution of multiple workflow segments (#14)
+- Sub-workflows can now **reference results from earlier steps explicitly**, enabling more complex, non-linear workflows.
+- Improved logging for loop execution, including clearer warnings when operations produce list-type results.
+
+## Bug Fixes
+
+- Fixed a bug where result parameters always resolved to the **last executed step**, ignoring the referenced step label.
+- Workflow execution now uses **cached state lookups** to resolve result parameters by step name (and ID), ensuring correct dependency handling across steps.
+
+# PEITHO 26.01.2
+
+## Updates
+- Converted a warning into an informational message when creating a new `results.json` file if it does not yet exist.
+
 # PEITHO 26.01.1
 
 ## New Features

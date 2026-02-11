@@ -13,7 +13,13 @@ new_workflowstate <- function(initial_input = NULL) {
       initial_input = initial_input,
       errors        = NULL,            # all errors encountered
       last_result   = initial_input,   # last step’s result
-      stepruns      = list()           # list of workflowsteprun objects
+      stepruns      = list(),           # list of workflowsteprun objects
+
+      # caches (duplication on purpose, we may later decide if we use 'id' or 'name' at the end)
+      results_by_id   = list(),
+      results_by_name = list(),
+      last_result_id  = NA_integer_,
+      last_result_name = NA_character_
     ),
     class = c("workflowstate", "list")
   )
@@ -24,7 +30,7 @@ truncate_one <- function(x, n_char) {
   if (nchar(x) > n_char) paste0(substr(x, 1, n_char), " ...") else x
 }
 
-truncate_many <- function(vals, n_char, n_items, collapse = ", ") {
+truncate_many <- function(vals, n_char, n_items, collapse = ", \\n") {
   vals <- as.character(vals)
   if (length(vals) > n_items) {
     vals <- c(vals[1:n_items], paste0("... (", length(vals) - n_items, " more items)"))
@@ -72,6 +78,29 @@ print.workflowstate <- function(x, ...) {
   invisible(x)
 }
 
+#' Convert a workflowstate to a data frame
+#' 
+#' This function summarizes the workflow state by converting the list of step runs
+#' into a data frame.
+#' 
+#' @param x A `workflowstate` object.
+#' @param ... Additional arguments (not used).
+#' @return A data frame summarizing the workflow state.
+#' @export
+as.data.frame.workflowstate <- function(x, ...) {
+  sr <- x$stepruns
+
+  data.frame(
+    entry     = vapply(sr, function(s) s$step$id, integer(1)),
+    name   = vapply(sr, function(s) s$step$name, character(1)),
+    label     = vapply(sr, function(s) s$step$label, character(1)),
+    has_error   = vapply(sr, function(s) s$has_error, logical(1)),
+    error       = vapply(sr, function(s) if (s$has_error) trunc(s$error) else "", character(1)),
+    output      = vapply(sr, function(s) if (!s$has_error) trunc(s$output) else "", character(1)),
+    stringsAsFactors = FALSE
+  )
+}
+
 #' Add a workflow step run to the workflow state
 #' 
 #' This function appends a `workflowsteprun` object to the list of executed step runs
@@ -83,6 +112,7 @@ print.workflowstate <- function(x, ...) {
 #' @return The updated `workflowstate` object.
 #' @export
 update.workflowstate <- function(object, steprun, idx, ...) {
+  # validations and initial input
   if (!inherits(object, "workflowstate")) {
     stop("Argument 'state' must be of class 'workflowstate'.")
   }
@@ -101,6 +131,7 @@ update.workflowstate <- function(object, steprun, idx, ...) {
     object$initial_input <- initial_input
   }
 
+  # add or update steprun at index
   if (idx <= length(object$stepruns)) {
     object$stepruns[[idx]] <- steprun
     # remove all later stepruns
@@ -110,7 +141,24 @@ update.workflowstate <- function(object, steprun, idx, ...) {
   } else {
     object$stepruns[[length(object$stepruns) + 1L]] <- steprun
   }
-  object$last_result <- if (!steprun$has_error) steprun$output else object$last_result
+
+  if (!steprun$has_error) {
+    object$last_result <- steprun$output
+
+    # cache with stable keys
+    sid <- steprun$step$id
+    sname <- steprun$step$name
+
+    object$last_result_id <- sid
+    object$last_result_name <- sname
+
+    # key by id
+    object$results_by_id[[sid]] <- steprun$output
+
+    # key by name (names should be unique once you start prefixing subflows)
+    object$results_by_name[[sname]] <- steprun$output
+  } # else: on error, do not update last_result or caches
+
   object$errors <- if (steprun$has_error) c(object$errors, steprun$error) else object$errors
   object
 }

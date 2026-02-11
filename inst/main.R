@@ -1,4 +1,3 @@
-devtools::load_all()
+library(PEITHO)
 
-startApplication(launch.browser = TRUE)
-
+PEITHO::startApplication(launch.browser = TRUE)

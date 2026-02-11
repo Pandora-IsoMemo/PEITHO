@@ -1,100 +1,3 @@
-# ---- workflowsteprun class ----
-
-#' Create a new workflow step run object
-#'
-#' This object records the execution of a single step within a workflow,
-#' including the step definition, the arguments used, the output or error,
-#' and any additional metadata.
-#' @param step   A `workflowstep` object representing the step definition.
-#' @param args   A list of arguments that were passed to the step's operation.
-#'  Contains actual values used during execution (e.g. results of previous steps).
-#' @param output The output produced by the step, if successful.
-#' @param error  An error object if the step failed, otherwise `NULL`.
-#' @param ...    Additional metadata to store with the step run.
-#' @return A `workflowsteprun` object.
-#' @export
-new_workflowsteprun <- function(step, args, output = NULL, error = NULL, ...) {
-  # validate that step is a workflowstep
-  if (!inherits(step, "workflowstep")) {
-    stop("Argument 'step' must be of class 'workflowstep'.")
-  }
-
-  if (!is.list(args)) args <- as.list(args)
-
-  structure(
-    list(
-      step   = step,   # the workflowstep definition at run time
-      args   = args,   # actual arguments passed to the function
-      output = output, # result (if no error)
-      error  = error,  # condition object (if any)
-      has_error = if (is.list(error)) {
-        any(!sapply(error, is.null))
-      } else {
-        !is.null(error)
-      },
-      meta   = list(...)
-    ),
-    class = c("workflowsteprun", "list")
-  )
-}
-
-#' Print method for workflowsteprun objects
-#'
-#' @param x A `workflowsteprun` object.
-#' @param ... Additional arguments (not used).
-#' @export
-print.workflowsteprun <- function(x, ...) {
-  cat("<workflowsteprun>\n")
-  cat("  step id:   ", x$step$id, "  (", x$step$name, ")\n", sep = "")
-  cat("  operation: ", x$step$operation, "\n", sep = "")
-  cat("  args:      ", paste(names(x$args), collapse = ", "), "\n", sep = "")
-  cat("  has error: ", x$has_error, "\n", sep = "")
-  cat("  available fields: $", paste(names(x), collapse = ", $"), "\n", sep = "")
-  invisible(x)
-}
-
-#' Summary method for workflowsteprun objects
-#'
-#' @param object A `workflowsteprun` object.
-#' @param ... Additional arguments (not used).
-#' @export
-summary.workflowsteprun <- function(object, ...) {
-  if (length(object$error) > 0) {
-    is_error <- !sapply(object$error, is.null)
-  } else {
-    is_error <- !is.null(object$error)
-  }
-
-  list(
-    entry      = object$step$id,
-    name       = object$step$name,
-    label      = object$step$label,
-    result     = object$output,
-    errors     = if (!any(is_error)) "" else {
-      sapply(object$error[is_error], function(e) {
-        if (inherits(e, "condition")) {
-          conditionMessage(e)
-        } else if (is.character(e)) {
-          e
-        } else {
-          as.character(e)
-        }
-      })
-    }
-  )
-}
-
-resolve_operation <- function(op_name, env) {
-  PEITHO:::logDebug("  Resolving operation function: %s", op_name)
-  if (!is.character(op_name) || length(op_name) != 1L || !nzchar(op_name)) {
-    stop("'operation' must be a non-empty character string.", call. = FALSE)
-  }
-  if (!exists(op_name, mode = "function", envir = env, inherits = TRUE)) {
-    stop("Operation '", op_name, "' not found in given environment.", call. = FALSE)
-  }
-  get(op_name, envir = env, mode = "function", inherits = TRUE)
-}
-
 # ---- workflowstep class ----
 
 # constructor --------------------------------------------------------------
@@ -176,6 +79,17 @@ print.workflowstep <- function(x, ...) {
   invisible(x)
 }
 
+resolve_operation <- function(op_name, env) {
+  PEITHO:::logDebug("  Resolving operation function: %s", op_name)
+  if (!is.character(op_name) || length(op_name) != 1L || !nzchar(op_name)) {
+    stop("'operation' must be a non-empty character string.", call. = FALSE)
+  }
+  if (!exists(op_name, mode = "function", envir = env, inherits = TRUE)) {
+    stop("Operation '", op_name, "' not found in given environment.", call. = FALSE)
+  }
+  get(op_name, envir = env, mode = "function", inherits = TRUE)
+}
+
 run_with_error <- function(fn, args) {
   tryCatch(
     list(output = do.call(fn, args), error = NULL),
@@ -222,7 +136,8 @@ run.workflowstep <- function(
     if (!inherits(param, "operationparam")) {
       stop("All entries in 'params' must be of class 'operationparam'.", call. = FALSE)
     }
-    arg_list <- extract_arg_list(param, last_result = as.list(state$last_result))
+
+    arg_list <- extract_arg_list(param, state = state)
     args <- c(args, arg_list)
   }
 
@@ -240,18 +155,26 @@ run.workflowstep <- function(
   if (sum(is_arg_list) > 1 || sum(is_param_config_loop) > 1) {
     stop("Looping over multiple arguments is not supported.", call. = FALSE)
   }
+
+  arg_list_indices    <- which(unname(is_arg_list))
+  loop_param_indices  <- which(is_param_config_loop)
+
   # if loop_param and loop_arg disagree, throw error
-  if (!identical(which(is_param_config_loop), which(unname(is_arg_list)))) {
-    stop(
-      "Mismatch between 'loop' setting in operationparam and actual argument value.",
-      call. = FALSE
+  if (!identical(loop_param_indices, arg_list_indices)) {
+    PEITHO:::logWarn(
+      "WARNING! Detected list argument(s) for operation '%s', but 'loop' is set to '%s'.",
+      object$operation,
+      params[[arg_list_indices[1]]]$loop
     )
   }
 
   # 3) actually call the function, if needed then in a loop
-  if (any(is_arg_list)) {
-    PEITHO:::logDebug("  Running operation with looping over argument index %d", which(is_arg_list))
-    loop_index <- which(is_arg_list)[1]
+  if (any(is_param_config_loop)) {
+    PEITHO:::logDebug(
+      "  Running operation: WITH LOOPING over argument index %d",
+      loop_param_indices
+    )
+    loop_index <- loop_param_indices[1]
     loop_values <- args[[loop_index]]
 
     runs <- lapply(loop_values, function(v) {
@@ -261,6 +184,16 @@ run.workflowstep <- function(
     results <- lapply(runs, `[[`, "output")
     errors  <- lapply(runs, `[[`, "error")
 
+    PEITHO:::logInfo("  %d loop iterations for operation '%s':", length(runs), object$operation)
+    max_result_length <- max(lengths(results))
+    if (max_result_length > 1L) {
+      PEITHO:::logWarn(
+        "     WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs."
+      )
+    } else {
+      PEITHO:::logInfo("     %d single results.", length(results))
+    }
+
     # return list of results/errors
     steprun <- new_workflowsteprun(
       step   = object,
@@ -269,8 +202,19 @@ run.workflowstep <- function(
       error  = errors
     )
   } else {
-    PEITHO:::logDebug("  Running operation without looping")
+    PEITHO:::logDebug("  Running operation: NO LOOPING")
+
     run <- run_with_error(fn, args) # <--- RUN FUNCTION HERE, single run
+
+    # check if result has length > 1 or not
+    is_single_result <- length(run$output) == 1L
+    PEITHO:::logInfo(
+      "  Operation '%s': %s result%s",
+      object$operation,
+      if (is_single_result) "single" else length(run$output),
+      if (is_single_result) "" else "s"
+    )
+
     steprun <- new_workflowsteprun(
       step   = object,
       args   = args,

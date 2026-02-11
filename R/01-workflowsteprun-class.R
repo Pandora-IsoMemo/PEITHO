@@ -1,0 +1,121 @@
+# ---- workflowsteprun class ----
+
+#' Create a new workflow step run object
+#'
+#' This object records the execution of a single step within a workflow,
+#' including the step definition, the arguments used, the output or error,
+#' and any additional metadata.
+#' @param step   A `workflowstep` object representing the step definition.
+#' @param args   A list of arguments that were passed to the step's operation.
+#'  Contains actual values used during execution (e.g. results of previous steps).
+#' @param output The output produced by the step, if successful.
+#' @param error  An error object if the step failed, otherwise `NULL`.
+#' @param ...    Additional metadata to store with the step run.
+#' @return A `workflowsteprun` object.
+#' @export
+new_workflowsteprun <- function(step, args, output = NULL, error = NULL, ...) {
+  # validate that step is a workflowstep
+  if (!inherits(step, "workflowstep")) {
+    stop("Argument 'step' must be of class 'workflowstep'.")
+  }
+
+  if (!is.list(args)) args <- as.list(args)
+
+  structure(
+    list(
+      step   = step,   # the workflowstep definition at run time
+      args   = args,   # actual arguments passed to the function
+      output = output, # result (if no error)
+      error  = error,  # condition object (if any)
+      has_error = if (is.list(error)) {
+        any(!sapply(error, is.null))
+      } else {
+        !is.null(error)
+      },
+      meta   = list(...)
+    ),
+    class = c("workflowsteprun", "list")
+  )
+}
+
+#' Print method for workflowsteprun objects
+#'
+#' @param x A `workflowsteprun` object.
+#' @param ... Additional arguments (not used).
+#' @export
+print.workflowsteprun <- function(x, ...) {
+  cat("<workflowsteprun>\n")
+  cat("  step id:   ", x$step$id, "  (", x$step$name, ")\n", sep = "")
+  cat("  operation: ", x$step$operation, "\n", sep = "")
+  cat("  args:      ", paste(names(x$args), collapse = ", "), "\n", sep = "")
+  cat("  has error: ", x$has_error, "\n", sep = "")
+  cat("  available fields: $", paste(names(x), collapse = ", $"), "\n", sep = "")
+  invisible(x)
+}
+
+#' Summary method for workflowsteprun objects
+#'
+#' @param object A `workflowsteprun` object.
+#' @param ... Additional arguments (not used).
+#' @export
+summary.workflowsteprun <- function(object, ...) {
+  # Normalize: error is always a list
+  errs <- object$error
+  if (is.null(errs)) {
+    errs <- list()
+  } else if (!is.list(errs) || inherits(errs, "condition")) {
+    # condition is technically a list in R, so we special-case it
+    errs <- list(errs)
+  }
+
+  has_error <- function(x) {
+    if (is.null(x)) return(FALSE)
+    if (inherits(x, "condition")) return(TRUE)
+
+    if (is.character(x)) {
+      x <- x[!is.na(x)]
+      return(length(x) > 0 && any(nzchar(x)))
+    }
+
+    # For other types (e.g. error codes, objects), treat as error if not "empty"
+    # (adjust if you have a specific "no error" sentinel)
+    TRUE
+  }
+
+  err_msg <- function(x) {
+    if (is.null(x)) return(NULL)
+
+    if (inherits(x, "condition")) {
+      return(conditionMessage(x))
+    }
+
+    if (is.character(x)) {
+      x <- x[!is.na(x)]
+      x <- x[nzchar(x)]
+      return(if (length(x)) paste(x, collapse = "\n") else NULL)
+    }
+
+    # Try a readable fallback for arbitrary objects
+    msg <- tryCatch(
+      paste(capture.output(str(x)), collapse = "\n"),
+      error = function(...) NULL
+    )
+    if (!is.null(msg) && nzchar(msg)) return(msg)
+
+    as.character(x)
+  }
+
+  is_error <- vapply(errs, has_error, logical(1))
+
+  errors_out <- if (!any(is_error)) "" else {
+    unlist(lapply(errs[is_error], err_msg), use.names = FALSE)
+  }
+
+  list(
+    entry  = object$step$id,
+    name   = object$step$name,
+    label  = object$step$label,
+    result = object$output,
+    errors = errors_out
+  )
+}

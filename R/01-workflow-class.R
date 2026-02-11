@@ -1,47 +1,5 @@
 # ---- workflow class ----
 
-#' Workflow run object
-#' 
-#' This object represents a completed run of a workflow, containing the workflow definition
-#' and the final state after execution.
-#' @param workflow A `workflow` object.
-#' @param state A `workflowstate` object.
-#' @return A `workflowrun` object.
-#' @export
-new_workflowrun <- function(workflow, state) {
-  if (!inherits(workflow, "workflow")) {
-    stop("Argument 'workflow' must be of class 'workflow'.")
-  }
-  if (!inherits(state, "workflowstate")) {
-    stop("Argument 'state' must be of class 'workflowstate'.")
-  }
-
-  structure(
-    list(
-      workflow = workflow,
-      state    = state,
-      errors   = state$errors,
-      last_result   = state$last_result
-    ),
-    class = "workflowrun"
-  )
-}
-
-#' Print method for workflowrun objects
-#'
-#' @param x A `workflowrun` object.
-#' @param ... Additional arguments (not used).
-#' @export
-print.workflowrun <- function(x, ...) {
-  cat("<workflowrun>\n")
-  cat("  workflow: ", x$workflow$name, "\n", sep = "")
-  cat("  steps:    ", length(x$workflow$steps), "\n", sep = "")
-  cat("Finished with state:\n")
-  print(x$state)
-  cat("  available fields: $", paste(names(x), collapse = ", $"), "\n", sep = "")
-  invisible(x)
-}
-
 #' Helper to get file paths for PEITHO workflow files
 #' 
 #' This function constructs full file paths for the workflow files located in a specified folder.
@@ -108,12 +66,13 @@ new_workflow <- function(
       PEITHO:::logDebug("Using default PEITHO workflow file paths...")
       workflow_file_paths <- PEITHO:::workflow_file_paths()
     }
-    if (!dir.exists(workflow_file_paths$path_to_folder)) {
-      stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
-    }
+
+    validate_workflow_file_paths(workflow_file_paths)
+
     if (length(steps)) {
       PEITHO:::logWarn("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.")
     }
+
     steps <- PEITHO:::extract_workflow_from_files(
       workflow_file_paths = workflow_file_paths,
       show_functions_path = FALSE
@@ -127,24 +86,12 @@ new_workflow <- function(
     workflow_file_paths <- list()
   }
 
-  # 2) Validate steps are workflowstep objects
-  if (length(steps)) {
-    ok <- base::vapply(steps, inherits, logical(1), what = "workflowstep")
-    if (!all(ok)) {
-      base::stop("All elements of 'steps' must be of class 'workflowstep'.", call. = FALSE)
-    }
-  }
+  # 2) Validations
+  validate_workflow_steps(steps)
+  validate_unique_step_names(steps)
 
   # 3) Determine current step
-  if (is.null(current)) {
-    # default if not specified
-    current <- if (length(steps)) 1L else NA_integer_
-  } else if (length(steps) == 0L) {
-    current <- NA_integer_
-  } else {
-    # clamp to [1, length(steps)]
-    current <- max(1L, min(as.integer(current), length(steps)))
-  }
+  current <- validate_current_index(current, length(steps))
 
   # 4) Build workflow object
   structure(
@@ -163,6 +110,42 @@ new_workflow <- function(
 
 workflow <- function(steps = list(), name = "Untitled workflow", current = 1L, ...) {
   new_workflow(steps = steps, name = name, current = current, ...)
+}
+
+#' Convert a workflow object to a data frame
+#'
+#' This method converts a `workflow` object into a data frame summarizing its steps.
+#'
+#' @param x A `workflow` object.
+#' @param ... Additional arguments (not used).
+#' @return A data frame summarizing the workflow steps.
+#' @export
+as.data.frame.workflow <- function(x, ...) {
+  steps <- x$steps
+  data.frame(
+    name = vapply(steps, function(s) s$name, character(1)),
+    label = vapply(steps, function(s) s$label, character(1)),
+    comments = vapply(steps, function(s) s$comments, character(1)),
+    operation = vapply(steps, function(s) s$operation, character(1)),
+    params = vapply(steps, function(s) flatten_params(s$params), character(1)),
+    stringsAsFactors = FALSE
+  )
+}
+
+flatten_params <- function(params) {
+  if (length(params) == 0) return("")
+  paste(
+    vapply(params, function(p) {
+      if (!is.null(p$name) && p$type %in% c("input", "result")) {
+        paste0(p$name, "=", p$tag, toString(p$label), p$tag)
+      } else if (!is.null(p$name) && p$type == "literal") {
+        paste0(p$name, "=", toString(p$value))
+      } else {
+        ""
+      }
+    }, character(1)),
+    collapse = ", "
+  )
 }
 
 # print method -------------------------------------------------------------
@@ -201,6 +184,71 @@ print.workflow <- function(x, ...) {
   cat("  available fields: $", paste(names(x), collapse = ", $"), "\n", sep = "")
   invisible(x)
 }
+
+# -------------------------------------------------------------------------
+# Validation helpers for workflow construction
+# -------------------------------------------------------------------------
+# These helpers centralize validations that were previously inline in new_workflow().
+# Keeping them here makes new_workflow() easier to read, and ensures consistent checks
+# for other constructors/helpers that may create/modify workflows later.
+
+validate_workflow_file_paths <- function(workflow_file_paths) {
+  # Minimal structural validation; actual file existence is checked in extract_workflow_from_files()
+  if (!is.list(workflow_file_paths)) {
+    stop("'workflow_file_paths' must be a list.", call. = FALSE)
+  }
+  if (length(workflow_file_paths) == 0L) {
+    return(invisible(TRUE))
+  }
+  if (is.null(workflow_file_paths$path_to_folder) || !nzchar(workflow_file_paths$path_to_folder)) {
+    stop("'workflow_file_paths$path_to_folder' must be a non-empty string.", call. = FALSE)
+  }
+  if (!dir.exists(workflow_file_paths$path_to_folder)) {
+    stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+validate_workflow_steps <- function(steps) {
+  if (!is.list(steps)) {
+    stop("'steps' must be a list.", call. = FALSE)
+  }
+  if (length(steps) == 0L) return(invisible(TRUE))
+
+  ok <- vapply(steps, inherits, logical(1), what = "workflowstep")
+  if (!all(ok)) {
+    stop("All elements of 'steps' must be of class 'workflowstep'.", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+validate_unique_step_names <- function(steps) {
+  if (!length(steps)) return(invisible(TRUE))
+  nms <- vapply(steps, `[[`, character(1), "name")
+
+  if (anyDuplicated(nms)) {
+    dup <- unique(nms[duplicated(nms)])
+    stop("Workflow has duplicate step names: ", paste(dup, collapse = ", "), call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+validate_current_index <- function(current, n_steps) {
+  if (is.null(current)) {
+    return(if (n_steps) 1L else NA_integer_)
+  }
+  if (n_steps == 0L) return(NA_integer_)
+
+  current <- as.integer(current)
+  if (is.na(current)) return(NA_integer_)
+
+  # clamp to [1, n_steps]
+  max(1L, min(current, n_steps))
+}
+
+# -------------------------------------------------------------------------
+# Save/load workflow as ZIP file
+# -------------------------------------------------------------------------
 
 #' Save workflow as a ZIP file
 #'
@@ -333,6 +381,9 @@ run.workflow <- function(
   env = NULL,
   ...
 ) {
+  # unpack additional args
+  additional_args <- list(...)
+
   # for now we always stop on error!!!
   stop_on_error <- TRUE
 
@@ -378,6 +429,9 @@ run.workflow <- function(
   PEITHO:::logDebug("Running workflow from step %d to %d", from, to)
 
   for (j in seq_along(idxs)) {
+    if (shiny::isRunning()) {
+      shiny::incProgress(1 / length(idxs), detail = paste("Running step", j, "of", length(idxs)))
+    }
     PEITHO:::logInfo("Running step %d of %d", j, length(idxs))
     i <- idxs[j]
     step <- object$steps[[i]]

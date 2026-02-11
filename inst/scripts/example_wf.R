@@ -1,5 +1,5 @@
 # download and install the repo from git
-devtools::install_github("Pandora-IsoMemo/PEITHO")
+#devtools::install_github("Pandora-IsoMemo/PEITHO")
 
 # load PEITHO package
 library(PEITHO)
@@ -14,15 +14,20 @@ my_wf <- new_workflow(
   workflow_file_paths = workflow_file_paths(path = "")
 )
 
+as.data.frame(my_wf)
+
 # save the workflow as zip file
 zipfile_path <- "./my_workflow.peitho"
 save_as_zip(my_wf, file = zipfile_path)
 
 # run the workflow from step 1 to 5
-my_run_1 <- run(my_wf, from = 1, to = 5)
+my_run_1 <- run(my_wf, from = 1, to = 11)
+
+extract_inputs(my_run_1)
+as.data.frame(my_run_1)
 
 # see results
-length(my_run_1$state$last_result) # 3 outputs from 3 urls
+length(my_run_1$state$last_result)
 
 # print the first n_char of each of the last result
 PEITHO:::trunc(my_run_1$state$last_result, n_char = 100)
