@@ -59,7 +59,7 @@ print.workflowsteprun <- function(x, ...) {
 #' @param ... Additional arguments (not used).
 #' @export
 summary.workflowsteprun <- function(object, ...) {
-  if (length(object$error) > 0) {
+  if (is.list(object$error) && !inherits(object$error, "condition")) {
     is_error <- !sapply(object$error, is.null)
   } else {
     is_error <- !is.null(object$error)

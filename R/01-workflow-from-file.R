@@ -18,7 +18,7 @@ read_json_if_exists <- function(path) {
 get_inputs <- function(
   path_to_folder,
   inputs_file,
-  pattern = "@#\\*I\\*#@"
+  pattern = "@#*I*#@"
 ) {
   input_path <- file.path(path_to_folder, inputs_file)
 
@@ -88,7 +88,7 @@ make_param_from_arg <- function(
       name     = arg_name,
       value    = input_list[[varname]],
       type     = "input",
-      tag      = "@#\\*I\\*#@",
+      tag      = "@#*I*#@",
       label    = varname,
       loop     = cmd_loop %||% "no"
     )
@@ -101,7 +101,7 @@ make_param_from_arg <- function(
       name     = arg_name,
       value    = NULL,
       type     = "result",
-      tag      = "@#\\*L\\*#@",
+      tag      = "@#*L*#@",
       label    = varname,
       loop     = cmd_loop %||% "no"
     )
