@@ -22,11 +22,6 @@ shinyServer(function(input, output, session) {
     wf_run(wf_run_val)
   })
 
-  # Custom message handler for updating progress bar
-  # session$onFlushed(function() {
-  #   session$sendCustomMessage("updateProgressBar", list(id = "wf_progress", value = 0))
-  # })
-
   # observe({
   #   zipfile_path <- "./my_workflow.peitho"
   #   save_as_zip(wf(), file = zipfile_path)
