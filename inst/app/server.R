@@ -29,9 +29,9 @@ shinyServer(function(input, output, session) {
   #   bindEvent(input$download_wf)
 
   output$wf_table <- renderTable({
-    wf <- wf()
-    if (is.null(wf)) return(NULL)
-    as.data.frame(wf)
+    wf_val <- wf()
+    if (is.null(wf_val)) return(NULL)
+    as.data.frame(wf_val)
   }, rownames = TRUE)
 
   output$inputs_table <- renderTable({
