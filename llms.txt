@@ -32,6 +32,14 @@ devtools::build_site()
 
 ## All functions
 
+- [`as.data.frame(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/as.data.frame.workflow.md)
+  : Convert a workflow object to a data frame
+- [`as.data.frame(`*`<workflowrun>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/as.data.frame.workflowrun.md)
+  : Convert a workflowrun object to a data frame
+- [`as.data.frame(`*`<workflowstate>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/as.data.frame.workflowstate.md)
+  : Convert a workflowstate to a data frame
+- [`extract_inputs()`](https://pandora-isomemo.github.io/PEITHO/reference/extract_inputs.md)
+  : Extract input values from a workflow run
 - [`extract_workflow_from_files()`](https://pandora-isomemo.github.io/PEITHO/reference/extract_workflow_from_files.md)
   : Extract workflow steps from files in a folder
 - [`fetch_WebText()`](https://pandora-isomemo.github.io/PEITHO/reference/fetch_WebText.md)

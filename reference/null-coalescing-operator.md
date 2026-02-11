@@ -21,4 +21,4 @@ a %||% b
 
 ## Value
 
-Left value if not NULL, otherwise right value.
+Left value if not NULL or length zero, otherwise right value.

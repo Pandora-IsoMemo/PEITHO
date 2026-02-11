@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PEITHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.01.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.02.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,43 +100,59 @@ path, or use the example workflow included with PEITHO by passing an
 empty string as the path:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_workflow.html">new_workflow</a></span><span class="op">(</span>workflow_file_paths <span class="op">=</span> <span class="fu"><a href="../reference/workflow_file_paths.html">workflow_file_paths</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">""</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:52] Creating empty results.json file.</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:52] Parsing command simple_split for step 1</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:52] Parsing command fetch_WebText for step 2</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:52] Parsing command unlist for step 3</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:52] Parsing command paste for step 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:52] Parsing command gsub for step 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:52] Parsing command simple_split for step 6</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Creating empty results.json file.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command simple_split for step 1</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command fetch_WebText for step 2</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command unlist for step 3</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command paste for step 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command paste for step 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command gsub for step 6</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command simple_split for step 7</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command simple_split for step 8</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command fetch_WebText for step 9</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command unlist for step 10</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command paste for step 11</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command paste for step 12</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:32] Parsing command paste for step 13</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="exporting-a-workflow-as-a-zip-file">Exporting a Workflow as a Zip File<a class="anchor" aria-label="anchor" href="#exporting-a-workflow-as-a-zip-file"></a>
 </h2>
 <p>You can export the current workflow setup (all relevant files) as a
 zip archive (here with the <code>.peitho</code> extension):</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zipfile_path</span> <span class="op">&lt;-</span> <span class="st">"./examples/my_workflow.peitho"</span></span>
 <span><span class="fu"><a href="../reference/save_as_zip.html">save_as_zip</a></span><span class="op">(</span><span class="va">my_wf</span>, file <span class="op">=</span> <span class="va">zipfile_path</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:52] Creating directory './examples' for saving zip file.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:33] Creating directory './examples' for saving zip file.</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="running-a-workflow">Running a Workflow<a class="anchor" aria-label="anchor" href="#running-a-workflow"></a>
 </h2>
 <p>To execute the workflow, use the <code><a href="../reference/run.html">run()</a></code> function. You can
 specify which steps to run (e.g., from step 1 to 5):</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_run_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_wf</span>, from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:52] Running step 1 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:52] Running step 2 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:55] Running step 3 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:55] Running step 4 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:55] Running step 5 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:33] Running step 1 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:33]   Operation 'simple_split': 3 results</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:33] Running step 2 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:35]   3 loop iterations for operation 'fetch_WebText':</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-02-11 15:20:35]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:35] Running step 3 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:35]   3 loop iterations for operation 'unlist':</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-02-11 15:20:35]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:35] Running step 4 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:35]   3 loop iterations for operation 'paste':</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:35]      3 single results.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Running step 5 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-02-11 15:20:36] WARNING! Detected list argument(s) for operation 'paste', but 'loop' is set to 'no'.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36]   Operation 'paste': single result</span></span></code></pre>
 <p>After running, you can inspect the results:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_run_1</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 3</span></span></code></pre>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<pre><code><span><span class="co">## [1] 1</span></span></code></pre>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">PEITHO</span><span class="fu">:::</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">trunc</a></span><span class="op">(</span><span class="va">my_run_1</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span>, n_char <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "Main pagHALLO\\nContHALLOnts\\nCurrHALLOnt HALLOvHALLOnts\\nRandom articlHALLO\\nAbout WikipHALLOdia\\nCo ..., Main pagHALLO\\nContHALLOnts\\nCurrHALLOnt HALLOvHALLOnts\\nRandom articlHALLO\\nAbout WikipHALLOdia\\nCo ..., Main pagHALLO\\nContHALLOnts\\nCurrHALLOnt HALLOvHALLOnts\\nRandom articlHALLO\\nAbout WikipHALLOdia\\nCo ..."</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "Main page---Contents---Current events---Random article---About Wikipedia---Contact us---Help---Learn ..."</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="importing-and-modifying-a-workflow-from-a-zip-file">Importing and Modifying a Workflow from a Zip File<a class="anchor" aria-label="anchor" href="#importing-and-modifying-a-workflow-from-a-zip-file"></a>
@@ -145,33 +161,47 @@ specify which steps to run (e.g., from step 1 to 5):</p>
 where the workflow files will be extracted. You may also modify the
 workflow steps (for example, by editing <code>commands.json</code> or
 <code>inputs.json</code> in the extracted folder) before running it.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zipfile_path</span> <span class="op">&lt;-</span> <span class="st">"./examples/my_workflow.peitho"</span></span>
 <span></span>
 <span><span class="va">my_wf_imported</span> <span class="op">&lt;-</span> <span class="fu">PEITHO</span><span class="fu">::</span><span class="fu"><a href="../reference/import_workflow.html">import_workflow</a></span><span class="op">(</span></span>
 <span>  zipfile <span class="op">=</span> <span class="va">zipfile_path</span>,</span>
 <span>  extract_dir <span class="op">=</span> <span class="st">"./examples/peitho_import"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:55] Parsing command simple_split for step 1</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:55] Parsing command fetch_WebText for step 2</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:55] Parsing command unlist for step 3</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:55] Parsing command paste for step 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:55] Parsing command gsub for step 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:55] Parsing command simple_split for step 6</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command simple_split for step 1</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command fetch_WebText for step 2</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command unlist for step 3</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command paste for step 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command paste for step 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command gsub for step 6</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command simple_split for step 7</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command simple_split for step 8</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command fetch_WebText for step 9</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command unlist for step 10</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command paste for step 11</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command paste for step 12</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Parsing command paste for step 13</span></span></code></pre>
 <p>You can now run the imported (and possibly modified) workflow and
 inspect the results as before:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_run_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_wf_imported</span>, from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:55] Running step 1 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:55] Running step 2 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:58] Running step 3 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-01-23 08:33:58] Running step 4 of 4</span></span></code></pre>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Running step 1 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36]   Operation 'simple_split': 3 results</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:36] Running step 2 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:38]   3 loop iterations for operation 'fetch_WebText':</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-02-11 15:20:38]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:38] Running step 3 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:38]   3 loop iterations for operation 'unlist':</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-02-11 15:20:38]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:38] Running step 4 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:39]   3 loop iterations for operation 'paste':</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-02-11 15:20:39]      3 single results.</span></span></code></pre>
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_run_2</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 3</span></span></code></pre>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">PEITHO</span><span class="fu">:::</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">trunc</a></span><span class="op">(</span><span class="va">my_run_2</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span>, n_char <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "Main page\\nContents\\nCurrent events\\nRandom article\\nAbout Wikipedia\\nContact us\\nHelp\\nLearn to edi ..., Main page\\nContents\\nCurrent events\\nRandom article\\nAbout Wikipedia\\nContact us\\nHelp\\nLearn to edi ..., Main page\\nContents\\nCurrent events\\nRandom article\\nAbout Wikipedia\\nContact us\\nHelp\\nLearn to edi ..."</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "Main page---Contents---Current events---Random article---About Wikipedia---Contact us---Help---Learn ..., \\nMain page---Contents---Current events---Random article---About Wikipedia---Contact us---Help---Learn ..., \\nMain page---Contents---Current events---Random article---About Wikipedia---Contact us---Help---Learn ..."</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>

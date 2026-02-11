@@ -34,19 +34,33 @@ empty string as the path:
 my_wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 ```
 
-    ## INFO [2026-01-23 08:33:52] Creating empty results.json file.
+    ## INFO [2026-02-11 15:20:32] Creating empty results.json file.
 
-    ## INFO [2026-01-23 08:33:52] Parsing command simple_split for step 1
+    ## INFO [2026-02-11 15:20:32] Parsing command simple_split for step 1
 
-    ## INFO [2026-01-23 08:33:52] Parsing command fetch_WebText for step 2
+    ## INFO [2026-02-11 15:20:32] Parsing command fetch_WebText for step 2
 
-    ## INFO [2026-01-23 08:33:52] Parsing command unlist for step 3
+    ## INFO [2026-02-11 15:20:32] Parsing command unlist for step 3
 
-    ## INFO [2026-01-23 08:33:52] Parsing command paste for step 4
+    ## INFO [2026-02-11 15:20:32] Parsing command paste for step 4
 
-    ## INFO [2026-01-23 08:33:52] Parsing command gsub for step 5
+    ## INFO [2026-02-11 15:20:32] Parsing command paste for step 5
 
-    ## INFO [2026-01-23 08:33:52] Parsing command simple_split for step 6
+    ## INFO [2026-02-11 15:20:32] Parsing command gsub for step 6
+
+    ## INFO [2026-02-11 15:20:32] Parsing command simple_split for step 7
+
+    ## INFO [2026-02-11 15:20:32] Parsing command simple_split for step 8
+
+    ## INFO [2026-02-11 15:20:32] Parsing command fetch_WebText for step 9
+
+    ## INFO [2026-02-11 15:20:32] Parsing command unlist for step 10
+
+    ## INFO [2026-02-11 15:20:32] Parsing command paste for step 11
+
+    ## INFO [2026-02-11 15:20:32] Parsing command paste for step 12
+
+    ## INFO [2026-02-11 15:20:32] Parsing command paste for step 13
 
 ## Exporting a Workflow as a Zip File
 
@@ -58,7 +72,7 @@ zipfile_path <- "./examples/my_workflow.peitho"
 save_as_zip(my_wf, file = zipfile_path)
 ```
 
-    ## INFO [2026-01-23 08:33:52] Creating directory './examples' for saving zip file.
+    ## INFO [2026-02-11 15:20:33] Creating directory './examples' for saving zip file.
 
 ## Running a Workflow
 
@@ -70,15 +84,33 @@ function. You can specify which steps to run (e.g., from step 1 to 5):
 my_run_1 <- run(my_wf, from = 1, to = 5)
 ```
 
-    ## INFO [2026-01-23 08:33:52] Running step 1 of 5
+    ## INFO [2026-02-11 15:20:33] Running step 1 of 5
 
-    ## INFO [2026-01-23 08:33:52] Running step 2 of 5
+    ## INFO [2026-02-11 15:20:33]   Operation 'simple_split': 3 results
 
-    ## INFO [2026-01-23 08:33:55] Running step 3 of 5
+    ## INFO [2026-02-11 15:20:33] Running step 2 of 5
 
-    ## INFO [2026-01-23 08:33:55] Running step 4 of 5
+    ## INFO [2026-02-11 15:20:35]   3 loop iterations for operation 'fetch_WebText':
 
-    ## INFO [2026-01-23 08:33:55] Running step 5 of 5
+    ## WARN [2026-02-11 15:20:35]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
+
+    ## INFO [2026-02-11 15:20:35] Running step 3 of 5
+
+    ## INFO [2026-02-11 15:20:35]   3 loop iterations for operation 'unlist':
+
+    ## WARN [2026-02-11 15:20:35]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
+
+    ## INFO [2026-02-11 15:20:35] Running step 4 of 5
+
+    ## INFO [2026-02-11 15:20:35]   3 loop iterations for operation 'paste':
+
+    ## INFO [2026-02-11 15:20:35]      3 single results.
+
+    ## INFO [2026-02-11 15:20:36] Running step 5 of 5
+
+    ## WARN [2026-02-11 15:20:36] WARNING! Detected list argument(s) for operation 'paste', but 'loop' is set to 'no'.
+
+    ## INFO [2026-02-11 15:20:36]   Operation 'paste': single result
 
 After running, you can inspect the results:
 
@@ -86,13 +118,13 @@ After running, you can inspect the results:
 length(my_run_1$state$last_result)
 ```
 
-    ## [1] 3
+    ## [1] 1
 
 ``` r
 PEITHO:::trunc(my_run_1$state$last_result, n_char = 100)
 ```
 
-    ## [1] "Main pagHALLO\\nContHALLOnts\\nCurrHALLOnt HALLOvHALLOnts\\nRandom articlHALLO\\nAbout WikipHALLOdia\\nCo ..., Main pagHALLO\\nContHALLOnts\\nCurrHALLOnt HALLOvHALLOnts\\nRandom articlHALLO\\nAbout WikipHALLOdia\\nCo ..., Main pagHALLO\\nContHALLOnts\\nCurrHALLOnt HALLOvHALLOnts\\nRandom articlHALLO\\nAbout WikipHALLOdia\\nCo ..."
+    ## [1] "Main page---Contents---Current events---Random article---About Wikipedia---Contact us---Help---Learn ..."
 
 ## Importing and Modifying a Workflow from a Zip File
 
@@ -110,17 +142,31 @@ my_wf_imported <- PEITHO::import_workflow(
 )
 ```
 
-    ## INFO [2026-01-23 08:33:55] Parsing command simple_split for step 1
+    ## INFO [2026-02-11 15:20:36] Parsing command simple_split for step 1
 
-    ## INFO [2026-01-23 08:33:55] Parsing command fetch_WebText for step 2
+    ## INFO [2026-02-11 15:20:36] Parsing command fetch_WebText for step 2
 
-    ## INFO [2026-01-23 08:33:55] Parsing command unlist for step 3
+    ## INFO [2026-02-11 15:20:36] Parsing command unlist for step 3
 
-    ## INFO [2026-01-23 08:33:55] Parsing command paste for step 4
+    ## INFO [2026-02-11 15:20:36] Parsing command paste for step 4
 
-    ## INFO [2026-01-23 08:33:55] Parsing command gsub for step 5
+    ## INFO [2026-02-11 15:20:36] Parsing command paste for step 5
 
-    ## INFO [2026-01-23 08:33:55] Parsing command simple_split for step 6
+    ## INFO [2026-02-11 15:20:36] Parsing command gsub for step 6
+
+    ## INFO [2026-02-11 15:20:36] Parsing command simple_split for step 7
+
+    ## INFO [2026-02-11 15:20:36] Parsing command simple_split for step 8
+
+    ## INFO [2026-02-11 15:20:36] Parsing command fetch_WebText for step 9
+
+    ## INFO [2026-02-11 15:20:36] Parsing command unlist for step 10
+
+    ## INFO [2026-02-11 15:20:36] Parsing command paste for step 11
+
+    ## INFO [2026-02-11 15:20:36] Parsing command paste for step 12
+
+    ## INFO [2026-02-11 15:20:36] Parsing command paste for step 13
 
 You can now run the imported (and possibly modified) workflow and
 inspect the results as before:
@@ -129,13 +175,27 @@ inspect the results as before:
 my_run_2 <- run(my_wf_imported, from = 1, to = 4)
 ```
 
-    ## INFO [2026-01-23 08:33:55] Running step 1 of 4
+    ## INFO [2026-02-11 15:20:36] Running step 1 of 4
 
-    ## INFO [2026-01-23 08:33:55] Running step 2 of 4
+    ## INFO [2026-02-11 15:20:36]   Operation 'simple_split': 3 results
 
-    ## INFO [2026-01-23 08:33:58] Running step 3 of 4
+    ## INFO [2026-02-11 15:20:36] Running step 2 of 4
 
-    ## INFO [2026-01-23 08:33:58] Running step 4 of 4
+    ## INFO [2026-02-11 15:20:38]   3 loop iterations for operation 'fetch_WebText':
+
+    ## WARN [2026-02-11 15:20:38]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
+
+    ## INFO [2026-02-11 15:20:38] Running step 3 of 4
+
+    ## INFO [2026-02-11 15:20:38]   3 loop iterations for operation 'unlist':
+
+    ## WARN [2026-02-11 15:20:38]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
+
+    ## INFO [2026-02-11 15:20:38] Running step 4 of 4
+
+    ## INFO [2026-02-11 15:20:39]   3 loop iterations for operation 'paste':
+
+    ## INFO [2026-02-11 15:20:39]      3 single results.
 
 ``` r
 length(my_run_2$state$last_result)
@@ -147,7 +207,7 @@ length(my_run_2$state$last_result)
 PEITHO:::trunc(my_run_2$state$last_result, n_char = 100)
 ```
 
-    ## [1] "Main page\\nContents\\nCurrent events\\nRandom article\\nAbout Wikipedia\\nContact us\\nHelp\\nLearn to edi ..., Main page\\nContents\\nCurrent events\\nRandom article\\nAbout Wikipedia\\nContact us\\nHelp\\nLearn to edi ..., Main page\\nContents\\nCurrent events\\nRandom article\\nAbout Wikipedia\\nContact us\\nHelp\\nLearn to edi ..."
+    ## [1] "Main page---Contents---Current events---Random article---About Wikipedia---Contact us---Help---Learn ..., \\nMain page---Contents---Current events---Random article---About Wikipedia---Contact us---Help---Learn ..., \\nMain page---Contents---Current events---Random article---About Wikipedia---Contact us---Help---Learn ..."
 
 ## Summary
 

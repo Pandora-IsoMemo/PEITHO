@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PEITHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.01.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.02.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,6 +35,35 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="26.02.0" id="peitho-26020">PEITHO 26.02.0<a class="anchor" aria-label="anchor" href="#peitho-26020"></a></h2>
+<div class="section level3">
+<h3 id="new-features-26-02-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-26-02-0"></a></h3>
+<ul><li>Introduced <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> S3 methods for workflows, workflow runs, and workflow states, plus a new <code><a href="../reference/extract_inputs.html">extract_inputs()</a></code> helper.</li>
+<li>Extended the Shiny app to build and execute an example workflow with progress tracking and tabular result views (#21).</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="26.01.3" id="peitho-26013">PEITHO 26.01.3<a class="anchor" aria-label="anchor" href="#peitho-26013"></a></h2>
+<div class="section level3">
+<h3 id="new-features-26-01-3">New Features<a class="anchor" aria-label="anchor" href="#new-features-26-01-3"></a></h3>
+<ul><li>Extended the example workflow to demonstrate <strong>sub-workflows</strong>, allowing sequential execution of multiple workflow segments (#14)</li>
+<li>Sub-workflows can now <strong>reference results from earlier steps explicitly</strong>, enabling more complex, non-linear workflows.</li>
+<li>Improved logging for loop execution, including clearer warnings when operations produce list-type results.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-26-01-3">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-26-01-3"></a></h3>
+<ul><li>Fixed a bug where result parameters always resolved to the <strong>last executed step</strong>, ignoring the referenced step label.</li>
+<li>Workflow execution now uses <strong>cached state lookups</strong> to resolve result parameters by step name (and ID), ensuring correct dependency handling across steps.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="26.01.2" id="peitho-26012">PEITHO 26.01.2<a class="anchor" aria-label="anchor" href="#peitho-26012"></a></h2>
+<div class="section level3">
+<h3 id="updates-26-01-2">Updates<a class="anchor" aria-label="anchor" href="#updates-26-01-2"></a></h3>
+<ul><li>Converted a warning into an informational message when creating a new <code>results.json</code> file if it does not yet exist.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="26.01.1" id="peitho-26011">PEITHO 26.01.1<a class="anchor" aria-label="anchor" href="#peitho-26011"></a></h2>
 <div class="section level3">
