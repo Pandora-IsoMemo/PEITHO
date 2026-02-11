@@ -10,7 +10,7 @@ new_operationparam(
   name = NULL,
   value = "",
   label = "",
-  type = c("input", "result", "literal"),
+  type = c("literal", "input", "result"),
   loop = c("no", "yes", "auto"),
   ...
 )

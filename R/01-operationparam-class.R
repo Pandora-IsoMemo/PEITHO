@@ -26,12 +26,15 @@ new_operationparam <- function(
   name = NULL,
   value = "",
   label = "",
-  type = c("input", "result", "literal"),
+  type = c("literal", "input", "result"),
   loop = c("no", "yes", "auto"),
   ...
 ) {
   type <- match.arg(type)
   loop <- match.arg(loop)
+
+  tags <- c(literal = "", input = "@#*I*#@", result = "@#*L*#@")
+  tag <- tags[type]
 
   structure(
     list(
@@ -39,8 +42,9 @@ new_operationparam <- function(
       position = as.integer(position),
       name     = name,
       value    = value,
-      label    = label,
       type     = type,
+      tag      = tag,
+      label    = label,
       loop     = loop,
       dots     = list(...)
     ),

@@ -14,12 +14,17 @@ my_wf <- new_workflow(
   workflow_file_paths = workflow_file_paths(path = "")
 )
 
+as.data.frame(my_wf)
+
 # save the workflow as zip file
 zipfile_path <- "./my_workflow.peitho"
 save_as_zip(my_wf, file = zipfile_path)
 
 # run the workflow from step 1 to 5
 my_run_1 <- run(my_wf, from = 1, to = 11)
+
+extract_inputs(my_run_1)
+as.data.frame(my_run_1)
 
 # see results
 length(my_run_1$state$last_result)

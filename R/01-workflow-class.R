@@ -1,47 +1,5 @@
 # ---- workflow class ----
 
-#' Workflow run object
-#' 
-#' This object represents a completed run of a workflow, containing the workflow definition
-#' and the final state after execution.
-#' @param workflow A `workflow` object.
-#' @param state A `workflowstate` object.
-#' @return A `workflowrun` object.
-#' @export
-new_workflowrun <- function(workflow, state) {
-  if (!inherits(workflow, "workflow")) {
-    stop("Argument 'workflow' must be of class 'workflow'.")
-  }
-  if (!inherits(state, "workflowstate")) {
-    stop("Argument 'state' must be of class 'workflowstate'.")
-  }
-
-  structure(
-    list(
-      workflow = workflow,
-      state    = state,
-      errors   = state$errors,
-      last_result   = state$last_result
-    ),
-    class = "workflowrun"
-  )
-}
-
-#' Print method for workflowrun objects
-#'
-#' @param x A `workflowrun` object.
-#' @param ... Additional arguments (not used).
-#' @export
-print.workflowrun <- function(x, ...) {
-  cat("<workflowrun>\n")
-  cat("  workflow: ", x$workflow$name, "\n", sep = "")
-  cat("  steps:    ", length(x$workflow$steps), "\n", sep = "")
-  cat("Finished with state:\n")
-  print(x$state)
-  cat("  available fields: $", paste(names(x), collapse = ", $"), "\n", sep = "")
-  invisible(x)
-}
-
 #' Helper to get file paths for PEITHO workflow files
 #' 
 #' This function constructs full file paths for the workflow files located in a specified folder.
@@ -152,6 +110,42 @@ new_workflow <- function(
 
 workflow <- function(steps = list(), name = "Untitled workflow", current = 1L, ...) {
   new_workflow(steps = steps, name = name, current = current, ...)
+}
+
+#' Convert a workflow object to a data frame
+#'
+#' This method converts a `workflow` object into a data frame summarizing its steps.
+#'
+#' @param x A `workflow` object.
+#' @param ... Additional arguments (not used).
+#' @return A data frame summarizing the workflow steps.
+#' @export
+as.data.frame.workflow <- function(x, ...) {
+  steps <- x$steps
+  data.frame(
+    name = vapply(steps, function(s) s$name, character(1)),
+    label = vapply(steps, function(s) s$label, character(1)),
+    comments = vapply(steps, function(s) s$comments, character(1)),
+    operation = vapply(steps, function(s) s$operation, character(1)),
+    params = vapply(steps, function(s) flatten_params(s$params), character(1)),
+    stringsAsFactors = FALSE
+  )
+}
+
+flatten_params <- function(params) {
+  if (length(params) == 0) return("")
+  paste(
+    vapply(params, function(p) {
+      if (!is.null(p$name) && p$type %in% c("input", "result")) {
+        paste0(p$name, "=", p$tag, toString(p$label), p$tag)
+      } else if (!is.null(p$name) && p$type == "literal") {
+        paste0(p$name, "=", toString(p$value))
+      } else {
+        ""
+      }
+    }, character(1)),
+    collapse = ", "
+  )
 }
 
 # print method -------------------------------------------------------------
@@ -387,6 +381,9 @@ run.workflow <- function(
   env = NULL,
   ...
 ) {
+  # unpack additional args
+  additional_args <- list(...)
+
   # for now we always stop on error!!!
   stop_on_error <- TRUE
 
@@ -432,6 +429,9 @@ run.workflow <- function(
   PEITHO:::logDebug("Running workflow from step %d to %d", from, to)
 
   for (j in seq_along(idxs)) {
+    if (shiny::isRunning()) {
+      shiny::incProgress(1 / length(idxs), detail = paste("Running step", j, "of", length(idxs)))
+    }
     PEITHO:::logInfo("Running step %d of %d", j, length(idxs))
     i <- idxs[j]
     step <- object$steps[[i]]

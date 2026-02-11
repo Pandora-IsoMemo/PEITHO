@@ -34,7 +34,3 @@ split_strings <- function(strings, separator) {
     result_labeling = result_labeling
   ))
 }
-
-simple_split <- function(x, split, ...) {
-  strsplit(x, split, ...)[[1]]
-}

@@ -13,9 +13,23 @@ tagList(
       sidebarLayout(
         sidebarPanel(
           width = 2,
-          actionButton("example", "Create Example")
+          actionButton("example", "Create Example"),
+          br(),
+          br(),
+          actionButton("run", "Run Example")#,
+          # br(),
+          # br(),
+          # actionButton("download_wf", "Download Workflow"),
+          # br(),
+          # br(),
+          # actionButton("download_wfr", "Download Workflow Run"),
         ),
         mainPanel(
+          tabsetPanel(
+            tabPanel("sequence", tableOutput("wf_table")),
+            tabPanel("inputs", tableOutput("inputs_table")),
+            tabPanel("results", tableOutput("results_table"))
+          )
         ),
       )
     )

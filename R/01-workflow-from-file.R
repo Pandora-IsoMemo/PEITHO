@@ -87,8 +87,8 @@ make_param_from_arg <- function(
       position = arg_i,
       name     = arg_name,
       value    = input_list[[varname]],
-      label    = varname,
       type     = "input",
+      label    = varname,
       loop     = cmd_loop %||% "no"
     )
   } else if (is_result_tag(arg)) {
@@ -99,8 +99,8 @@ make_param_from_arg <- function(
       position = arg_i,
       name     = arg_name,
       value    = NULL,
-      label    = varname,
       type     = "result",
+      label    = varname,
       loop     = cmd_loop %||% "no"
     )
   } else {
@@ -110,7 +110,6 @@ make_param_from_arg <- function(
       position = arg_i,
       name     = arg_name,
       value    = strip_outer_quotes(arg),
-      label    = "",
       type     = "literal",
       loop     = cmd_loop %||% "no"
     )
