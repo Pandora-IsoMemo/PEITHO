@@ -12,7 +12,7 @@ shinyServer(function(input, output, session) {
     if (is.null(wf())) return()
 
     wf_run_val <- NULL
-    withProgress(message = "Running workflow...", value = 0, {
+    shiny::withProgress(message = "Running workflow...", value = 0, {
       wf_run_val <- run(
         wf(),
         from = 1,

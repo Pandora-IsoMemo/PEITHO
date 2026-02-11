@@ -18,7 +18,7 @@ read_json_if_exists <- function(path) {
 get_inputs <- function(
   path_to_folder,
   inputs_file,
-  pattern = "@#*I*#@"
+  pattern = "@#\\*I\\*#@"
 ) {
   input_path <- file.path(path_to_folder, inputs_file)
 

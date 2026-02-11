@@ -59,27 +59,63 @@ print.workflowsteprun <- function(x, ...) {
 #' @param ... Additional arguments (not used).
 #' @export
 summary.workflowsteprun <- function(object, ...) {
-  if (is.list(object$error) && !inherits(object$error, "condition")) {
-    is_error <- !sapply(object$error, is.null)
-  } else {
-    is_error <- !is.null(object$error)
+  # Normalize: error is always a list
+  errs <- object$error
+  if (is.null(errs)) {
+    errs <- list()
+  } else if (!is.list(errs) || inherits(errs, "condition")) {
+    # condition is technically a list in R, so we special-case it
+    errs <- list(errs)
+  }
+
+  has_error <- function(x) {
+    if (is.null(x)) return(FALSE)
+    if (inherits(x, "condition")) return(TRUE)
+
+    if (is.character(x)) {
+      x <- x[!is.na(x)]
+      return(length(x) > 0 && any(nzchar(x)))
+    }
+
+    # For other types (e.g. error codes, objects), treat as error if not "empty"
+    # (adjust if you have a specific "no error" sentinel)
+    TRUE
+  }
+
+  err_msg <- function(x) {
+    if (is.null(x)) return(NULL)
+
+    if (inherits(x, "condition")) {
+      return(conditionMessage(x))
+    }
+
+    if (is.character(x)) {
+      x <- x[!is.na(x)]
+      x <- x[nzchar(x)]
+      return(if (length(x)) paste(x, collapse = "\n") else NULL)
+    }
+
+    # Try a readable fallback for arbitrary objects
+    msg <- tryCatch(
+      paste(capture.output(str(x)), collapse = "\n"),
+      error = function(...) NULL
+    )
+    if (!is.null(msg) && nzchar(msg)) return(msg)
+
+    as.character(x)
+  }
+
+  is_error <- vapply(errs, has_error, logical(1))
+
+  errors_out <- if (!any(is_error)) "" else {
+    unlist(lapply(errs[is_error], err_msg), use.names = FALSE)
   }
 
   list(
-    entry      = object$step$id,
-    name       = object$step$name,
-    label      = object$step$label,
-    result     = object$output,
-    errors     = if (!any(is_error)) "" else {
-      sapply(object$error[is_error], function(e) {
-        if (inherits(e, "condition")) {
-          conditionMessage(e)
-        } else if (is.character(e)) {
-          e
-        } else {
-          as.character(e)
-        }
-      })
-    }
+    entry  = object$step$id,
+    name   = object$step$name,
+    label  = object$step$label,
+    result = object$output,
+    errors = errors_out
   )
 }

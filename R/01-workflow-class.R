@@ -430,7 +430,7 @@ run.workflow <- function(
 
   for (j in seq_along(idxs)) {
     if (shiny::isRunning()) {
-      incProgress(1 / length(idxs), detail = paste("Running step", j, "of", length(idxs)))
+      shiny::incProgress(1 / length(idxs), detail = paste("Running step", j, "of", length(idxs)))
     }
     PEITHO:::logInfo("Running step %d of %d", j, length(idxs))
     i <- idxs[j]
