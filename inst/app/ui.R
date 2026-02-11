@@ -16,10 +16,13 @@ tagList(
           actionButton("example", "Create Example"),
           br(),
           br(),
-          actionButton("run", "Run Example"),
-          br(),
-          br(),
-          uiOutput("progress_ui")
+          actionButton("run", "Run Example")#,
+          # br(),
+          # br(),
+          # actionButton("download_wf", "Download Workflow"),
+          # br(),
+          # br(),
+          # actionButton("download_wfr", "Download Workflow Run"),
         ),
         mainPanel(
           tabsetPanel(

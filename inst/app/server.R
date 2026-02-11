@@ -1,36 +1,40 @@
 shinyServer(function(input, output, session) {
-  example_wf <- reactiveVal(NULL)
+  wf <- reactiveVal(NULL)
   wf_run <- reactiveVal(NULL)
 
   observeEvent(input$example, {
-    wf <- new_workflow()
-    example_wf(wf)
+    example_wf <- new_workflow()
+    wf(example_wf)
     wf_run(NULL)
   })
 
   observeEvent(input$run, {
-    wf <- example_wf()
-    if (is.null(wf)) return()
+    if (is.null(wf())) return()
 
     wf_run_val <- NULL
     withProgress(message = "Running workflow...", value = 0, {
       wf_run_val <- run(
-        wf,
+        wf(),
         from = 1,
-        to = length(wf$steps)
+        to = length(wf()$steps)
       )
     })
     wf_run(wf_run_val)
-    output$progress_ui <- renderUI({ NULL })
   })
 
   # Custom message handler for updating progress bar
-  session$onFlushed(function() {
-    session$sendCustomMessage("updateProgressBar", list(id = "wf_progress", value = 0))
-  })
+  # session$onFlushed(function() {
+  #   session$sendCustomMessage("updateProgressBar", list(id = "wf_progress", value = 0))
+  # })
+
+  # observe({
+  #   zipfile_path <- "./my_workflow.peitho"
+  #   save_as_zip(wf(), file = zipfile_path)
+  # }) %>%
+  #   bindEvent(input$download_wf)
 
   output$wf_table <- renderTable({
-    wf <- example_wf()
+    wf <- wf()
     if (is.null(wf)) return(NULL)
     as.data.frame(wf)
   }, rownames = TRUE)
