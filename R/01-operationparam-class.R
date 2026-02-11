@@ -12,15 +12,6 @@
 #'   - "input"  : value comes from user input or external input
 #'   - "result" : value refers to a previous step's result
 #'   - "literal": value is used as-is (a literal argument)
-#' @param tag      Marker string used when (de-)serializing workflows to indicate how
-#'  this parameter's value should be treated. One of:
-#'   - "" (default): no special marker; the value is stored and used as
-#'  a plain literal.
-#'   - "@#*I*#@"   : placeholder used for parameters whose value is
-#'  substituted from user or external input.
-#'   - "@#*L*#@"   : placeholder used for parameters whose value is
-#'  dynamically substituted (for example from another step's result) when
-#'  workflows are serialized as text.
 #' @param loop     Looping behavior for this parameter. One of:
 #'   - "no"   : do not loop
 #'   - "yes"  : always loop
@@ -36,13 +27,14 @@ new_operationparam <- function(
   value = "",
   label = "",
   type = c("literal", "input", "result"),
-  tag = c("", "@#*I*#@", "@#*L*#@"),
   loop = c("no", "yes", "auto"),
   ...
 ) {
   type <- match.arg(type)
-  tag <- match.arg(tag)
   loop <- match.arg(loop)
+
+  tags <- c(literal = "", input = "@#*I*#@", result = "@#*L*#@")
+  tag <- tags[type]
 
   structure(
     list(

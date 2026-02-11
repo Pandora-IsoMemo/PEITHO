@@ -88,7 +88,6 @@ make_param_from_arg <- function(
       name     = arg_name,
       value    = input_list[[varname]],
       type     = "input",
-      tag      = "@#*I*#@",
       label    = varname,
       loop     = cmd_loop %||% "no"
     )
@@ -101,7 +100,6 @@ make_param_from_arg <- function(
       name     = arg_name,
       value    = NULL,
       type     = "result",
-      tag      = "@#*L*#@",
       label    = varname,
       loop     = cmd_loop %||% "no"
     )
