@@ -11,4 +11,4 @@ RUN installPackage
 # Expose ports
 EXPOSE 3838
 
-CMD ["Rscript", "-e", "library(shiny); PEITHO::startApplication(3838, host = '0.0.0.0')"]
+CMD ["Rscript", "-e", "library(shiny); PEITHO::startApplication(3838)"]
