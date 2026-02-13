@@ -26,7 +26,7 @@ tagList(
         ),
         mainPanel(
           tabsetPanel(
-            tabPanel("Sequence", tableOutput("wf_table")),
+            tabPanel("Workflow", tableOutput("wf_table")),
             tabPanel("Inputs", tableOutput("inputs_table")),
             tabPanel("Results", tableOutput("results_table"))
           )

@@ -87,9 +87,9 @@ shinyServer(function(input, output, session) {
   }, rownames = TRUE)
 
   output$inputs_table <- renderTable({
-    wfr <- wf_run()
-    if (is.null(wfr)) return(NULL)
-    inputs <- extract_inputs(wfr)
+    wf_val <- wf()
+    if (is.null(wf_val)) return(NULL)
+    inputs <- extract_inputs(wf_val)
     if (is.null(inputs) || length(inputs) == 0) return(NULL)
     # Convert named list to data.frame for display
     data.frame(

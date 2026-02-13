@@ -112,6 +112,33 @@ workflow <- function(steps = list(), name = "Untitled workflow", current = 1L, .
   new_workflow(steps = steps, name = name, current = current, ...)
 }
 
+#' Extract input values from a workflow
+#'
+#' This function extracts user input values from the steps of a workflow. It looks for parameters of type "input" in each step and collects their values into a named list.
+#'
+#' @param x A `workflow` object.
+#' @param ... Additional arguments (not used).
+#' @return A named list of input values extracted from the workflow steps.
+#' @export
+extract_inputs.workflow <- function(x, ...) {
+  inputs <- list()
+
+  for (step in x$steps) {
+    step_inputs <- list()
+    for (param in step$params) {
+      if (inherits(param, "operationparam") && param$type == "input") {
+        step_inputs[[param$label]] <- param$value
+      }
+    }
+
+    if (length(step_inputs) == 0) next
+
+    inputs <- c(inputs, step_inputs)
+  }
+
+  inputs
+}
+
 #' Convert a workflow object to a data frame
 #'
 #' This method converts a `workflow` object into a data frame summarizing its steps.

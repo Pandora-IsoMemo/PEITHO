@@ -12,6 +12,7 @@ update <- function(object, steprun, idx, ...) {
 }
 
 #' Run a workflow step
+#'
 #' This is a generic function to run a workflow step or an entire workflow.
 #' @param object A `workflowstep` object or a `workflow` object.
 #' @param state A `workflowstate` object.
@@ -21,6 +22,17 @@ update <- function(object, steprun, idx, ...) {
 #' @export
 run <- function(object, state, ...) {
   UseMethod("run")
+}
+
+#' Extract inputs from a workflow
+#'
+#' This is a generic function to extract user input values from a workflow or workflow run.
+#' @param object A `workflow` object or a `workflowrun` object.
+#' @param ... Additional arguments (not used).
+#' @return A named list of input values.
+#' @export
+extract_inputs <- function(object, ...) {
+  UseMethod("extract_inputs")
 }
 
 #' Save an object as a ZIP file

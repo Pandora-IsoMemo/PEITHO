@@ -2,8 +2,7 @@
 % Please edit documentation in R/00-generics.R
 \name{run}
 \alias{run}
-\title{Run a workflow step
-This is a generic function to run a workflow step or an entire workflow.}
+\title{Run a workflow step}
 \usage{
 run(object, state, ...)
 }
@@ -19,6 +18,5 @@ A `workflowsteprun` object representing the result of executing the step or
  a list containing the updated `workflow` and `workflowstate` objects.
 }
 \description{
-Run a workflow step
 This is a generic function to run a workflow step or an entire workflow.
 }
