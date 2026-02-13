@@ -11,7 +11,7 @@ LazyData: true
 RoxygenNote: 7.3.2
 Depends: R (>= 4.1.0)
 Imports: 
-    DataTools (>= 26.01.0),
+    DataTools (>= 26.02.0),
     httr2,
     futile.logger,
     jsonlite,
