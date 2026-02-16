@@ -161,20 +161,25 @@ strip_outer_quotes <- function(x) {
 
 load_workflow_script_env <- function(script_path, parent_env, show_functions_path = TRUE) {
   if (is.null(script_path)) return(parent_env)
-  if (!file.exists(script_path)) {
-    stop("Custom script file not found: ", script_path, call. = FALSE)
+  if (!file.exists(script_path) || file.info(script_path)$size == 0) {
+    warn_msg <- sprintf(
+      "Custom script file not found or is empty: %s. Using global environment for operations.",
+      basename(script_path)
+    )
+    PEITHO:::logWarn("%s", warn_msg)
+    warning(warn_msg, call. = FALSE)
   }
   if (is_running_online()) {
-    PEITHO:::logWarn("Running online; skipping loading custom script.")
-    warning(
-      "Running online; skipping loading custom functions script: ",
-      script_path,
-      immediate. = TRUE, call. = FALSE
+    warn_msg <- sprintf(
+      "Running online; skipping loading custom functions script: %s",
+      basename(script_path)
     )
+    PEITHO:::logWarn("%s", warn_msg)
+    warning(warn_msg, immediate. = TRUE, call. = FALSE)
     return(parent_env)
   }
   if (show_functions_path) {
-    PEITHO:::logInfo("Loading custom script for workflow: %s", script_path)
+    PEITHO:::logInfo("Loading custom script for workflow: %s", basename(script_path))
   }
   script_env <- new.env(parent = parent_env)
   sys.source(script_path, envir = script_env)
@@ -234,33 +239,13 @@ extract_workflow_from_files <- function(workflow_file_paths, show_functions_path
     )
   }
 
-  # load custom functions only if functions file exists, otherwise use global environment
-  if (
-    !file.exists(workflow_file_paths$functions_path) ||
-      file.info(workflow_file_paths$functions_path)$size == 0
-  ) {
-    PEITHO:::logInfo(
-      "%s not found in folder '%s' or is empty. Using global environment for operations.",
-      basename(workflow_file_paths$functions_path),
-      workflow_file_paths$path_to_folder
-    )
-    env <- parent.frame()
-  } else if (is_running_online()) {
-    # check if file contains rows and only skip if it does
-    warn_msg <- "Running online; skipping loading custom functions script."
-    PEITHO:::logWarn("%s", warn_msg)
-    warning(
-      warn_msg,
-      immediate. = TRUE, call. = FALSE
-    )
-    env <- parent.frame()
-  } else {
-    env <- load_workflow_script_env(
-      script_path = workflow_file_paths$functions_path,
-      parent_env = parent.frame(),
-      show_functions_path = show_functions_path
-    )
-  }
+  # If the file exists and is not empty, load the functions file into a new environment that
+  # inherits from the global environment.
+  env <- load_workflow_script_env(
+    script_path = workflow_file_paths$functions_path,
+    parent_env = parent.frame(),
+    show_functions_path = show_functions_path
+  )
 
   PEITHO:::logDebug("Loading commands from %s", workflow_file_paths$commands_path)
   commands_list <- read_json_if_exists(path = workflow_file_paths$commands_path)

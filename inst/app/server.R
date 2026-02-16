@@ -19,10 +19,10 @@ shinyServer(function(input, output, session) {
     wf_name <- tools::file_path_sans_ext(names(imported_wf())[1])
 
     # unzip the file to a temporary directory and get the paths of the workflow files
-    tempdir <- tempfile(pattern = "workflow_")
+    temp_dir <- tempfile(pattern = "workflow_")
     dir.create(temp_dir, showWarnings = FALSE, recursive = TRUE)
     on.exit(unlink(temp_dir, recursive = TRUE, force = TRUE), add = TRUE)
-    unzip(imported_wf()[[1]], exdir = temp_dir) %>%
+    unzip(imported_wf()[[1]], exdir = temp_dir) |>
       shinyTryCatch(
         errorTitle = "Error unzipping workflow",
         warningTitle = "Warning unzipping workflow"
@@ -33,7 +33,7 @@ shinyServer(function(input, output, session) {
       name = wf_name,
       workflow_file_paths = wf_file_paths,
       use_peitho_folder = TRUE
-    ) %>%
+    ) |>
       shinyTryCatch(
         errorTitle = "Error creating workflow",
         warningTitle = "Warning creating workflow"
@@ -59,7 +59,7 @@ shinyServer(function(input, output, session) {
         from = 1,
         to = length(wf()$steps)
       )
-    })  %>%
+    }) |>
       shinyTryCatch(
         errorTitle = "Error running workflow",
         warningTitle = "Warning running workflow"
