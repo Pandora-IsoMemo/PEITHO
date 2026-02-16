@@ -18,4 +18,3 @@ inputs: "inputs.json"
 commands: "commands.json"
 results: "results.json"
 functions: "functions.R"
-
