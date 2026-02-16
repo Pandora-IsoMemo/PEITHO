@@ -12,9 +12,21 @@ shinyServer(function(input, output, session) {
     options = DataTools::importOptions(rPackageName = config()[["rPackageName"]])
   )
 
+  active_temp_dir <- reactiveVal(NULL)
+
   observe({
     PEITHO:::logDebug("%s: Observing 'imported_wf'", session$ns("imported_wf"))
     req(imported_wf(), isTRUE(length(imported_wf()) > 0))
+
+    # clean up the previous temp directory if it exists
+    if (!is.null(active_temp_dir())) {
+      PEITHO:::logDebug(
+        "%s: Cleaning up previous temp directory: %s",
+        session$ns("imported_wf"), active_temp_dir()
+      )
+      unlink(active_temp_dir(), recursive = TRUE, force = TRUE)
+      active_temp_dir(NULL)
+    }
 
     wf_name <- tools::file_path_sans_ext(names(imported_wf())[1])
 
@@ -22,10 +34,8 @@ shinyServer(function(input, output, session) {
     temp_dir <- tempfile(pattern = "workflow_")
     dir.create(temp_dir, showWarnings = FALSE, recursive = TRUE)
     # do not use on.exit here because we want to keep the unzipped files around while the workflow
-    # is loaded, and only delete them when a new workflow is loaded or the app is closed.
-    # Instead, we will clean up the temp directory when a new workflow is imported or
-    # when the app is closed.
-
+    # is loaded, and only delete them when a new workflow is loaded.
+    active_temp_dir(temp_dir)
     unzip(imported_wf()[[1]], exdir = temp_dir) |>
       shinyTryCatch(
         errorTitle = "Error unzipping workflow",
