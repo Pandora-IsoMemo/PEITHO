@@ -22,6 +22,9 @@ tagList(
           tags$hr(),
           actionButton("run", "Run"),
           tags$hr(),
+          tags$h4("Download Workflow"),
+          textInput("userFileName", "File name (without extension)", value = "", width = "100%"),
+          tags$br(),
           downloadButton("download", "Download")
         ),
         mainPanel(

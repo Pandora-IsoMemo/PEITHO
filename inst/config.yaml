@@ -7,13 +7,11 @@ dataFileTypes:
   - "csv"
   - "odt"
   - "txt"
-modelFileTypes:
+fileExtension:
   - "peitho"
   - "zip"
-fileExtension:
-  - "peitho"      # for download of models
-  - "zip"
 rPackageName: "PEITHO"       # for download and import of models
+defaultFileName: "workflow_download"
 # config for example workflow
 pathToFolder: "scripts/peitho_files/example_workflow"
 # config for default workflow filenames

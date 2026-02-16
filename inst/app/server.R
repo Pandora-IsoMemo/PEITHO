@@ -4,7 +4,7 @@ shinyServer(function(input, output, session) {
 
   imported_wf <- DataTools::importServer(
     id = "import_wf",
-    ckanFileTypes = config()[["modelFileTypes"]],
+    ckanFileTypes = config()[["fileExtension"]],
     ignoreWarnings = TRUE,
     defaultSource = config()[["defaultSource"]],
     importType = "zip",
@@ -21,7 +21,11 @@ shinyServer(function(input, output, session) {
     # unzip the file to a temporary directory and get the paths of the workflow files
     temp_dir <- tempfile(pattern = "workflow_")
     dir.create(temp_dir, showWarnings = FALSE, recursive = TRUE)
-    on.exit(unlink(temp_dir, recursive = TRUE, force = TRUE), add = TRUE)
+    # do not use on.exit here because we want to keep the unzipped files around while the workflow
+    # is loaded, and only delete them when a new workflow is loaded or the app is closed.
+    # Instead, we will clean up the temp directory when a new workflow is imported or
+    # when the app is closed.
+
     unzip(imported_wf()[[1]], exdir = temp_dir) |>
       shinyTryCatch(
         errorTitle = "Error unzipping workflow",
@@ -71,14 +75,25 @@ shinyServer(function(input, output, session) {
   observe({
     if (is.null(wf())) {
       shinyjs::disable("download", asis = TRUE)
+      # reset the filename input when no workflow is loaded
+      updateTextInput(session, "userFileName", value = "")
     } else {
       shinyjs::enable("download", asis = TRUE)
+      # update the filename input with the workflow name if it's not already set
+      if (is.null(input$userFileName) || input$userFileName == "") {
+        updateTextInput(session, "userFileName", value = wf()$name)
+      }
     }
   })
 
   output$download <- downloadHandler(
     filename = function() {
-      "my_workflow.peitho"
+      if (is.null(input$userFileName) || input$userFileName == "") {
+        f_name <- paste0(wf()$name, ".peitho")
+      } else {
+        f_name <- paste0(input$userFileName, ".peitho")
+      }
+      f_name
     },
     content = function(file) {
       withProgress({
