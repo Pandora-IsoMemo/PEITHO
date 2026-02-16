@@ -2,14 +2,14 @@ shinyServer(function(input, output, session) {
   wf <- reactiveVal(NULL)
   wf_run <- reactiveVal(NULL)
 
-  imported_wf <- importServer(
+  imported_wf <- DataTools::importServer(
     id = "import_wf",
     ckanFileTypes = config()[["modelFileTypes"]],
     ignoreWarnings = TRUE,
     defaultSource = config()[["defaultSource"]],
     importType = "zip",
     fileExtension = config()[["fileExtension"]],
-    options = importOptions(rPackageName = config()[["rPackageName"]])
+    options = DataTools::importOptions(rPackageName = config()[["rPackageName"]])
   )
 
   observe({
@@ -19,11 +19,11 @@ shinyServer(function(input, output, session) {
     wf_name <- tools::file_path_sans_ext(names(imported_wf())[1])
 
     # unzip the file to a temporary directory and get the paths of the workflow files
-    temp_dir <- tempdir()
+    tempdir <- tempfile(pattern = "workflow_")
+    dir.create(temp_dir, showWarnings = FALSE, recursive = TRUE)
+    on.exit(unlink(temp_dir, recursive = TRUE, force = TRUE), add = TRUE)
     unzip(imported_wf()[[1]], exdir = temp_dir)
 
-    # list files in the temp directory to find workflow files
-    list.files(temp_dir, recursive = TRUE)
     wf_file_paths <- workflow_file_paths(path = temp_dir)
     wv_value <- new_workflow(
       name = wf_name,
