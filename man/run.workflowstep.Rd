@@ -4,10 +4,10 @@
 \alias{run.workflowstep}
 \title{Run a workflow step}
 \usage{
-\method{run}{workflowstep}(object, state, env = NULL, ...)
+\method{run}{workflowstep}(x, state, env = NULL, ...)
 }
 \arguments{
-\item{object}{A `workflowstep` object representing the step to execute.}
+\item{x}{A `workflowstep` object representing the step to execute.}
 
 \item{state}{A `workflowstate` object representing the current state of the workflow.}
 

@@ -10,7 +10,6 @@
 #' @param commands Name of the commands file (default: "commands.json").
 #' @param results Name of the results summary file (default: "results.json").
 #' @param functions Name of the R script file containing custom functions (default: "functions.R").
-#' @param config_path Path to configuration JSON file (default: package's config.json).
 #' @return A list with full paths to the specified files.
 #' @export
 workflow_file_paths <- function(
@@ -18,13 +17,14 @@ workflow_file_paths <- function(
   inputs    = "",
   commands  = "",
   results   = "",
-  functions = "",
-  config_path = system.file("config", "config.json", package = "PEITHO")
+  functions = ""
 ) {
-  cfg <- jsonlite::fromJSON(config_path)
+  cfg <- config()
 
   # fill empty args from config
-  if (path == "")      path      <- system.file(cfg$path_to_folder, package = "PEITHO")
+  # use example wf folder if empty
+  if (path == "")      path      <- system.file(cfg$pathToFolder, package = "PEITHO")
+  # use default filenames if empty
   if (inputs == "")    inputs    <- cfg$inputs
   if (commands == "")  commands  <- cfg$commands
   if (results == "")   results   <- cfg$results
@@ -110,6 +110,33 @@ new_workflow <- function(
 
 workflow <- function(steps = list(), name = "Untitled workflow", current = 1L, ...) {
   new_workflow(steps = steps, name = name, current = current, ...)
+}
+
+#' Extract input values from a workflow
+#'
+#' This function extracts user input values from the steps of a workflow. It looks for parameters of type "input" in each step and collects their values into a named list.
+#'
+#' @param x A `workflow` object.
+#' @param ... Additional arguments (not used).
+#' @return A named list of input values extracted from the workflow steps.
+#' @export
+extract_inputs.workflow <- function(x, ...) {
+  inputs <- list()
+
+  for (step in x$steps) {
+    step_inputs <- list()
+    for (param in step$params) {
+      if (inherits(param, "operationparam") && param$type == "input") {
+        step_inputs[[param$label]] <- param$value
+      }
+    }
+
+    if (length(step_inputs) == 0) next
+
+    inputs <- c(inputs, step_inputs)
+  }
+
+  inputs
 }
 
 #' Convert a workflow object to a data frame
@@ -206,6 +233,7 @@ validate_workflow_file_paths <- function(workflow_file_paths) {
   if (!dir.exists(workflow_file_paths$path_to_folder)) {
     stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
   }
+  # add check if functions script is not empty here?
   invisible(TRUE)
 }
 
@@ -364,7 +392,7 @@ import_workflow <- function(
 
 #' Run the entire workflow
 #'
-#' @param object A `workflow` object.
+#' @param x A `workflow` object.
 #' @param state A `workflowstate` object representing the initial state.
 #' @param from An integer index of the step to start from.
 #' @param to An integer index of the step to end at.
@@ -374,10 +402,10 @@ import_workflow <- function(
 #' @return A list containing the final workflow, state, and results of each step.
 #' @export
 run.workflow <- function(
-  object,
+  x,
   state = list(),
   from  = 1L,
-  to    = length(object$steps),
+  to    = length(x$steps),
   env = NULL,
   ...
 ) {
@@ -387,14 +415,14 @@ run.workflow <- function(
   # for now we always stop on error!!!
   stop_on_error <- TRUE
 
-  if (!inherits(object, "workflow")) {
-    stop("Argument 'object' must be of class 'workflow'.")
+  if (!inherits(x, "workflow")) {
+    stop("Argument 'x' must be of class 'workflow'.")
   }
-  if (length(object$steps) == 0L) {
+  if (length(x$steps) == 0L) {
     PEITHO:::logWarn("Workflow has no steps.")
     return(
       list(
-        workflow = object,
+        workflow = x,
         state    = state,
         results  = list()
       )
@@ -404,7 +432,7 @@ run.workflow <- function(
   if (length(state) == 0L) {
     state <- ""
     # get input param from first step
-    for (p in object$steps[[1]]$params) {
+    for (p in x$steps[[1]]$params) {
       if (p$type == "input") {
         state <- p$value
         break
@@ -416,15 +444,8 @@ run.workflow <- function(
     state <- new_workflowstate(initial_input = state)
   }
 
-  # env is stored in workflowstep or passed, else use parent frame
-  # no need to load functions here again, as each step has its own env
-  # env <- load_workflow_script_env(
-  #   object$workflow_file_paths$functions_path,
-  #   parent_env = env
-  # )
-
   from <- max(1L, as.integer(from))
-  to   <- min(length(object$steps), as.integer(to))
+  to   <- min(length(x$steps), as.integer(to))
   idxs <- seq(from, to)
   PEITHO:::logDebug("Running workflow from step %d to %d", from, to)
 
@@ -434,7 +455,7 @@ run.workflow <- function(
     }
     PEITHO:::logInfo("Running step %d of %d", j, length(idxs))
     i <- idxs[j]
-    step <- object$steps[[i]]
+    step <- x$steps[[i]]
 
     # run the step, with env explicitly passed
     steprun <- run(step, state, env = env, ...)
@@ -444,12 +465,12 @@ run.workflow <- function(
     # save summary to results file and handle errors
     steprun_summary <- summary(steprun)
 
-    if (length(object$workflow_file_paths) > 0) {
-      if (!file.exists(object$workflow_file_paths$results_path) || i == 1L) {
+    if (length(x$workflow_file_paths) > 0) {
+      if (!file.exists(x$workflow_file_paths$results_path) || i == 1L) {
         # if missing or first step, create empty results file
         jsonlite::write_json(
           list(),
-          object$workflow_file_paths$results_path,
+          x$workflow_file_paths$results_path,
           auto_unbox = TRUE,
           pretty = TRUE
         )
@@ -458,8 +479,8 @@ run.workflow <- function(
       update_json_summary(
         steprun_summary,
         idx = i,
-        path_to_folder = object$workflow_file_paths$path_to_folder,
-        results_file = basename(object$workflow_file_paths$results_path)
+        path_to_folder = x$workflow_file_paths$path_to_folder,
+        results_file = basename(x$workflow_file_paths$results_path)
       )
     }
 
@@ -471,7 +492,7 @@ run.workflow <- function(
     }
   }
 
-  new_workflowrun(object, state)
+  new_workflowrun(x, state)
 }
 
 

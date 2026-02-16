@@ -56,24 +56,10 @@ as.data.frame.workflowrun <- function(x, ...) {
 #'
 #' This function extracts user input values used in the workflow run.
 #'
-#' @param wfr A `workflowrun` object.
+#' @param x A `workflowrun` object.
+#' @param ... Additional arguments (not used).
 #' @return A named list of input values.
 #' @export
-extract_inputs <- function(wfr) {
-  inputs <- list()
-
-  for (step in wfr$workflow$steps) {
-    step_inputs <- list()
-    for (param in step$params) {
-      if (inherits(param, "operationparam") && param$type == "input") {
-        step_inputs[[param$label]] <- param$value
-      }
-    }
-
-    if (length(step_inputs) == 0) next
-
-    inputs <- c(inputs, step_inputs)
-  }
-
-  inputs
+extract_inputs.workflowrun <- function(x, ...) {
+  extract_inputs(x$workflow)
 }

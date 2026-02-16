@@ -4,10 +4,10 @@
 \alias{update}
 \title{Update a workflow state after running a step}
 \usage{
-update(object, steprun, idx, ...)
+update(x, steprun, idx, ...)
 }
 \arguments{
-\item{object}{A `workflowstate` object.}
+\item{x}{A `workflowstate` object.}
 
 \item{steprun}{A `workflowsteprun` object representing the result of the executed step.}
 

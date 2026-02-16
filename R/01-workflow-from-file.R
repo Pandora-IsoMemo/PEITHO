@@ -161,11 +161,21 @@ strip_outer_quotes <- function(x) {
 
 load_workflow_script_env <- function(script_path, parent_env, show_functions_path = TRUE) {
   if (is.null(script_path)) return(parent_env)
-  if (!file.exists(script_path)) {
-    stop("Custom script file not found: ", script_path, call. = FALSE)
+  if (!file.exists(script_path) || file.info(script_path)$size == 0) {
+    info_msg <- sprintf(
+      "Custom script file not found or is empty: %s. Using global environment for operations.",
+      basename(script_path)
+    )
+    PEITHO:::logInfo("%s", info_msg)
+    return(parent_env)
   }
   if (is_running_online()) {
-    PEITHO:::logWarn("Running online; skipping loading custom script.")
+    warn_msg <- sprintf(
+      "Running online; skipping loading custom functions script: %s",
+      basename(script_path)
+    )
+    PEITHO:::logWarn("%s", warn_msg)
+    warning(warn_msg, immediate. = TRUE, call. = FALSE)
     return(parent_env)
   }
   if (show_functions_path) {
@@ -194,22 +204,31 @@ extract_workflow_from_files <- function(workflow_file_paths, show_functions_path
   }
 
   # check if all files exist
+
+  # return empty wf if no inputs
   if (!file.exists(workflow_file_paths$inputs_path)) {
-    PEITHO:::logWarn(
+    warn_msg <- sprintf(
       "%s not found in folder '%s'. Returning empty workflow.",
       basename(workflow_file_paths$inputs_path),
       workflow_file_paths$path_to_folder
     )
+    PEITHO:::logWarn("%s", warn_msg)
+    warning(warn_msg, immediate. = TRUE, call. = FALSE)
     return(list())
   }
+  # return empty wf if no commands
   if (!file.exists(workflow_file_paths$commands_path)) {
-    PEITHO:::logWarn(
+    warn_msg <- sprintf(
       "%s not found in folder '%s'. Returning empty workflow.",
       basename(workflow_file_paths$commands_path),
       workflow_file_paths$path_to_folder
     )
+    PEITHO:::logWarn("%s", warn_msg)
+    warning(warn_msg, immediate. = TRUE, call. = FALSE)
     return(list())
   }
+
+  # create results file if not exists
   if (!file.exists(workflow_file_paths$results_path)) {
     PEITHO:::logInfo("Creating empty %s file.", basename(workflow_file_paths$results_path))
     jsonlite::write_json(
@@ -219,20 +238,14 @@ extract_workflow_from_files <- function(workflow_file_paths, show_functions_path
       pretty = TRUE
     )
   }
-  if (!file.exists(workflow_file_paths$functions_path)) {
-    PEITHO:::logInfo(
-      "%s not found in folder '%s'. Using global environment for operations.",
-      basename(workflow_file_paths$functions_path),
-      workflow_file_paths$path_to_folder
-    )
-    env <- parent.frame()
-  } else {
-    env <- load_workflow_script_env(
-      script_path = workflow_file_paths$functions_path,
-      parent_env = parent.frame(),
-      show_functions_path = show_functions_path
-    )
-  }
+
+  # If the file exists and is not empty, load the functions file into a new environment that
+  # inherits from the global environment.
+  env <- load_workflow_script_env(
+    script_path = workflow_file_paths$functions_path,
+    parent_env = parent.frame(),
+    show_functions_path = show_functions_path
+  )
 
   PEITHO:::logDebug("Loading commands from %s", workflow_file_paths$commands_path)
   commands_list <- read_json_if_exists(path = workflow_file_paths$commands_path)
@@ -277,5 +290,6 @@ extract_workflow_from_files <- function(workflow_file_paths, show_functions_path
     )
   })
 
+  # return all steps as list
   steps
 }

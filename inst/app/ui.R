@@ -2,6 +2,7 @@ library(shiny)
 library(PEITHO)
 
 tagList(
+  shinyjs::useShinyjs(),
   navbarPage(
     title = paste("PEITHO", packageVersion("PEITHO")),
     theme = shinythemes::shinytheme("flatly"),
@@ -13,22 +14,21 @@ tagList(
       sidebarLayout(
         sidebarPanel(
           width = 2,
-          actionButton("example", "Create Example"),
-          br(),
-          br(),
-          actionButton("run", "Run Example")#,
-          # br(),
-          # br(),
-          # actionButton("download_wf", "Download Workflow"),
-          # br(),
-          # br(),
-          # actionButton("download_wfr", "Download Workflow Run"),
+          DataTools::importUI("import_wf", label = "Import"),
+          actionButton("example", "Load Example"),
+          tags$hr(),
+          actionButton("run", "Run"),
+          tags$hr(),
+          tags$h4("Download Workflow"),
+          textInput("userFileName", "File name (without extension)", value = "", width = "100%"),
+          tags$br(),
+          downloadButton("download", "Download")
         ),
         mainPanel(
           tabsetPanel(
-            tabPanel("sequence", tableOutput("wf_table")),
-            tabPanel("inputs", tableOutput("inputs_table")),
-            tabPanel("results", tableOutput("results_table"))
+            tabPanel("Workflow", tableOutput("wf_table")),
+            tabPanel("Inputs", tableOutput("inputs_table")),
+            tabPanel("Results", tableOutput("results_table"))
           )
         ),
       )
