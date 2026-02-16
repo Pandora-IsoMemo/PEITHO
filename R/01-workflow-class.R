@@ -443,13 +443,6 @@ run.workflow <- function(
     state <- new_workflowstate(initial_input = state)
   }
 
-  # env is stored in workflowstep or passed, else use parent frame
-  # no need to load functions here again, as each step has its own env
-  # env <- load_workflow_script_env(
-  #   object$workflow_file_paths$functions_path,
-  #   parent_env = env
-  # )
-
   from <- max(1L, as.integer(from))
   to   <- min(length(object$steps), as.integer(to))
   idxs <- seq(from, to)

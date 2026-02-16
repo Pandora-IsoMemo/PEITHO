@@ -29,7 +29,11 @@ shinyServer(function(input, output, session) {
       name = wf_name,
       workflow_file_paths = wf_file_paths,
       use_peitho_folder = TRUE
-    )
+    ) %>%
+      shinyTryCatch(
+        errorTitle = "Error creating workflow",
+        warningTitle = "Warning creating workflow"
+      )
     wf(wv_value)
     wf_run(NULL)
   }) |>
@@ -51,7 +55,11 @@ shinyServer(function(input, output, session) {
         from = 1,
         to = length(wf()$steps)
       )
-    })
+    })  %>%
+      shinyTryCatch(
+        errorTitle = "Error running workflow",
+        warningTitle = "Warning running workflow"
+      )
     wf_run(wf_run_val)
   })
 
@@ -70,7 +78,7 @@ shinyServer(function(input, output, session) {
     },
     content = function(file) {
       withProgress({
-        PEITHO:::logDebug("%s: Entering 'download'")
+        PEITHO:::logDebug("%s: Entering 'download'", session$ns("download"))
         save_as_zip(wf(), file = file)
       },
       value = 0.8,

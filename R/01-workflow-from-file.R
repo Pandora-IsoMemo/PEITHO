@@ -166,6 +166,11 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
   }
   if (is_running_online()) {
     PEITHO:::logWarn("Running online; skipping loading custom script.")
+    warning(
+      "Running online; skipping loading custom functions script: ",
+      script_path,
+      immediate. = TRUE, call. = FALSE
+    )
     return(parent_env)
   }
   if (show_functions_path) {
