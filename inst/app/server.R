@@ -22,7 +22,11 @@ shinyServer(function(input, output, session) {
     tempdir <- tempfile(pattern = "workflow_")
     dir.create(temp_dir, showWarnings = FALSE, recursive = TRUE)
     on.exit(unlink(temp_dir, recursive = TRUE, force = TRUE), add = TRUE)
-    unzip(imported_wf()[[1]], exdir = temp_dir)
+    unzip(imported_wf()[[1]], exdir = temp_dir) %>%
+      shinyTryCatch(
+        errorTitle = "Error unzipping workflow",
+        warningTitle = "Warning unzipping workflow"
+      )
 
     wf_file_paths <- workflow_file_paths(path = temp_dir)
     wv_value <- new_workflow(
@@ -83,8 +87,6 @@ shinyServer(function(input, output, session) {
       },
       value = 0.8,
       message = "Downloading ...")
-
-      removeModal()
     }
   )
 
