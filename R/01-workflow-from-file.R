@@ -162,12 +162,12 @@ strip_outer_quotes <- function(x) {
 load_workflow_script_env <- function(script_path, parent_env, show_functions_path = TRUE) {
   if (is.null(script_path)) return(parent_env)
   if (!file.exists(script_path) || file.info(script_path)$size == 0) {
-    warn_msg <- sprintf(
+    info_msg <- sprintf(
       "Custom script file not found or is empty: %s. Using global environment for operations.",
       basename(script_path)
     )
-    PEITHO:::logWarn("%s", warn_msg)
-    warning(warn_msg, call. = FALSE)
+    PEITHO:::logInfo("%s", info_msg)
+    return(parent_env)
   }
   if (is_running_online()) {
     warn_msg <- sprintf(
@@ -179,7 +179,7 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
     return(parent_env)
   }
   if (show_functions_path) {
-    PEITHO:::logInfo("Loading custom script for workflow: %s", basename(script_path))
+    PEITHO:::logInfo("Loading custom script for workflow: %s", script_path)
   }
   script_env <- new.env(parent = parent_env)
   sys.source(script_path, envir = script_env)

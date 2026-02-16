@@ -78,7 +78,7 @@ test_that("extract_workflow_from_files correctly returns from commands.json and 
 test_that("extract_workflow_from_files returns empty list if commands.json missing", {
   tmpdir <- create_test_files()
   wf_paths <- workflow_file_paths(path = tmpdir)
-  steps <- extract_workflow_from_files(workflow_file_paths = wf_paths)
+  steps <- suppressWarnings(extract_workflow_from_files(workflow_file_paths = wf_paths))
   expect_type(steps, "list")
   expect_length(steps, 0)
   unlink(tmpdir, recursive = TRUE)
@@ -95,7 +95,7 @@ test_that("extract_workflow_from_files returns empty list if inputs.json is miss
   # Provide an empty inputs.json file
   tmpdir <- create_test_files(commands = commands)
   wf_paths <- workflow_file_paths(path = tmpdir)
-  steps <- extract_workflow_from_files(workflow_file_paths = wf_paths)
+  steps <- suppressWarnings(extract_workflow_from_files(workflow_file_paths = wf_paths))
   expect_type(steps, "list")
   expect_length(steps, 0)
   unlink(tmpdir, recursive = TRUE)
