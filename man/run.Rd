@@ -4,10 +4,10 @@
 \alias{run}
 \title{Run a workflow step}
 \usage{
-run(object, state, ...)
+run(x, state, ...)
 }
 \arguments{
-\item{object}{A `workflowstep` object or a `workflow` object.}
+\item{x}{A `workflowstep` object or a `workflow` object.}
 
 \item{state}{A `workflowstate` object.}
 

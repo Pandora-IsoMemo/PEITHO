@@ -4,10 +4,10 @@
 \alias{extract_inputs}
 \title{Extract inputs from a workflow}
 \usage{
-extract_inputs(object, ...)
+extract_inputs(x, ...)
 }
 \arguments{
-\item{object}{A `workflow` object or a `workflowrun` object.}
+\item{x}{A `workflow` object or a `workflowrun` object.}
 
 \item{...}{Additional arguments (not used).}
 }

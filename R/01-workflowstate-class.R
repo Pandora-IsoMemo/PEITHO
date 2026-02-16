@@ -105,21 +105,21 @@ as.data.frame.workflowstate <- function(x, ...) {
 #' 
 #' This function appends a `workflowsteprun` object to the list of executed step runs
 #' 
-#' @param object A `workflowstate` object.
+#' @param x A `workflowstate` object.
 #' @param steprun A `workflowsteprun` object to add.
 #' @param idx The index at which to add the step run.
 #' @param ... Additional arguments (not used).
 #' @return The updated `workflowstate` object.
 #' @export
-update.workflowstate <- function(object, steprun, idx, ...) {
+update.workflowstate <- function(x, steprun, idx, ...) {
   # validations and initial input
-  if (!inherits(object, "workflowstate")) {
-    stop("Argument 'state' must be of class 'workflowstate'.")
+  if (!inherits(x, "workflowstate")) {
+    stop("Argument 'x' must be of class 'workflowstate'.")
   }
   if (!inherits(steprun, "workflowsteprun")) {
     stop("Argument 'steprun' must be of class 'workflowsteprun'.")
   }
-  if (length(object$initial_input) == 0 && idx == 1L) {
+  if (length(x$initial_input) == 0 && idx == 1L) {
     # set input param from first step if not set
     for (p in steprun$step$params) {
       if (p$type == "input") {
@@ -128,37 +128,37 @@ update.workflowstate <- function(object, steprun, idx, ...) {
       }
     }
 
-    object$initial_input <- initial_input
+    x$initial_input <- initial_input
   }
 
   # add or update steprun at index
-  if (idx <= length(object$stepruns)) {
-    object$stepruns[[idx]] <- steprun
+  if (idx <= length(x$stepruns)) {
+    x$stepruns[[idx]] <- steprun
     # remove all later stepruns
-    if (length(object$stepruns) > idx) {
-      object$stepruns <- object$stepruns[1:idx]
+    if (length(x$stepruns) > idx) {
+      x$stepruns <- x$stepruns[1:idx]
     }
   } else {
-    object$stepruns[[length(object$stepruns) + 1L]] <- steprun
+    x$stepruns[[length(x$stepruns) + 1L]] <- steprun
   }
 
   if (!steprun$has_error) {
-    object$last_result <- steprun$output
+    x$last_result <- steprun$output
 
     # cache with stable keys
     sid <- steprun$step$id
     sname <- steprun$step$name
 
-    object$last_result_id <- sid
-    object$last_result_name <- sname
+    x$last_result_id <- sid
+    x$last_result_name <- sname
 
     # key by id
-    object$results_by_id[[sid]] <- steprun$output
+    x$results_by_id[[sid]] <- steprun$output
 
     # key by name (names should be unique once you start prefixing subflows)
-    object$results_by_name[[sname]] <- steprun$output
+    x$results_by_name[[sname]] <- steprun$output
   } # else: on error, do not update last_result or caches
 
-  object$errors <- if (steprun$has_error) c(object$errors, steprun$error) else object$errors
-  object
+  x$errors <- if (steprun$has_error) c(x$errors, steprun$error) else x$errors
+  x
 }
