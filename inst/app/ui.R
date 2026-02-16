@@ -1,7 +1,4 @@
 library(shiny)
-library(shinyjs)
-library(DataTools)
-library(shinythemes)
 library(PEITHO)
 
 tagList(

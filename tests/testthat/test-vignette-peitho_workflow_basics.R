@@ -13,6 +13,7 @@ test_that("save_as_zip exports workflow to zip", {
   zipfile_path <- tempfile(fileext = ".peitho")
   save_as_zip(wf, file = zipfile_path)
   expect_true(file.exists(zipfile_path))
+  unlink(zipfile_path) # Clean up
 })
 
 # Test: Running a Workflow
@@ -33,4 +34,6 @@ test_that("import_workflow imports workflow from zip", {
   expect_s3_class(imported_wf, "workflow")
   run_result <- run(imported_wf, from = 1, to = 4)
   expect_true(!is.null(run_result$state$last_result))
+  unlink(zipfile_path) # Clean up
+  unlink(extract_dir, recursive = TRUE) # Clean up
 })
