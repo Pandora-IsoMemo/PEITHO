@@ -1,4 +1,4 @@
-# Following settings can be defined app specific in the config.yaml file of the respective app
+# configs for file import
 defaultSource: "file"           # for import of data and models
 # file types that are allowed for import from Pandora ("ckan")
 dataFileTypes:
@@ -14,4 +14,11 @@ fileExtension:
   - "peitho"      # for download of models
   - "zip"
 rPackageName: "PEITHO"       # for download and import of models
+# config for example workflow
+pathToFolder: "scripts/peitho_files/example_workflow"
+# config for default workflow filenames
+inputs: "inputs.json"
+commands: "commands.json"
+results: "results.json"
+functions: "functions.R"
 

@@ -199,22 +199,31 @@ extract_workflow_from_files <- function(workflow_file_paths, show_functions_path
   }
 
   # check if all files exist
+
+  # return empty wf if no inputs
   if (!file.exists(workflow_file_paths$inputs_path)) {
-    PEITHO:::logWarn(
+    warn_msg <- sprintf(
       "%s not found in folder '%s'. Returning empty workflow.",
       basename(workflow_file_paths$inputs_path),
       workflow_file_paths$path_to_folder
     )
+    PEITHO:::logWarn("%s", warn_msg)
+    warning(warn_msg, immediate. = TRUE, call. = FALSE)
     return(list())
   }
+  # return empty wf if no commands
   if (!file.exists(workflow_file_paths$commands_path)) {
-    PEITHO:::logWarn(
+    warn_msg <- sprintf(
       "%s not found in folder '%s'. Returning empty workflow.",
       basename(workflow_file_paths$commands_path),
       workflow_file_paths$path_to_folder
     )
+    PEITHO:::logWarn("%s", warn_msg)
+    warning(warn_msg, immediate. = TRUE, call. = FALSE)
     return(list())
   }
+
+  # create results file if not exists
   if (!file.exists(workflow_file_paths$results_path)) {
     PEITHO:::logInfo("Creating empty %s file.", basename(workflow_file_paths$results_path))
     jsonlite::write_json(
@@ -224,11 +233,25 @@ extract_workflow_from_files <- function(workflow_file_paths, show_functions_path
       pretty = TRUE
     )
   }
-  if (!file.exists(workflow_file_paths$functions_path)) {
+
+  # load custom functions only if functions file exists, otherwise use global environment
+  if (
+    !file.exists(workflow_file_paths$functions_path) ||
+      file.info(workflow_file_paths$functions_path)$size == 0
+  ) {
     PEITHO:::logInfo(
-      "%s not found in folder '%s'. Using global environment for operations.",
+      "%s not found in folder '%s' or is empty. Using global environment for operations.",
       basename(workflow_file_paths$functions_path),
       workflow_file_paths$path_to_folder
+    )
+    env <- parent.frame()
+  } else if (is_running_online()) {
+    # check if file contains rows and only skip if it does
+    warn_msg <- "Running online; skipping loading custom functions script."
+    PEITHO:::logWarn("%s", warn_msg)
+    warning(
+      warn_msg,
+      immediate. = TRUE, call. = FALSE
     )
     env <- parent.frame()
   } else {
@@ -282,5 +305,6 @@ extract_workflow_from_files <- function(workflow_file_paths, show_functions_path
     )
   })
 
+  # return all steps as list
   steps
 }

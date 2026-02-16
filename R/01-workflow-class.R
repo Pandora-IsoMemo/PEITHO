@@ -10,7 +10,6 @@
 #' @param commands Name of the commands file (default: "commands.json").
 #' @param results Name of the results summary file (default: "results.json").
 #' @param functions Name of the R script file containing custom functions (default: "functions.R").
-#' @param config_path Path to configuration JSON file (default: package's config.json).
 #' @return A list with full paths to the specified files.
 #' @export
 workflow_file_paths <- function(
@@ -18,13 +17,14 @@ workflow_file_paths <- function(
   inputs    = "",
   commands  = "",
   results   = "",
-  functions = "",
-  config_path = system.file("config", "config.json", package = "PEITHO")
+  functions = ""
 ) {
-  cfg <- jsonlite::fromJSON(config_path)
+  cfg <- config()
 
   # fill empty args from config
-  if (path == "")      path      <- system.file(cfg$path_to_folder, package = "PEITHO")
+  # use example wf folder if empty
+  if (path == "")      path      <- system.file(cfg$pathToFolder, package = "PEITHO")
+  # use default filenames if empty
   if (inputs == "")    inputs    <- cfg$inputs
   if (commands == "")  commands  <- cfg$commands
   if (results == "")   results   <- cfg$results
@@ -233,6 +233,7 @@ validate_workflow_file_paths <- function(workflow_file_paths) {
   if (!dir.exists(workflow_file_paths$path_to_folder)) {
     stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
   }
+  # add check if functions script is not empty here?
   invisible(TRUE)
 }
 
