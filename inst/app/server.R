@@ -37,7 +37,7 @@ shinyServer(function(input, output, session) {
     # is loaded, and only delete them when a new workflow is loaded.
     active_temp_dir(temp_dir)
     unzip(imported_wf()[[1]], exdir = temp_dir) |>
-      shinyTryCatch(
+      shinyTools::shinyTryCatch(
         errorTitle = "Error unzipping workflow",
         warningTitle = "Warning unzipping workflow"
       )
@@ -48,7 +48,7 @@ shinyServer(function(input, output, session) {
       workflow_file_paths = wf_file_paths,
       use_peitho_folder = TRUE
     ) |>
-      shinyTryCatch(
+      shinyTools::shinyTryCatch(
         errorTitle = "Error creating workflow",
         warningTitle = "Warning creating workflow"
       )
@@ -58,7 +58,11 @@ shinyServer(function(input, output, session) {
     bindEvent(imported_wf())
 
   observeEvent(input$example, {
-    example_wf <- new_workflow(name = "example_workflow")
+    example_wf <- new_workflow(name = "example_workflow") |>
+      shinyTools::shinyTryCatch(
+        errorTitle = "Error creating workflow",
+        warningTitle = "Warning creating workflow"
+      )
     wf(example_wf)
     wf_run(NULL)
   })
@@ -74,7 +78,7 @@ shinyServer(function(input, output, session) {
         to = length(wf()$steps)
       )
     }) |>
-      shinyTryCatch(
+      shinyTools::shinyTryCatch(
         errorTitle = "Error running workflow",
         warningTitle = "Warning running workflow"
       )
@@ -108,7 +112,11 @@ shinyServer(function(input, output, session) {
     content = function(file) {
       withProgress({
         PEITHO:::logDebug("%s: Entering 'download'", session$ns("download"))
-        save_as_zip(wf(), file = file)
+        save_as_zip(wf(), file = file) |>
+      shinyTools::shinyTryCatch(
+        errorTitle = "Error downloading workflow",
+        warningTitle = "Warning downloading workflow"
+      )
       },
       value = 0.8,
       message = "Downloading ...")
