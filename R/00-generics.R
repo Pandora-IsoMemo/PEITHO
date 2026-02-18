@@ -1,13 +1,10 @@
-#' Update a workflow state after running a step
+#' Update an object
 #'
-#' This is a generic function to update a workflow state after executing a step.
-#' @param x A `workflowstate` object.
-#' @param steprun A `workflowsteprun` object representing the result of the executed step.
-#' @param idx The index of the step run to update.
-#' @param ... Additional arguments (not used).
-#' @return The updated `workflowstate` object.
+#' Generic update method for workflow-related objects.
+#' @param x The object to update.
+#' @param ... Additional arguments passed to methods.
 #' @export
-update <- function(x, steprun, idx, ...) {
+update <- function(x, ...) {
   UseMethod("update")
 }
 

@@ -2,22 +2,15 @@
 % Please edit documentation in R/00-generics.R
 \name{update}
 \alias{update}
-\title{Update a workflow state after running a step}
+\title{Update an object}
 \usage{
-update(x, steprun, idx, ...)
+update(x, ...)
 }
 \arguments{
-\item{x}{A `workflowstate` object.}
+\item{x}{The object to update.}
 
-\item{steprun}{A `workflowsteprun` object representing the result of the executed step.}
-
-\item{idx}{The index of the step run to update.}
-
-\item{...}{Additional arguments (not used).}
-}
-\value{
-The updated `workflowstate` object.
+\item{...}{Additional arguments passed to methods.}
 }
 \description{
-This is a generic function to update a workflow state after executing a step.
+Generic update method for workflow-related objects.
 }

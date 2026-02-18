@@ -26,9 +26,9 @@ tagList(
         ),
         mainPanel(
           tabsetPanel(
-            tabPanel("Workflow", tableOutput("wf_table")),
-            tabPanel("Inputs", tableOutput("inputs_table")),
-            tabPanel("Results", tableOutput("results_table"))
+            tabPanel("Workflow", workflow_table_ui("wf_table")),
+            tabPanel("Inputs", inputs_table_ui("inputs_table")),
+            tabPanel("Results", results_table_ui("results_table"))
           )
         ),
       )

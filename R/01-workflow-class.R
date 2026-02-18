@@ -88,7 +88,7 @@ new_workflow <- function(
 
   # 2) Validations
   validate_workflow_steps(steps)
-  validate_unique_step_names(steps)
+  validate_unique_steps(steps)
 
   # 3) Determine current step
   current <- validate_current_index(current, length(steps))
@@ -137,6 +137,14 @@ extract_inputs.workflow <- function(x, ...) {
   }
 
   inputs
+}
+
+extract_step_names <- function(x) {
+  step_ids <- vapply(x$steps, function(s) s$id, integer(1))
+  step_names <- vapply(x$steps, function(s) s$name, character(1))
+  names(step_ids) <- step_names
+  # return named vector for selectInput
+  step_ids
 }
 
 #' Convert a workflow object to a data frame
@@ -250,13 +258,18 @@ validate_workflow_steps <- function(steps) {
   invisible(TRUE)
 }
 
-validate_unique_step_names <- function(steps) {
+validate_unique_steps <- function(steps, id_fields = c("id", "name")) {
   if (!length(steps)) return(invisible(TRUE))
-  nms <- vapply(steps, `[[`, character(1), "name")
-
-  if (anyDuplicated(nms)) {
-    dup <- unique(nms[duplicated(nms)])
-    stop("Workflow has duplicate step names: ", paste(dup, collapse = ", "), call. = FALSE)
+  for (field in id_fields) {
+    vals <- vapply(steps, function(s) as.character(s[[field]]), character(1))
+    if (anyDuplicated(vals)) {
+      dup <- unique(vals[duplicated(vals)])
+      stop(sprintf(
+        "Workflow has duplicate step %s(s): %s",
+        field,
+        paste(dup, collapse = ", ")
+      ), call. = FALSE)
+    }
   }
   invisible(TRUE)
 }
@@ -324,6 +337,27 @@ import_workflow <- function(
 }
 
 # Accessor functions (some will be added later) ------------------------
+
+#' Update a workflow step
+#'
+#' This function updates a specific entry of a `workflowstep` object with a new value. It is used
+#' to modify step details such as name, label, comments, operation, parameters, or loop settings.
+#'
+#' @param x A `workflowstep` object to update.
+#' @param step The index of the step to update.
+#' @param value The new value to assign to the specified entry.
+#' @param entry The name of the entry to update (one of "name", "label", "comments", "operation",
+#'  "params", "loop")
+#' @param ... Additional arguments (not used).
+#' @return The updated `workflowstep` object.
+#' @export
+update.workflow <- function(x, step, entry, value, ...) {
+  # update the steps
+  updated_step <- update(x$steps[[step]], entry = entry, value = value, ...)
+  x$steps[[step]] <- updated_step
+  # return updated workflow
+  x
+}
 
 # current_step.workflow <- function(x, ...) {
 #   if (length(x$steps) == 0L || is.na(x$current)) {

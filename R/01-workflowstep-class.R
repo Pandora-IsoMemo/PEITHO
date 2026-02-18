@@ -79,6 +79,29 @@ print.workflowstep <- function(x, ...) {
   invisible(x)
 }
 
+#' Update a workflow step
+#' 
+#' This method allows updating specific fields of a `workflowstep` object, such as its name,
+#' label, comments, operation, parameters, or loop configuration.
+#' 
+#' @param x The `workflowstep` object to update.
+#' @param value The new value to assign to the specified field.
+#' @param entry The name of the field to update. Must be one of "name", "label", "comments",
+#'  "operation", "params", or "loop".
+#' @param ... Additional arguments (not used).
+#' @return The updated `workflowstep` object.
+#' @export
+update.workflowstep <- function(
+  x,
+  value,
+  entry = c("name", "label", "comments", "operation", "params", "loop"),
+  ...
+) {
+  entry <- match.arg(entry)
+  x[[entry]] <- value
+  x
+}
+
 resolve_operation <- function(op_name, env) {
   PEITHO:::logDebug("  Resolving operation function: %s", op_name)
   if (!is.character(op_name) || length(op_name) != 1L || !nzchar(op_name)) {
