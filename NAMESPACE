@@ -3,6 +3,7 @@
 S3method(as.data.frame,workflow)
 S3method(as.data.frame,workflowrun)
 S3method(as.data.frame,workflowstate)
+S3method(as.data.frame,workflowstep)
 S3method(extract_inputs,workflow)
 S3method(extract_inputs,workflowrun)
 S3method(print,WebText)

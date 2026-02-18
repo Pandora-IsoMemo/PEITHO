@@ -157,14 +157,8 @@ extract_step_names <- function(x) {
 #' @export
 as.data.frame.workflow <- function(x, ...) {
   steps <- x$steps
-  data.frame(
-    name = vapply(steps, function(s) s$name, character(1)),
-    label = vapply(steps, function(s) s$label, character(1)),
-    comments = vapply(steps, function(s) s$comments, character(1)),
-    operation = vapply(steps, function(s) s$operation, character(1)),
-    params = vapply(steps, function(s) flatten_params(s$params), character(1)),
-    stringsAsFactors = FALSE
-  )
+  df_list <- lapply(steps, as.data.frame.workflowstep)
+  do.call(rbind, df_list)
 }
 
 flatten_params <- function(params) {

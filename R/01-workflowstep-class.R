@@ -79,6 +79,25 @@ print.workflowstep <- function(x, ...) {
   invisible(x)
 }
 
+#' Convert a workflowstep to a data frame
+#'
+#' This method converts a `workflowstep` object into a data frame format, which can be
+#' useful for tabular display or exporting.
+#' @param x A `workflowstep` object.
+#' @param ... Additional arguments (not used).
+#' @return A data frame with one row representing the workflow step.
+#' @export
+as.data.frame.workflowstep <- function(x, ...) {
+  data.frame(
+    "Name"          = x$name,
+    "Label"         = x$label,
+    "Comments"      = x$comments,
+    "Function"      = x$operation,
+    "Parameters"    = flatten_params(x$params),
+    stringsAsFactors = FALSE
+  )
+}
+
 #' Update a workflow step
 #' 
 #' This method allows updating specific fields of a `workflowstep` object, such as its name,
