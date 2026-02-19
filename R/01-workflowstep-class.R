@@ -79,6 +79,22 @@ print.workflowstep <- function(x, ...) {
   invisible(x)
 }
 
+flatten_params <- function(params) {
+  if (length(params) == 0) return("")
+  paste(
+    vapply(params, function(p) {
+      if (!is.null(p$name) && p$type %in% c("input", "result")) {
+        paste0(p$name, "=", p$tag, toString(p$label), p$tag)
+      } else if (!is.null(p$name) && p$type == "literal") {
+        paste0(p$name, "=", toString(p$value))
+      } else {
+        ""
+      }
+    }, character(1)),
+    collapse = ", "
+  )
+}
+
 #' Convert a workflowstep to a data frame
 #'
 #' This method converts a `workflowstep` object into a data frame format, which can be
@@ -96,6 +112,31 @@ as.data.frame.workflowstep <- function(x, ...) {
     "Parameters"    = flatten_params(x$params),
     stringsAsFactors = FALSE
   )
+}
+
+map_field <- function() {
+  list(
+    id = "id",
+    Name = "name",
+    Label = "label",
+    Comments = "comments",
+    Function = "operation",
+    Parameters = "params"
+  )
+}
+
+#' Get a specific field from a workflowstep
+#'
+#' @param x A `workflowstep` object.
+#' @param field The name of the field to retrieve (e.g., "name", "comments").
+#' @param ... Additional arguments (not used).
+#' @return The value of the specified field from the workflowstep.
+#' @export
+get_field.workflowstep <- function(x, field, with_map_field = TRUE, ...) {
+  if (with_map_field) {
+    field <- map_field()[[field]]
+  }
+  x[[field]]
 }
 
 #' Update a workflow step

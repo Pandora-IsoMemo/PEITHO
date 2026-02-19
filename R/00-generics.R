@@ -1,3 +1,14 @@
+#' Get a specific field
+#'
+#' Generic get method for workflow-related objects.
+#' @param x The object to extract the field from.
+#' @param field The name of the field to retrieve.
+#' @param ... Additional arguments passed to methods.
+#' @export
+get_field <- function(x, field, ...) {
+  UseMethod("get_field")
+}
+
 #' Update an object
 #'
 #' Generic update method for workflow-related objects.

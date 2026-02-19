@@ -112,71 +112,6 @@ workflow <- function(steps = list(), name = "Untitled workflow", current = 1L, .
   new_workflow(steps = steps, name = name, current = current, ...)
 }
 
-#' Extract input values from a workflow
-#'
-#' This function extracts user input values from the steps of a workflow. It looks for parameters of type "input" in each step and collects their values into a named list.
-#'
-#' @param x A `workflow` object.
-#' @param ... Additional arguments (not used).
-#' @return A named list of input values extracted from the workflow steps.
-#' @export
-extract_inputs.workflow <- function(x, ...) {
-  inputs <- list()
-
-  for (step in x$steps) {
-    step_inputs <- list()
-    for (param in step$params) {
-      if (inherits(param, "operationparam") && param$type == "input") {
-        step_inputs[[param$label]] <- param$value
-      }
-    }
-
-    if (length(step_inputs) == 0) next
-
-    inputs <- c(inputs, step_inputs)
-  }
-
-  inputs
-}
-
-extract_step_names <- function(x) {
-  step_ids <- vapply(x$steps, function(s) s$id, integer(1))
-  step_names <- vapply(x$steps, function(s) s$name, character(1))
-  names(step_ids) <- step_names
-  # return named vector for selectInput
-  step_ids
-}
-
-#' Convert a workflow object to a data frame
-#'
-#' This method converts a `workflow` object into a data frame summarizing its steps.
-#'
-#' @param x A `workflow` object.
-#' @param ... Additional arguments (not used).
-#' @return A data frame summarizing the workflow steps.
-#' @export
-as.data.frame.workflow <- function(x, ...) {
-  steps <- x$steps
-  df_list <- lapply(steps, as.data.frame.workflowstep)
-  do.call(rbind, df_list)
-}
-
-flatten_params <- function(params) {
-  if (length(params) == 0) return("")
-  paste(
-    vapply(params, function(p) {
-      if (!is.null(p$name) && p$type %in% c("input", "result")) {
-        paste0(p$name, "=", p$tag, toString(p$label), p$tag)
-      } else if (!is.null(p$name) && p$type == "literal") {
-        paste0(p$name, "=", toString(p$value))
-      } else {
-        ""
-      }
-    }, character(1)),
-    collapse = ", "
-  )
-}
-
 # print method -------------------------------------------------------------
 
 #' Print method for workflow objects
@@ -212,6 +147,78 @@ print.workflow <- function(x, ...) {
   if (length(x$dots)) cat("  dots:   ", length(x$dots), "\n", sep = "")
   cat("  available fields: $", paste(names(x), collapse = ", $"), "\n", sep = "")
   invisible(x)
+}
+
+#' Convert a workflow object to a data frame
+#'
+#' This method converts a `workflow` object into a data frame summarizing its steps.
+#'
+#' @param x A `workflow` object.
+#' @param ... Additional arguments (not used).
+#' @return A data frame summarizing the workflow steps.
+#' @export
+as.data.frame.workflow <- function(x, ...) {
+  steps <- x$steps
+  df_list <- lapply(steps, as.data.frame.workflowstep)
+  do.call(rbind, df_list)
+}
+
+step_name_to_position <- function(x, step_name) {
+  step_names <- vapply(x$steps, function(s) s$name, character(1))
+  match(step_name, step_names)
+
+}
+
+#' Get a specific field from a workflow
+#'
+#' @param x  A `workflow` object.
+#' @param field The name of the field to retrieve (e.g., "Name", "Comments").
+#' @param step_name Name of the step to retrieve the field from.
+#' @param ... Additional arguments (not used).
+#' @return The value of the specified field from the workflow or a specific step.
+#' @export
+get_field.workflow <- function(x, field, step_name, ...) {
+  step_position <- step_name_to_position(x, step_name)
+  if (is.na(step_position)) {
+    stop("Step with name '", step_name, "' not found in workflow.")
+  }
+  step <- x$steps[[step_position]]
+  get_field(step, field)
+}
+
+#' Extract input values from a workflow
+#'
+#' This function extracts user input values from the steps of a workflow. It looks for parameters of type "input" in each step and collects their values into a named list.
+#'
+#' @param x A `workflow` object.
+#' @param ... Additional arguments (not used).
+#' @return A named list of input values extracted from the workflow steps.
+#' @export
+extract_inputs.workflow <- function(x, ...) {
+  inputs <- list()
+
+  for (step in x$steps) {
+    step_inputs <- list()
+    for (param in step$params) {
+      if (inherits(param, "operationparam") && param$type == "input") {
+        step_inputs[[param$label]] <- param$value
+      }
+    }
+
+    if (length(step_inputs) == 0) next
+
+    inputs <- c(inputs, step_inputs)
+  }
+
+  inputs
+}
+
+extract_step_names <- function(x) {
+  step_ids <- vapply(x$steps, function(s) s$id, integer(1))
+  step_names <- vapply(x$steps, function(s) s$name, character(1))
+  names(step_ids) <- step_names
+  # return named vector for selectInput
+  step_ids
 }
 
 # -------------------------------------------------------------------------
