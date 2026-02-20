@@ -114,7 +114,7 @@ as.data.frame.workflowstep <- function(x, ...) {
   )
 }
 
-map_field <- function() {
+map_field <- function(field = NULL) {
   list(
     id = "id",
     Name = "name",
@@ -122,7 +122,7 @@ map_field <- function() {
     Comments = "comments",
     Function = "operation",
     Parameters = "params"
-  )
+  )[[field]]
 }
 
 #' Get a specific field from a workflowstep
@@ -134,7 +134,7 @@ map_field <- function() {
 #' @export
 get_field.workflowstep <- function(x, field, with_map_field = TRUE, ...) {
   if (with_map_field) {
-    field <- map_field()[[field]]
+    field <- map_field(field)
   }
   x[[field]]
 }

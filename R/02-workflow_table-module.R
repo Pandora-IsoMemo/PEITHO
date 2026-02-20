@@ -102,26 +102,30 @@ workflow_edit_server <- function(id, wf) {
 
       current_value <- wf_df[[step_idx, input$field_select]]
       updateTextInput(session, "new_value", value = as.character(current_value))
-    })
+    }) |>
+      bindEvent(input$step_select, input$field_select)
 
-    # observe({
-    #   req(input$step_select)
-    #   req(input$field_select)
+    observe({
+      req(input$step_select)
+      req(input$field_select)
+      req(input$new_value)
 
-    #   wf_val <- wf()
-    #   if (is.null(wf_val)) return()
+      wf_val <- wf()
+      if (is.null(wf_val)) return()
 
-    #   step_idx <- which(as.data.frame(wf_val)[["Name"]] == input$step_select)
-    #   if (length(step_idx) == 0) return()
+      step_idx <- which(as.data.frame(wf_val)[["Name"]] == input$step_select)
+      if (length(step_idx) == 0) return()
 
-    #   field_name <- input$field_select
-    #   new_value <- input$new_value
+      field_name <- map_field(input$field_select)
+      new_value <- input$new_value
 
-    #   # Update the workflow object with the new value
-    #   wf_val[[step_idx, field_name]] <<- new_value
+      # Update the workflow object with the new value
+      wf_val <- update.workflow(wf_val, step_idx, field_name, new_value) |>
+        shinyTryCatch(errorTitle = "Editing Workflow failed")
 
-    #   # Trigger reactive update by assigning the modified workflow back to the reactive value
-    #   wf(wf_val)
-    # })
+      # Trigger reactive update by assigning the modified workflow back to the reactive value
+      wf(wf_val)
+    }) |>
+      bindEvent(input$edit_btn)
   })
 }

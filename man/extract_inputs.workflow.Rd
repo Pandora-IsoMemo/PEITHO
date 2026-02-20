@@ -15,5 +15,6 @@
 A named list of input values extracted from the workflow steps.
 }
 \description{
-This function extracts user input values from the steps of a workflow. It looks for parameters of type "input" in each step and collects their values into a named list.
+This function extracts user input values from the steps of a workflow. It looks
+for parameters of type "input" in each step and collects their values into a named list.
 }

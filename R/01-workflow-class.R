@@ -188,7 +188,8 @@ get_field.workflow <- function(x, field, step_name, ...) {
 
 #' Extract input values from a workflow
 #'
-#' This function extracts user input values from the steps of a workflow. It looks for parameters of type "input" in each step and collects their values into a named list.
+#' This function extracts user input values from the steps of a workflow. It looks
+#' for parameters of type "input" in each step and collects their values into a named list.
 #'
 #' @param x A `workflow` object.
 #' @param ... Additional arguments (not used).
