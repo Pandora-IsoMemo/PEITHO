@@ -114,7 +114,7 @@ as.data.frame.workflowstep <- function(x, ...) {
   )
 }
 
-map_field <- function(field = NULL) {
+map_field <- function() {
   list(
     id = "id",
     Name = "name",
@@ -122,7 +122,7 @@ map_field <- function(field = NULL) {
     Comments = "comments",
     Function = "operation",
     Parameters = "params"
-  )[[field]]
+  )
 }
 
 #' Get a specific field from a workflowstep
@@ -134,7 +134,7 @@ map_field <- function(field = NULL) {
 #' @export
 get_field.workflowstep <- function(x, field, with_map_field = TRUE, ...) {
   if (with_map_field) {
-    field <- map_field(field)
+    field <- map_field()[[field]]
   }
   x[[field]]
 }
@@ -148,16 +148,51 @@ get_field.workflowstep <- function(x, field, with_map_field = TRUE, ...) {
 #' @param value The new value to assign to the specified field.
 #' @param entry The name of the field to update. Must be one of "name", "label", "comments",
 #'  "operation", "params", or "loop".
+#' @param with_map_field Logical, whether to map the field name using `map_field()`.
+#'  Defaults to `TRUE`.
 #' @param ... Additional arguments (not used).
 #' @return The updated `workflowstep` object.
 #' @export
 update.workflowstep <- function(
   x,
   value,
-  entry = c("name", "label", "comments", "operation", "params", "loop"),
+  entry,
+  with_map_field = TRUE,
   ...
 ) {
-  entry <- match.arg(entry)
+  # validate entry
+  if (with_map_field) {
+    if (!entry %in% names(map_field())) {
+      allowed_entries <- names(map_field())
+      stop(sprintf(
+        "Invalid entry '%s'. Must be one of %s.",
+        entry,
+        paste(allowed_entries, collapse = ", ")
+      ), call. = FALSE)
+    }
+    entry <- map_field()[[entry]]
+  }
+  if (!entry %in% c(unlist(map_field(), use.names = FALSE), "loop")) {
+    allowed_entries <- c(unlist(map_field(), use.names = FALSE), "loop")
+    stop(sprintf(
+      "Invalid entry '%s'. Must be one of %s.",
+      entry,
+      paste(allowed_entries, collapse = ", ")
+    ), call. = FALSE)
+  }
+
+  # validate value
+  if (entry %in% c("name", "label", "comments", "operation")) {
+    if (!is.character(value) || length(value) != 1L) {
+      stop(sprintf("'%s' must be a single character string.", entry), call. = FALSE)
+    }
+  } else if (entry == "params") {
+    #browser()
+    if (!is.character(value) || !is.list(value)) {
+      #stop("'params' can only be a list o.", call. = FALSE)
+    }
+    # we need to extract param from character string
+  }
   x[[entry]] <- value
   x
 }

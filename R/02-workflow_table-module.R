@@ -116,7 +116,7 @@ workflow_edit_server <- function(id, wf) {
       step_idx <- which(as.data.frame(wf_val)[["Name"]] == input$step_select)
       if (length(step_idx) == 0) return()
 
-      field_name <- map_field(input$field_select)
+      field_name <- input$field_select
       new_value <- input$new_value
 
       # Update the workflow object with the new value
