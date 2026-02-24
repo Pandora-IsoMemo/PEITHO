@@ -120,7 +120,7 @@ workflow_edit_server <- function(id, wf) {
       new_value <- input$new_value
 
       # Update the workflow object with the new value
-      wf_val <- update.workflow(wf_val, step_idx, field_name, new_value) |>
+      wf_val <- update(wf_val, step_idx, field_name, new_value) |>
         shinyTryCatch(errorTitle = "Editing Workflow failed")
 
       # Trigger reactive update by assigning the modified workflow back to the reactive value
