@@ -131,8 +131,8 @@ print.workflow <- function(x, ...) {
       is_curr <- if (i == x$current) "*" else " "
       cat(
         sprintf(
-          "   %s [%d] %s (operation: %s)\n",
-          is_curr, s$id, s$name, s$operation
+          "   %s [%d] %s (command: %s)\n",
+          is_curr, s$id, s$name, s$command
         )
       )
     }
@@ -343,19 +343,21 @@ import_workflow <- function(
 #' Update a workflow step
 #'
 #' This function updates a specific entry of a `workflowstep` object with a new value. It is used
-#' to modify step details such as name, label, comments, operation, parameters, or loop settings.
+#' to modify step details such as name, label, comments, command, parameters, or loop settings.
 #'
 #' @param x A `workflowstep` object to update.
 #' @param step The index of the step to update.
 #' @param value The new value to assign to the specified entry.
-#' @param entry The name of the entry to update (one of "name", "label", "comments", "operation",
+#' @param entry The name of the entry to update (one of "name", "label", "comments", "command",
 #'  "params", "loop")
 #' @param ... Additional arguments (not used).
 #' @return The updated `workflowstep` object.
 #' @export
 update.workflow <- function(x, step, entry, value, ...) {
+  # get commands file path
+  wf_file_paths <- x$workflow_file_paths
   # update the steps
-  updated_step <- update(x$steps[[step]], entry = entry, value = value, ...)
+  updated_step <- update(x$steps[[step]], wf_file_paths, entry = entry, value = value,  ...)
   x$steps[[step]] <- updated_step
   # return updated workflow
   x
@@ -432,7 +434,7 @@ update.workflow <- function(x, step, entry, value, ...) {
 #' @param state A `workflowstate` object representing the initial state.
 #' @param from An integer index of the step to start from.
 #' @param to An integer index of the step to end at.
-#' @param env An environment to look up operation functions. Defaults to `NULL`, which uses
+#' @param env An environment to look up command functions. Defaults to `NULL`, which uses
 #'  each step's own env or the caller's env.
 #' @param ... Additional arguments passed to `run.workflowstep()`.
 #' @return A list containing the final workflow, state, and results of each step.

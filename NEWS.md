@@ -1,13 +1,13 @@
 # PEITHO 26.02.3
 
-# New Features
+## New Features
 
 - Integrated workflow import and export functionality into the PEITHO Shiny application, enabling users to upload workflows from zip files and download them for sharing or backup. (#21)
 - Added a centralized YAML configuration file (inst/config.yaml) to manage app settings such as allowed file types and default import sources.
 
 # PEITHO 26.02.2
 
-# Updates
+## Updates
 
 - Removed 'host' argument from `startApplication()` function, as it is no longer needed.
 

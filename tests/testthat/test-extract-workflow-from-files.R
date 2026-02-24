@@ -68,7 +68,7 @@ test_that("extract_workflow_from_files correctly returns from commands.json and 
   expect_equal(steps[[1]]$params[[2]]$type, "literal")
   expect_equal(steps[[1]]$params[[2]]$name, "pattern")
   expect_equal(steps[[1]]$params[[2]]$value, ", ")
-  expect_equal(steps[[2]]$operation, "toupper")
+  expect_equal(steps[[2]]$command, "toupper")
   expect_equal(steps[[2]]$params[[1]]$type, "literal")
   expect_equal(steps[[2]]$params[[1]]$name, "x")
   expect_equal(steps[[2]]$params[[1]]$value, "hello world")

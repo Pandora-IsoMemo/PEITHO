@@ -13,6 +13,6 @@ utils::globalVariables(
 #' @importFrom stats setNames
 #' @importFrom stringr str_squish
 #' @importFrom tibble tibble
-#' @importFrom utils str
+#' @importFrom utils capture.output str
 #' @importFrom yaml yaml.load_file
 NULL

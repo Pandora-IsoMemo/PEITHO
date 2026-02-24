@@ -11,7 +11,7 @@
 
 \item{state}{A `workflowstate` object representing the current state of the workflow.}
 
-\item{env}{An environment to look up the operation function. Defaults to the step's
+\item{env}{An environment to look up the command function. Defaults to the step's
 own env or the caller's env.}
 
 \item{...}{Additional arguments (not used).}

@@ -11,6 +11,8 @@
 
 \item{field}{The name of the field to retrieve (e.g., "name", "comments").}
 
+\item{with_map_field}{Logical, whether to map the field name using `map_field()`. Defaults to `TRUE`.}
+
 \item{...}{Additional arguments (not used).}
 }
 \value{

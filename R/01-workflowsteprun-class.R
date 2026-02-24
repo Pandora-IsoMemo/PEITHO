@@ -6,7 +6,7 @@
 #' including the step definition, the arguments used, the output or error,
 #' and any additional metadata.
 #' @param step   A `workflowstep` object representing the step definition.
-#' @param args   A list of arguments that were passed to the step's operation.
+#' @param args   A list of arguments that were passed to the step's command.
 #'  Contains actual values used during execution (e.g. results of previous steps).
 #' @param output The output produced by the step, if successful.
 #' @param error  An error object if the step failed, otherwise `NULL`.
@@ -46,7 +46,7 @@ new_workflowsteprun <- function(step, args, output = NULL, error = NULL, ...) {
 print.workflowsteprun <- function(x, ...) {
   cat("<workflowsteprun>\n")
   cat("  step id:   ", x$step$id, "  (", x$step$name, ")\n", sep = "")
-  cat("  operation: ", x$step$operation, "\n", sep = "")
+  cat("  command: ", x$step$command, "\n", sep = "")
   cat("  args:      ", paste(names(x$args), collapse = ", "), "\n", sep = "")
   cat("  has error: ", x$has_error, "\n", sep = "")
   cat("  available fields: $", paste(names(x), collapse = ", $"), "\n", sep = "")

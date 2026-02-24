@@ -11,7 +11,7 @@
 
 \item{step}{The index of the step to update.}
 
-\item{entry}{The name of the entry to update (one of "name", "label", "comments", "operation",
+\item{entry}{The name of the entry to update (one of "name", "label", "comments", "command",
 "params", "loop")}
 
 \item{value}{The new value to assign to the specified entry.}
@@ -23,5 +23,5 @@ The updated `workflowstep` object.
 }
 \description{
 This function updates a specific entry of a `workflowstep` object with a new value. It is used
-to modify step details such as name, label, comments, operation, parameters, or loop settings.
+to modify step details such as name, label, comments, command, parameters, or loop settings.
 }

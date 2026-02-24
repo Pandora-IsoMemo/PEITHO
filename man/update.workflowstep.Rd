@@ -4,20 +4,20 @@
 \alias{update.workflowstep}
 \title{Update a workflow step}
 \usage{
-\method{update}{workflowstep}(
-  x,
-  value,
-  entry = c("name", "label", "comments", "operation", "params", "loop"),
-  ...
-)
+\method{update}{workflowstep}(x, workflow_file_paths, value, entry, with_map_field = TRUE, ...)
 }
 \arguments{
 \item{x}{The `workflowstep` object to update.}
 
+\item{workflow_file_paths}{The paths to the workflow files, used for updating related files.}
+
 \item{value}{The new value to assign to the specified field.}
 
 \item{entry}{The name of the field to update. Must be one of "name", "label", "comments",
-"operation", "params", or "loop".}
+"command", "params", or "loop".}
+
+\item{with_map_field}{Logical, whether to map the field name using `map_field()`.
+Defaults to `TRUE`.}
 
 \item{...}{Additional arguments (not used).}
 }
@@ -26,5 +26,5 @@ The updated `workflowstep` object.
 }
 \description{
 This method allows updating specific fields of a `workflowstep` object, such as its name,
-label, comments, operation, parameters, or loop configuration.
+label, comments, command, parameters, or loop configuration.
 }

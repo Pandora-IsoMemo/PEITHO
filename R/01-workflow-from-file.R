@@ -38,8 +38,9 @@ get_inputs <- function(
         if (is.na(end_indx)) {
           end_indx <- length(lines)
         }
-
+        # get variable name
         varname <- extract_tag_varname(tag, paste0("^", pattern, "(.*)", pattern, "$"))
+        # get value in between tags and store in list
         input_list[[varname]] <- paste(lines[start_indx:end_indx], collapse = "\n")
       }
     } else {
@@ -186,6 +187,32 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
   return(script_env)
 }
 
+extract_params_from_arg_string <- function(args_string, loop, step_i, wf_file_paths) {
+  parsed   <- parse_args(args_string)
+  args_vec <- parsed$values
+  args_names <- parsed$names
+
+  # create params
+  params <- vector("list", length(args_vec))
+  for (arg_i in seq_along(args_vec)) {
+    PEITHO:::logDebug("  Processing argument %d: %s", arg_i, args_vec[[arg_i]])
+    arg_name <- args_names[arg_i]
+    if (!nzchar(arg_name)) arg_name <- NULL
+
+    params[[arg_i]] <- make_param_from_arg(
+      arg      = args_vec[[arg_i]],
+      arg_name = arg_name,
+      arg_i    = arg_i,
+      step_i   = step_i,
+      cmd_loop = loop,
+      path_to_folder = wf_file_paths$path_to_folder,
+      inputs_file = basename(wf_file_paths$inputs_path)
+    )
+  }
+
+  params
+}
+
 #' Extract workflow steps from files in a folder
 #'
 #' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
@@ -254,28 +281,13 @@ extract_workflow_from_files <- function(workflow_file_paths, show_functions_path
   steps <- lapply(seq_along(commands_list), function(step_i) {
     cmd <- commands_list[[step_i]]
 
-    PEITHO:::logInfo("Parsing command %s for step %d", cmd$command, step_i)
-    parsed   <- parse_args(cmd$args)
-    args_vec <- parsed$values
-    args_names <- parsed$names
-
-    # create params
-    params <- vector("list", length(args_vec))
-    for (arg_i in seq_along(args_vec)) {
-      PEITHO:::logDebug("  Processing argument %d: %s", arg_i, args_vec[[arg_i]])
-      arg_name <- args_names[arg_i]
-      if (!nzchar(arg_name)) arg_name <- NULL
-
-      params[[arg_i]] <- make_param_from_arg(
-        arg      = args_vec[[arg_i]],
-        arg_name = arg_name,
-        arg_i    = arg_i,
-        step_i   = step_i,
-        cmd_loop = cmd$loop,
-        path_to_folder = workflow_file_paths$path_to_folder,
-        inputs_file = basename(workflow_file_paths$inputs_path)
-      )
-    }
+    PEITHO:::logInfo("Parsing arguments for command %s for step %d", cmd$command, step_i)
+    params <- extract_params_from_arg_string(
+      args_string = cmd$args,
+      loop = cmd$loop,
+      step_i = step_i,
+      wf_file_paths = workflow_file_paths
+    )
 
     # create workflowstep
     new_workflowstep(
@@ -283,7 +295,8 @@ extract_workflow_from_files <- function(workflow_file_paths, show_functions_path
       name            = cmd$name %||% paste0("Step ", step_i),
       label           = cmd$label %||% cmd$name %||% paste0("Step ", step_i),
       comments        = cmd$comments %||% "",
-      operation       = cmd$command,
+      command         = cmd$command,
+      args            = cmd$args %||% "",
       params          = params %||% list(),
       loop            = cmd$loop %||% "no",
       env             = env
