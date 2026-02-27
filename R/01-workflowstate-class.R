@@ -91,7 +91,7 @@ as.data.frame.workflowstate <- function(x, ...) {
   sr <- x$stepruns
 
   data.frame(
-    entry     = vapply(sr, function(s) s$step$id, integer(1)),
+    entry     = vapply(sr, function(s) s$step$entry, integer(1)),
     name   = vapply(sr, function(s) s$step$name, character(1)),
     label     = vapply(sr, function(s) s$step$label, character(1)),
     has_error   = vapply(sr, function(s) s$has_error, logical(1)),
@@ -146,7 +146,7 @@ update.workflowstate <- function(x, steprun, idx, ...) {
     x$last_result <- steprun$output
 
     # cache with stable keys
-    sid <- steprun$step$id
+    sid <- steprun$step$entry
     sname <- steprun$step$name
 
     x$last_result_id <- sid

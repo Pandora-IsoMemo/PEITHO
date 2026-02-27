@@ -11,9 +11,10 @@ results_table_ui <- function(id) {
 #'
 #' @param id Shiny module id
 #' @param wf_run reactive workflow run object
+#' @param is_active_tab Reactive expression indicating whether the inputs tab is active
 #' @return None. Registers output$results_table
 #' @export
-results_table_server <- function(id, wf_run) {
+results_table_server <- function(id, wf_run, is_active_tab) {
   moduleServer(id, function(input, output, session) {
     output$results_table <- renderTable({
       wfr <- wf_run()

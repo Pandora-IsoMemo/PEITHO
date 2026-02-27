@@ -3,14 +3,14 @@
 param1_1 <- new_operationparam(6, 1, name = "x", value = "hallo, test", type = "input")
 param1_2 <- new_operationparam(6, 2, name = "split", value = ", ", type = "literal")
 step1 <- new_workflowstep(
-  id = 6,
+  entry = 6,
   command = "strsplit",
   params = list(param1_1, param1_2)
 )
 param2_1 <- new_operationparam(7, 1, name = "x", value = "foo, bar", type = "literal")
 param2_2 <- new_operationparam(7, 2, name = "split", value = ", ", type = "literal")
 step2 <- new_workflowstep(
-  id = 7,
+  entry = 7,
   command = "strsplit",
   params = list(param2_1, param2_2)
 )
@@ -34,7 +34,7 @@ test_that("run.workflow executes all steps and returns results", {
 test_that("run.workflow stops on error", {
   error_fn <- function() stop("fail")
   assign("error_fn", error_fn, envir = .GlobalEnv)
-  step_err <- new_workflowstep(id = 3, command = "error_fn")
+  step_err <- new_workflowstep(entry = 3, command = "error_fn")
   wf <- new_workflow(
     name = "Workflow with error",
     steps = list(step1, step_err, step2),

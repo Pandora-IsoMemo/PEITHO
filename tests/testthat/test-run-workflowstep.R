@@ -1,20 +1,20 @@
 test_that("new_workflowstep creates valid object with base function", {
-  step <- new_workflowstep(id = 1, command = "strsplit")
+  step <- new_workflowstep(entry = 1, command = "strsplit")
   expect_s3_class(step, "workflowstep")
   expect_equal(step$name, "Step 1")
   expect_equal(step$command, "strsplit")
 })
 
 test_that("new_workflowstep fails for missing function", {
-  expect_error(new_workflowstep(id = 3, command = "not_a_function"), "not found")
+  expect_error(new_workflowstep(entry = 3, command = "not_a_function"), "not found")
 })
 
 test_that("new_workflowstep sets name and label correctly", {
-  step <- new_workflowstep(id = 4, command = "strsplit")
+  step <- new_workflowstep(entry = 4, command = "strsplit")
   expect_equal(step$name, "Step 4")
   expect_equal(step$label, "Step 4")
   step2 <- new_workflowstep(
-    id = 5,
+    entry = 5,
     command = "strsplit",
     name = "Custom Name",
     label = "Custom Label"
@@ -25,7 +25,7 @@ test_that("new_workflowstep sets name and label correctly", {
 
 test_that("new_workflowstep stores params", {
   step <- new_workflowstep(
-    id = 6,
+    entry = 6,
     command = "strsplit",
     params = list(x = "hallo, test", split = ", ")
   )
@@ -35,7 +35,7 @@ test_that("new_workflowstep stores params", {
 
 test_that("run.workflowstep errors if state is not workflowstate", {
   step <- new_workflowstep(
-    id = 3,
+    entry = 3,
     command = "strsplit",
     params = list(x = "hallo, test", split = ", ")
   )
@@ -47,7 +47,7 @@ test_that("run.workflowstep errors if state is not workflowstate", {
 test_that("new_workflowstep creates valid object with operationparam params", {
   param1 <- new_operationparam(1, 1, "x", "hallo, test")
   param2 <- new_operationparam(1, 2, "split", ", ")
-  step <- new_workflowstep(id = 1, command = "strsplit", params = list(param1, param2))
+  step <- new_workflowstep(entry = 1, command = "strsplit", params = list(param1, param2))
   expect_s3_class(step, "workflowstep")
   expect_equal(step$name, "Step 1")
   expect_equal(step$command, "strsplit")
@@ -58,7 +58,7 @@ test_that("new_workflowstep creates valid object with operationparam params", {
 test_that("run.workflowstep executes command and returns correct output", {
   param1 <- new_operationparam(6, 1, "x", "hallo, test")
   param2 <- new_operationparam(6, 2, "split", ", ")
-  step <- new_workflowstep(id = 6, command = "strsplit", params = list(param1, param2))
+  step <- new_workflowstep(entry = 6, command = "strsplit", params = list(param1, param2))
   state <- new_workflowstate()
   steprun <- run.workflowstep(step, state, path_to_folder = tempdir())
   expect_s3_class(steprun, "workflowsteprun")
@@ -70,7 +70,7 @@ test_that("run.workflowstep handles command error", {
   error_fn <- function() stop("fail")
   assign("error_fn", error_fn, envir = .GlobalEnv)
   param1 <- new_operationparam(2, 1, "x", "foo")
-  step <- new_workflowstep(id = 2, command = "error_fn", params = list(param1))
+  step <- new_workflowstep(entry = 2, command = "error_fn", params = list(param1))
   state <- new_workflowstate()
   steprun <- run.workflowstep(step, state, path_to_folder = tempdir())
   expect_s3_class(steprun, "workflowsteprun")
@@ -81,7 +81,7 @@ test_that("run.workflowstep handles command error", {
 
 test_that("run.workflowstep errors if state is not workflowstate", {
   param1 <- new_operationparam(3, 1, "x", "foo")
-  step <- new_workflowstep(id = 3, command = "strsplit", params = list(param1))
+  step <- new_workflowstep(entry = 3, command = "strsplit", params = list(param1))
   not_state <- list()
   expect_error(run.workflowstep(
     step,

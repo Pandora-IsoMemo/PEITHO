@@ -25,7 +25,7 @@ tagList(
           downloadButton("download", "Download")
         ),
         mainPanel(
-          tabsetPanel(
+          tabsetPanel(id = "main_tabs",
             tabPanel("Workflow", workflow_table_ui("wf_table")),
             tabPanel("Inputs", inputs_table_ui("inputs_table")),
             tabPanel("Results", results_table_ui("results_table"))

@@ -45,7 +45,7 @@ new_workflowsteprun <- function(step, args, output = NULL, error = NULL, ...) {
 #' @export
 print.workflowsteprun <- function(x, ...) {
   cat("<workflowsteprun>\n")
-  cat("  step id:   ", x$step$id, "  (", x$step$name, ")\n", sep = "")
+  cat("  step id:   ", x$step$entry, "  (", x$step$name, ")\n", sep = "")
   cat("  command: ", x$step$command, "\n", sep = "")
   cat("  args:      ", paste(names(x$args), collapse = ", "), "\n", sep = "")
   cat("  has error: ", x$has_error, "\n", sep = "")
@@ -112,7 +112,7 @@ summary.workflowsteprun <- function(object, ...) {
   }
 
   list(
-    entry  = object$step$id,
+    entry  = object$step$entry,
     name   = object$step$name,
     label  = object$step$label,
     result = object$output,

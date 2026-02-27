@@ -4,12 +4,14 @@
 \alias{results_table_server}
 \title{Results Table Server Module}
 \usage{
-results_table_server(id, wf_run)
+results_table_server(id, wf_run, is_active_tab)
 }
 \arguments{
 \item{id}{Shiny module id}
 
 \item{wf_run}{reactive workflow run object}
+
+\item{is_active_tab}{Reactive expression indicating whether the inputs tab is active}
 }
 \value{
 None. Registers output$results_table

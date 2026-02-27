@@ -1,10 +1,10 @@
 # ---- workflow class ----
 
 #' Helper to get file paths for PEITHO workflow files
-#' 
+#'
 #' This function constructs full file paths for the workflow files located in a specified folder.
-#' Validation of file existence is performed in `extract_workflow_from_files()`.
-#' 
+#' Validation of file existence is performed in `workflow_steps_from_files()`.
+#'
 #' @param path Path to folder containing workflow files (default: PEITHO example folder).
 #' @param inputs Name of the inputs file (default: "inputs.json").
 #' @param commands Name of the commands file (default: "commands.json").
@@ -44,19 +44,22 @@ workflow_file_paths <- function(
 #' This object represents a workflow, consisting of a sequence of workflow steps,
 #' the current step index, and additional metadata.
 #' @param name    A name for the workflow.
+#' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
+#' @param use_peitho_folder Logical; if `TRUE`, load steps from PEITHO example folder. If `FALSE`,
+#'  use provided `steps` and ignore `workflow_file_paths`, useful for testing.
+#' @param input_list A list of inputs for the workflow steps.
 #' @param steps   A list of `workflowstep` objects defining the steps of the workflow.
 #' @param current The index of the current step in the workflow.
-#' @param use_peitho_folder Logical; if `TRUE`, load steps from PEITHO example folder.
-#' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
 #' @param ...     Additional metadata to store with the workflow.
 #' @return A `workflow` object.
 #' @export
 new_workflow <- function(
   name    = "Untitled workflow",
+  workflow_file_paths = list(),
+  use_peitho_folder = TRUE,
+  input_list = list(),
   steps = list(),
   current = if (length(steps)) 1L else NA_integer_,
-  use_peitho_folder = TRUE,
-  workflow_file_paths = list(),
   ...
 ) {
   # 1) Decide where steps come from
@@ -69,16 +72,32 @@ new_workflow <- function(
 
     validate_workflow_file_paths(workflow_file_paths)
 
+    if (length(input_list)) {
+      PEITHO:::logWarn("Argument 'input_list' is ignored when 'use_peitho_folder' is TRUE.")
+    }
     if (length(steps)) {
       PEITHO:::logWarn("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.")
     }
 
-    steps <- PEITHO:::extract_workflow_from_files(
+    # we have duplicated validation of paths ...
+    input_list <- PEITHO:::extract_input_list_from_files(workflow_file_paths$inputs_path)
+
+    steps <- PEITHO:::workflow_steps_from_files(
       workflow_file_paths = workflow_file_paths,
+      input_list = input_list,
       show_functions_path = FALSE
     )
   } else {
+    if (length(workflow_file_paths)) {
+      PEITHO:::logWarn(
+        "Argument 'workflow_file_paths' is ignored when 'use_peitho_folder' is FALSE."
+      )
+    }
+
     PEITHO:::logDebug("Creating workflow from provided steps...")
+    if (length(input_list) == 0L) {
+      PEITHO:::logWarn("No 'input_list' provided for workflow.")
+    }
     if (length(steps) == 0L) {
       PEITHO:::logWarn("No steps provided for workflow.")
     }
@@ -97,6 +116,7 @@ new_workflow <- function(
   structure(
     list(
       name           = name,
+      input_list     = input_list,
       steps          = steps,
       current        = current,
       workflow_file_paths = workflow_file_paths,
@@ -104,12 +124,6 @@ new_workflow <- function(
     ),
     class = c("workflow", "list")
   )
-}
-
-# user-facing helper (function with more validation) -----------------------
-
-workflow <- function(steps = list(), name = "Untitled workflow", current = 1L, ...) {
-  new_workflow(steps = steps, name = name, current = current, ...)
 }
 
 # print method -------------------------------------------------------------
@@ -132,7 +146,7 @@ print.workflow <- function(x, ...) {
       cat(
         sprintf(
           "   %s [%d] %s (command: %s)\n",
-          is_curr, s$id, s$name, s$command
+          is_curr, s$entry, s$name, s$command
         )
       )
     }
@@ -215,11 +229,11 @@ extract_inputs.workflow <- function(x, ...) {
 }
 
 extract_step_names <- function(x) {
-  step_ids <- vapply(x$steps, function(s) s$id, integer(1))
+  step_entries <- vapply(x$steps, function(s) s$entry, integer(1))
   step_names <- vapply(x$steps, function(s) s$name, character(1))
-  names(step_ids) <- step_names
+  names(step_entries) <- step_names
   # return named vector for selectInput
-  step_ids
+  step_entries
 }
 
 # -------------------------------------------------------------------------
@@ -230,7 +244,7 @@ extract_step_names <- function(x) {
 # for other constructors/helpers that may create/modify workflows later.
 
 validate_workflow_file_paths <- function(workflow_file_paths) {
-  # Minimal structural validation; actual file existence is checked in extract_workflow_from_files()
+  # Minimal structural validation; actual file existence is checked in workflow_steps_from_files()
   if (!is.list(workflow_file_paths)) {
     stop("'workflow_file_paths' must be a list.", call. = FALSE)
   }
@@ -240,6 +254,7 @@ validate_workflow_file_paths <- function(workflow_file_paths) {
   if (is.null(workflow_file_paths$path_to_folder) || !nzchar(workflow_file_paths$path_to_folder)) {
     stop("'workflow_file_paths$path_to_folder' must be a non-empty string.", call. = FALSE)
   }
+
   if (!dir.exists(workflow_file_paths$path_to_folder)) {
     stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
   }
@@ -260,7 +275,7 @@ validate_workflow_steps <- function(steps) {
   invisible(TRUE)
 }
 
-validate_unique_steps <- function(steps, id_fields = c("id", "name")) {
+validate_unique_steps <- function(steps, id_fields = c("entry", "name")) {
   if (!length(steps)) return(invisible(TRUE))
   for (field in id_fields) {
     vals <- vapply(steps, function(s) as.character(s[[field]]), character(1))
@@ -363,6 +378,68 @@ update.workflow <- function(x, step, entry, value, ...) {
   x
 }
 
+rebuild_workflow_params_from_inputs <- function(x) {
+  il <- x$input_list %||% list()
+
+  for (i in seq_along(x$steps)) {
+    step <- x$steps[[i]]
+    step$params <- extract_params_from_arg_string(
+      args_string = step$args,
+      loop = step$loop,
+      step_i = step$entry,
+      input_list = il
+    )
+    x$steps[[i]] <- step
+  }
+
+  x
+}
+
+#' Update the input list of a workflow
+#'
+#' This method updates the `input_list` of a `workflow` object and optionally writes the
+#' updated list to the corresponding inputs file if the workflow is file-backed. It also
+#' has an option to rebuild the parameters of the workflow steps based on the new input list.
+#'
+#' @param x The `workflow` object to update.
+#' @param input_list A named list of input values to update in the workflow.
+#' @param write_file Logical; if `TRUE`, the updated input list will be written to the
+#'  inputs file if the workflow has associated file paths.
+#' @param rebuild_params Logical; if `TRUE`, the parameters of the workflow steps will be
+#'  rebuilt based on the new input list using the existing argument strings and loop settings.
+#' @param ... Additional arguments (not used).
+#' @return The updated `workflow` object with the new input list and optionally updated parameters.
+#' @export
+update_input_list.workflow <- function(
+  x,
+  input_list,
+  write_file = TRUE,
+  rebuild_params = TRUE,
+  ...
+) {
+  if (!is.list(input_list)) {
+    stop("'input_list' must be a list.", call. = FALSE)
+  }
+
+  # 1) update in-memory
+  x$input_list <- input_list
+
+  # 2) persist to inputs file (if file-backed)
+  if (write_file && length(x$workflow_file_paths)) {
+    in_path <- x$workflow_file_paths$inputs_path
+    if (!is.null(in_path) && nzchar(in_path)) {
+      jsonlite::write_json(input_list, in_path, auto_unbox = TRUE, pretty = TRUE)
+    }
+  }
+
+  # 3) keep steps consistent with current parsing logic
+  if (rebuild_params && length(x$steps)) {
+    x <- rebuild_workflow_params_from_inputs(x)
+  }
+
+  x
+}
+
 # current_step.workflow <- function(x, ...) {
 #   if (length(x$steps) == 0L || is.na(x$current)) {
 #     return(NULL)
@@ -414,7 +491,7 @@ update.workflow <- function(x, step, entry, value, ...) {
 #   }
 
 #   if (!is.null(id)) {
-#     ids <- vapply(x$steps, function(s) s$id, integer(1))
+#     ids <- vapply(x$steps, function(s) s$entry, integer(1))
 #     idx <- which(ids == as.integer(id))
 #     if (length(idx) == 1L) {
 #       x$current <- idx
@@ -524,7 +601,7 @@ run.workflow <- function(
 
     if (stop_on_error && !(length(steprun_summary$errors) == 1 && steprun_summary$errors == "")) {
       stop(
-        "step ", i, " (id=", step$id, "): ", paste(steprun_summary$errors, collapse = "; "),
+        "step ", i, " (entry=", step$entry, "): ", paste(steprun_summary$errors, collapse = "; "),
         call. = FALSE
       )
     }

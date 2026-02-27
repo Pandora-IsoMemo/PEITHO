@@ -15,17 +15,16 @@ read_json_if_exists <- function(path) {
   jsonlite::fromJSON(path, simplifyVector = FALSE)
 }
 
-get_inputs <- function(
-  path_to_folder,
-  inputs_file,
+load_inputs_to_list <- function(
+  input_path,
   pattern = "@#\\*I\\*#@"
 ) {
-  input_path <- file.path(path_to_folder, inputs_file)
-
   # load input.json or input.txt
   if (grepl("\\.json$", input_path)) {
+    # load input.json
     input_list <- read_json_if_exists(input_path)
   } else if (grepl("\\.txt$", input_path)) {
+    # load input.txt
     if (file.exists(input_path)) {
       lines <- readLines(input_path)
       tag_list_indx <- grepl(paste0("^", pattern, ".*", pattern, "$"), lines)
@@ -70,12 +69,10 @@ make_param_from_arg <- function(
   step_i,
   arg_i,
   cmd_loop,
-  path_to_folder,
-  inputs_file
+  input_list
 ) {
   if (is_input_tag(arg)) {
     varname <- extract_tag_varname(arg, "^@#\\*I\\*#@(.*)@#\\*I\\*#@$")
-    input_list <- get_inputs(path_to_folder = path_to_folder, inputs_file = inputs_file)
 
     if (!varname %in% names(input_list)) {
       stop(
@@ -187,7 +184,7 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
   return(script_env)
 }
 
-extract_params_from_arg_string <- function(args_string, loop, step_i, wf_file_paths) {
+extract_params_from_arg_string <- function(args_string, loop, step_i, input_list) {
   parsed   <- parse_args(args_string)
   args_vec <- parsed$values
   args_names <- parsed$names
@@ -205,12 +202,30 @@ extract_params_from_arg_string <- function(args_string, loop, step_i, wf_file_pa
       arg_i    = arg_i,
       step_i   = step_i,
       cmd_loop = loop,
-      path_to_folder = wf_file_paths$path_to_folder,
-      inputs_file = basename(wf_file_paths$inputs_path)
+      input_list = input_list
     )
   }
 
   params
+}
+
+extract_input_list_from_files <- function(inputs_path) {
+  # return empty wf if no inputs
+  if (!file.exists(inputs_path)) {
+    warn_msg <- sprintf(
+      "%s not found in folder '%s'. Returning empty workflow.",
+      basename(inputs_path),
+      dirname(inputs_path)
+    )
+    PEITHO:::logWarn("%s", warn_msg)
+    warning(warn_msg, immediate. = TRUE, call. = FALSE)
+    return(list())
+  }
+
+  PEITHO:::logDebug("Loading inputs from %s", inputs_path)
+  input_list <- load_inputs_to_list(inputs_path)
+
+  input_list
 }
 
 #' Extract workflow steps from files in a folder
@@ -220,25 +235,14 @@ extract_params_from_arg_string <- function(args_string, loop, step_i, wf_file_pa
 #' @param show_functions_path Logical, whether to show the path of the loaded script file.
 #' @return A list of `workflowstep` objects.
 #' @export
-extract_workflow_from_files <- function(workflow_file_paths, show_functions_path = TRUE) {
-  # if folder not found return empty list and warn
-  if (!dir.exists(workflow_file_paths$path_to_folder)) {
-    PEITHO:::logWarn(
-      "PEITHO files not found. No folder '%s'. Returning empty workflow.",
-      workflow_file_paths$path_to_folder
-    )
-    return(list())
-  }
-
-  # check if all files exist
-
+workflow_steps_from_files <- function(
+  workflow_file_paths,
+  input_list,
+  show_functions_path = TRUE
+) {
   # return empty wf if no inputs
-  if (!file.exists(workflow_file_paths$inputs_path)) {
-    warn_msg <- sprintf(
-      "%s not found in folder '%s'. Returning empty workflow.",
-      basename(workflow_file_paths$inputs_path),
-      workflow_file_paths$path_to_folder
-    )
+  if (length(input_list) == 0) {
+    warn_msg <- sprintf("Empty input list. Returning empty workflow.")
     PEITHO:::logWarn("%s", warn_msg)
     warning(warn_msg, immediate. = TRUE, call. = FALSE)
     return(list())
@@ -286,12 +290,12 @@ extract_workflow_from_files <- function(workflow_file_paths, show_functions_path
       args_string = cmd$args,
       loop = cmd$loop,
       step_i = step_i,
-      wf_file_paths = workflow_file_paths
+      input_list = input_list
     )
 
     # create workflowstep
     new_workflowstep(
-      id              = step_i,
+      entry           = step_i,
       name            = cmd$name %||% paste0("Step ", step_i),
       label           = cmd$label %||% cmd$name %||% paste0("Step ", step_i),
       comments        = cmd$comments %||% "",

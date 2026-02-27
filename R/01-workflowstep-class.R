@@ -6,11 +6,12 @@
 #'
 #' This object defines a single step within a workflow,
 #' including its unique identifier, name, command, parameters, and other metadata.
-#' @param id             An integer identifier for the step. MUST BE THE NUMBER OF THE STEP IN THE WORKFLOW
+#' @param entry          An integer representing the step's position in the workflow.
+#'                       This should be unique for each step.
 #' @param command        A character string specifying the name of the function to execute for
 #'                       this step, e.g. "strsplit". This function must exist in the loaded
 #'                       name space or in a custom script environment.
-#' @param name           A human-readable name for the step. Defaults to "Step <id>".
+#' @param name           A human-readable name for the step. Defaults to "Step <entry>".
 #' @param label          A label for the step, used in UIs. Defaults to the same as `name`.
 #' @param comments       A character string with comments or description for the step.
 #' @param args           The original argument string from the workflow file, for reference.
@@ -23,7 +24,7 @@
 #' @return A `workflowstep` object.
 #' @export
 new_workflowstep <- function(
-  id,
+  entry,
   command,                       # function name (incl. custom name in script), exist in name space
   name            = NULL,
   label           = NULL,
@@ -34,14 +35,14 @@ new_workflowstep <- function(
   env             = parent.frame(),  # where to look up command
   ...
 ) {
-  if (is.null(name)) name <- paste("Step", id)
+  if (is.null(name)) name <- paste("Step", entry)
   if (is.null(label)) label <- name
 
   resolve_operation(command, env = env)
 
   structure(
     list(
-      id              = as.integer(id),
+      entry           = as.integer(entry),
       name            = name,
       label           = label,
       comments        = comments,
@@ -65,7 +66,7 @@ new_workflowstep <- function(
 #' @export
 print.workflowstep <- function(x, ...) {
   cat("<workflowstep>\n")
-  cat("  id:             ", x$id, "\n", sep = "")
+  cat("  entry:          ", x$entry, "\n", sep = "")
   cat("  name:           ", x$name, "\n", sep = "")
   if (x$label != x$name) {
     cat("  label:          ", x$label, "\n", sep = "")
@@ -199,11 +200,13 @@ update.workflowstep <- function(
   if (entry == "args") {
     # update params also here, not only at runtime, to keep them in sync
     # we should update files also here, not only at runtime, to keep them in sync
+    PEITHO:::logDebug("Loading inputs from %s", workflow_file_paths$inputs_path)
+    input_list <- load_inputs_to_list(workflow_file_paths$inputs_path)
     x$params <- extract_params_from_arg_string(
       args_string = value,
       loop = x$loop,
-      step_i = x$id,
-      wf_file_paths = workflow_file_paths # used to extract concrete values for inputs
+      step_i = x$entry,
+      input_list = input_list
     )
   }
 
@@ -215,13 +218,13 @@ update.workflowstep <- function(
   logDebug(
     "Updating workflow file '%s': step %d, entry '%s' with value '%s'",
     basename(workflow_file_paths$commands_path),
-    x$id,
+    x$entry,
     entry,
     value
   )
   # do all entries match?
   # align id <> entry? Can we update the id right now? -> no, cannot yet change order or id/entry
-  commands_list[[x$id]][[entry]] <- value
+  commands_list[[x$entry]][[entry]] <- value
   write_json(commands_list, path = workflow_file_paths$commands_path, auto_unbox = TRUE)
 
   # return updated workflowstep

@@ -45,8 +45,7 @@ shinyServer(function(input, output, session) {
     wf_file_paths <- workflow_file_paths(path = temp_dir)
     wv_value <- new_workflow(
       name = wf_name,
-      workflow_file_paths = wf_file_paths,
-      use_peitho_folder = TRUE
+      workflow_file_paths = wf_file_paths
     ) |>
       shinyTools::shinyTryCatch(
         errorTitle = "Error creating workflow",
@@ -123,7 +122,11 @@ shinyServer(function(input, output, session) {
     }
   )
 
-  workflow_table_server("wf_table", wf)
-  inputs_table_server("inputs_table", wf)
-  results_table_server("results_table", wf_run)
+  workflow_table_server("wf_table", wf, is_active_tab = reactive(input$main_tabs == "Workflow"))
+  inputs_table_server("inputs_table", wf, is_active_tab = reactive(input$main_tabs == "Inputs"))
+  results_table_server(
+    "results_table",
+    wf_run,
+    is_active_tab = reactive(input$main_tabs == "Results")
+  )
 })

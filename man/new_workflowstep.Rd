@@ -5,7 +5,7 @@
 \title{Create a new workflow step object}
 \usage{
 new_workflowstep(
-  id,
+  entry,
   command,
   name = NULL,
   label = NULL,
@@ -18,13 +18,14 @@ new_workflowstep(
 )
 }
 \arguments{
-\item{id}{An integer identifier for the step. MUST BE THE NUMBER OF THE STEP IN THE WORKFLOW}
+\item{entry}{An integer representing the step's position in the workflow.
+This should be unique for each step.}
 
 \item{command}{A character string specifying the name of the function to execute for
 this step, e.g. "strsplit". This function must exist in the loaded
 name space or in a custom script environment.}
 
-\item{name}{A human-readable name for the step. Defaults to "Step <id>".}
+\item{name}{A human-readable name for the step. Defaults to "Step <entry>".}
 
 \item{label}{A label for the step, used in UIs. Defaults to the same as `name`.}
 

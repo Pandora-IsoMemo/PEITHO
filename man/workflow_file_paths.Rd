@@ -28,5 +28,5 @@ A list with full paths to the specified files.
 }
 \description{
 This function constructs full file paths for the workflow files located in a specified folder.
-Validation of file existence is performed in `extract_workflow_from_files()`.
+Validation of file existence is performed in `workflow_steps_from_files()`.
 }

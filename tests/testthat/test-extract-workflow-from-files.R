@@ -36,7 +36,7 @@ create_test_files <- function(
   tmpdir
 }
 
-test_that("extract_workflow_from_files correctly returns from commands.json and inputs.json", {
+test_that("workflow_steps_from_files correctly returns from commands.json and inputs.json", {
   commands <- list(
     list(
       name = "Step 1",
@@ -56,7 +56,11 @@ test_that("extract_workflow_from_files correctly returns from commands.json and 
   inputs <- list(myinput = "foo, bar")
   tmpdir <- create_test_files(commands = commands, inputs = inputs)
   wf_paths <- workflow_file_paths(path = tmpdir)
-  steps <- extract_workflow_from_files(workflow_file_paths = wf_paths)
+  input_list <- extract_input_list_from_files(wf_paths$inputs_path)
+  steps <- workflow_steps_from_files(
+    workflow_file_paths = wf_paths,
+    input_list = input_list
+  )
   expect_type(steps, "list")
   expect_length(steps, 2)
   expect_s3_class(steps[[1]], "workflowstep")
@@ -75,16 +79,20 @@ test_that("extract_workflow_from_files correctly returns from commands.json and 
   unlink(tmpdir, recursive = TRUE)
 })
 
-test_that("extract_workflow_from_files returns empty list if commands.json missing", {
+test_that("workflow_steps_from_files returns empty list if commands.json missing", {
   tmpdir <- create_test_files()
   wf_paths <- workflow_file_paths(path = tmpdir)
-  steps <- suppressWarnings(extract_workflow_from_files(workflow_file_paths = wf_paths))
+  input_list <- suppressWarnings(extract_input_list_from_files(wf_paths$inputs_path))
+  steps <- suppressWarnings(workflow_steps_from_files(
+    workflow_file_paths = wf_paths,
+    input_list = input_list
+  ))
   expect_type(steps, "list")
   expect_length(steps, 0)
   unlink(tmpdir, recursive = TRUE)
 })
 
-test_that("extract_workflow_from_files returns empty list if inputs.json is missing", {
+test_that("workflow_steps_from_files returns empty list if inputs.json is missing", {
   commands <- list(list(
     name = "Step 1",
     command = "strsplit",
@@ -95,13 +103,17 @@ test_that("extract_workflow_from_files returns empty list if inputs.json is miss
   # Provide an empty inputs.json file
   tmpdir <- create_test_files(commands = commands)
   wf_paths <- workflow_file_paths(path = tmpdir)
-  steps <- suppressWarnings(extract_workflow_from_files(workflow_file_paths = wf_paths))
+  input_list <- suppressWarnings(extract_input_list_from_files(wf_paths$inputs_path))
+  steps <- suppressWarnings(workflow_steps_from_files(
+    workflow_file_paths = wf_paths,
+    input_list = input_list
+  ))
   expect_type(steps, "list")
   expect_length(steps, 0)
   unlink(tmpdir, recursive = TRUE)
 })
 
-test_that("extract_workflow_from_files supports custom file names", {
+test_that("workflow_steps_from_files supports custom file names", {
   commands <- list(
     list(
       name = "Step 1",
@@ -121,14 +133,18 @@ test_that("extract_workflow_from_files supports custom file names", {
     path = tmpdir,
     commands = "custom_commands.json"
   )
-  steps <- extract_workflow_from_files(workflow_file_paths = wf_paths)
+  input_list <- extract_input_list_from_files(wf_paths$inputs_path)
+  steps <- workflow_steps_from_files(
+    workflow_file_paths = wf_paths,
+    input_list = input_list
+  )
   expect_type(steps, "list")
   expect_length(steps, 1)
   expect_equal(steps[[1]]$name, "Step 1")
   unlink(tmpdir, recursive = TRUE)
 })
 
-test_that("extract_workflow_from_files parses args as named list", {
+test_that("workflow_steps_from_files parses args as named list", {
   commands <- list(
     list(
       name = "Step 1",
@@ -141,7 +157,11 @@ test_that("extract_workflow_from_files parses args as named list", {
   inputs <- list(myinput = "foo, bar")
   tmpdir <- create_test_files(commands = commands, inputs = inputs)
   wf_paths <- workflow_file_paths(path = tmpdir)
-  steps <- extract_workflow_from_files(workflow_file_paths = wf_paths)
+  input_list <- extract_input_list_from_files(wf_paths$inputs_path)
+  steps <- workflow_steps_from_files(
+    workflow_file_paths = wf_paths,
+    input_list = input_list
+  )
   expect_type(steps, "list")
   expect_length(steps, 1)
   expect_equal(steps[[1]]$params[[1]]$name, "x")

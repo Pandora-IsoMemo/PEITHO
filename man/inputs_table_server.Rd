@@ -4,12 +4,14 @@
 \alias{inputs_table_server}
 \title{Inputs Table Server}
 \usage{
-inputs_table_server(id, wf)
+inputs_table_server(id, wf, is_active_tab)
 }
 \arguments{
 \item{id}{Module ID}
 
 \item{wf}{Reactive expression containing the workflow object}
+
+\item{is_active_tab}{Reactive expression indicating whether the inputs tab is active}
 }
 \value{
 Shiny server logic for rendering the inputs table

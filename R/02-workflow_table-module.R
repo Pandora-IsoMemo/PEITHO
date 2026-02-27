@@ -18,9 +18,10 @@ workflow_table_ui <- function(id, title = "") {
 #'
 #' @param id Module ID
 #' @param wf Reactive expression containing the workflow object
+#' @param is_active_tab Reactive expression indicating whether the inputs tab is active
 #' @return Shiny server logic for rendering the workflow table
 #' @export
-workflow_table_server <- function(id, wf) {
+workflow_table_server <- function(id, wf, is_active_tab) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$tbl <- renderTable({
