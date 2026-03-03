@@ -369,6 +369,7 @@ import_workflow <- function(
 #' @return The updated `workflowstep` object.
 #' @export
 update.workflow <- function(x, step, entry, value, ...) {
+  # pass entry & value NOT a whole step -> we need to update the wf object AND the commands json
   # get commands file path
   wf_file_paths <- x$workflow_file_paths
   # update the steps

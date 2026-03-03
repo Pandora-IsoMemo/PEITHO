@@ -40,10 +40,9 @@ inputs_table_server <- function(id, wf, is_active_tab) {
       # hide the edit UI when no workflow is loaded or the inputs tab is not active
       if (is.null(wf()) || !is_active_tab()) return(NULL)
 
+      PEITHO:::logDebug("%s: Render inputs edit", id)
       input_edit_ui(ns("edit"))
     })
-
-    PEITHO:::logDebug("%s: Render inputs edit", id)
 
     input_edit_server("edit", wf, is_active_tab)
   })
@@ -105,24 +104,30 @@ input_edit_server <- function(id, wf, is_active_tab) {
     }) |>
       bindEvent(input$input_select)
 
-    # observe({
-    #   req(input$input_select)
-    #   req(input$new_value)
+    observe({
+      req(input$input_select)
+      req(input$new_value)
 
-    #   wf_val <- wf()
-    #   if (is.null(wf_val)) return()
+      wf_val <- wf()
+      if (is.null(wf_val)) return()
 
-    #   input_name <- input$input_select
-    #   new_value <- input$new_value
+      input_list_val <- wf_val$input_list
 
-    #   browser()
-    #   # # Update the workflow object with the new value
-    #   # wf_val <- update(wf_val, step_idx, field_name, new_value) |>
-    #   #   shinyTryCatch(errorTitle = "Editing Workflow failed")
+      input_list_val[[input$input_select]] <- input$new_value
 
-    #   # # Trigger reactive update by assigning the modified workflow back to the reactive value
-    #   # wf(wf_val)
-    # }) |>
-    #   bindEvent(input$edit_btn)
+      PEITHO:::logDebug("%s: Update workflow input list", id)
+      wf_val <- PEITHO:::update_input_list(
+        x = wf_val,
+        input_list = input_list_val
+      ) |>
+        shinyTools::shinyTryCatch(
+          errorTitle = "Updating workflow input list failed",
+          warningTitle = "Updating workflow input list warning"
+        )
+
+      # Trigger reactive update by assigning the modified workflow back to the reactive value
+      wf(wf_val)
+    }) |>
+      bindEvent(input$edit_btn)
   })
 }
