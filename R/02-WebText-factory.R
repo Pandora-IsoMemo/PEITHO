@@ -13,9 +13,6 @@ peitho_user_agent <- function() {
 #' `WebText` object containing the extracted text and metadata.
 #'
 #' @param url A character string specifying the URL to fetch.
-#' @param css_selector A character string specifying the CSS selector
-#'   to identify text-containing HTML elements. Default is
-#'   `"h1, h2, h3, p, li"`.
 #' @param timeout_sec An integer specifying the timeout for the HTTP
 #'   request in seconds. Default is `10`.
 #' @param user_agent An optional character string specifying the User-Agent
@@ -28,7 +25,6 @@ peitho_user_agent <- function() {
 #' @export
 fetch_WebText <- function(
   url,
-  css_selector = "h1, h2, h3, p, li",
   timeout_sec  = 10,
   user_agent   = NULL,
   return_text_blocks_only = TRUE
@@ -83,23 +79,40 @@ fetch_WebText <- function(
   # Title
   title_node <- rvest::html_element(html, "title")
   if (!is.na(title_node) && !is.null(title_node)) {
-    title <- rvest::html_text2(title_node)
+    title <- rvest::html_text2(title_node) # gets text without html tags and squishes whitespace
   }
 
   # Text nodes
-  nodes <- rvest::html_elements(html, css_selector)
-  if (length(nodes) == 0L) {
-    warn_msgs <- c(
-      warn_msgs,
-      paste("No elements matched CSS selector:", css_selector)
-    )
-    PEITHO:::logWarn(paste(warn_msgs, collapse = "\n"))
+  main_node <- rvest::html_element(html, "main")
+
+  if (is.null(main_node)) {
+    main_node <- rvest::html_element(html, "article")
   }
 
-  text_blocks <- rvest::html_text2(nodes)
-  text_blocks <- stringr::str_squish(text_blocks)
-  text_blocks <- text_blocks[nzchar(text_blocks)]
-  text_blocks <- unique(text_blocks)
+  if (!is.null(main_node)) {
+    text_blocks <- rvest::html_text2(main_node)
+  } else {
+    body_node <- rvest::html_element(html, "body")
+
+    if (!is.null(body_node)) {
+      # Remove unwanted sections (modifies body_node in place)
+      body_node |>
+        rvest::html_elements(xpath = ".//*[self::nav or self::footer or self::aside or self::script or self::style]") |>
+        xml2::xml_remove()
+
+      text_blocks <- rvest::html_text2(body_node)
+    } else {
+      warn_msgs <- c(
+        warn_msgs,
+        "No <body> element found in HTML. Unable to extract text."
+      )
+      PEITHO:::logWarn(paste(warn_msgs, collapse = "\n"))
+    }
+  }
+
+  if (nzchar(text_blocks)) {
+    text_blocks <- stringr::str_squish(text_blocks)
+  }
 
   if (return_text_blocks_only) return(text_blocks)
 
@@ -112,4 +125,3 @@ fetch_WebText <- function(
     warnings    = warn_msgs
   )
 }
-

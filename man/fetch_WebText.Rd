@@ -6,7 +6,6 @@
 \usage{
 fetch_WebText(
   url,
-  css_selector = "h1, h2, h3, p, li",
   timeout_sec = 10,
   user_agent = NULL,
   return_text_blocks_only = TRUE
@@ -14,10 +13,6 @@ fetch_WebText(
 }
 \arguments{
 \item{url}{A character string specifying the URL to fetch.}
-
-\item{css_selector}{A character string specifying the CSS selector
-to identify text-containing HTML elements. Default is
-`"h1, h2, h3, p, li"`.}
 
 \item{timeout_sec}{An integer specifying the timeout for the HTTP
 request in seconds. Default is `10`.}
