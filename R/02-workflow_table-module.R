@@ -37,7 +37,7 @@ workflow_table_server <- function(id, wf, is_active_tab) {
       workflow_edit_ui(ns("edit"))
     })
 
-    workflow_edit_server("edit", wf)
+    workflow_edit_server("edit", wf, is_active_tab)
   })
 }
 
@@ -70,23 +70,42 @@ workflow_edit_ui <- function(id) {
   )
 }
 
-workflow_edit_server <- function(id, wf) {
+workflow_edit_server <- function(id, wf, is_active_tab) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     observe({
-      wf_val <- wf()
-      if (is.null(wf_val)) {
+      req(isTRUE(is_active_tab()))
+
+      if (is.null(wf())) {
+        PEITHO:::logDebug("%s: Reset inputs if empty wf", id)
         # hide the step select input when no workflow is loaded
         updateSelectInput(session, "step_select", choices = NULL, selected = NULL)
         updateSelectInput(session, "field_select", choices = NULL, selected = NULL)
-      } else {
-        wf_df <- as.data.frame(wf_val)
-        step_choices <- wf_df[["Name"]]
-        updateSelectInput(session, "step_select", choices = step_choices, selected = NULL)
-        field_choices <- colnames(wf_df)
-        updateSelectInput(session, "field_select", choices = field_choices, selected = NULL)
       }
+    })
+
+    observe({
+      req(isTRUE(is_active_tab()), wf())
+      PEITHO:::logDebug("%s: Update inputs", id)
+
+      wf_val <- wf()
+      wf_df <- as.data.frame(wf_val)
+      step_choices <- wf_df[["Name"]]
+      if (isTRUE(input$step_select %in% step_choices)) {
+        selected_input <- input$step_select
+      } else {
+        selected_input <- NULL
+      }
+      updateSelectInput(session, "step_select", choices = step_choices, selected = selected_input)
+
+      field_choices <- colnames(wf_df)
+      if (isTRUE(input$field_select %in% field_choices)) {
+        selected_field <- input$field_select
+      } else {
+        selected_field <- NULL
+      }
+      updateSelectInput(session, "field_select", choices = field_choices, selected = selected_field)
     })
 
     observe({
