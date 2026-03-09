@@ -14,6 +14,8 @@
 #' @param name           A human-readable name for the step. Defaults to "Step <entry>".
 #' @param label          A label for the step, used in UIs. Defaults to the same as `name`.
 #' @param comments       A character string with comments or description for the step.
+#' @param required_inputs A list of required inputs for this step, extracted from the argument string.
+#' @param required_steps  A list of required steps for this step, extracted from the argument string.
 #' @param args           The original argument string from the workflow file, for reference.
 #' @param params         A list of parameters to pass to the command function.
 #' @param loop           A character string indicating if the step should be looped over.
@@ -29,6 +31,8 @@ new_workflowstep <- function(
   name            = NULL,
   label           = NULL,
   comments        = "",
+  required_inputs = list(),      # list of required inputs for this step, extracted from args string
+  required_steps  = list(),      # list of required steps for this step, extracted from args string
   args            = "",          # original argument string from workflow file, for reference
   params          = list(),      # free-form list for step-specific parameters
   loop            = "",          # loop variable name (if any)
@@ -47,6 +51,8 @@ new_workflowstep <- function(
       label           = label,
       comments        = comments,
       command         = command,
+      required_inputs = required_inputs,
+      required_steps  = required_steps,
       args            = args,
       params          = params,
       loop            = loop,
@@ -202,7 +208,7 @@ update.workflowstep <- function(
     # we should update files also here, not only at runtime, to keep them in sync
     PEITHO:::logDebug("Loading inputs from %s", workflow_file_paths$inputs_path)
     input_list <- load_inputs_to_list(workflow_file_paths$inputs_path)
-    x$params <- extract_params_from_arg_string(
+    x$params <- make_param_from_arg_loop(
       args_string = value,
       loop = x$loop,
       step_i = x$entry,

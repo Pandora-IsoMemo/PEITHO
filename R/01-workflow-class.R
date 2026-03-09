@@ -73,14 +73,19 @@ new_workflow <- function(
     validate_workflow_file_paths(workflow_file_paths)
 
     if (length(input_list)) {
-      PEITHO:::logWarn("Argument 'input_list' is ignored when 'use_peitho_folder' is TRUE.")
-    }
-    if (length(steps)) {
-      PEITHO:::logWarn("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.")
+      warn <- "Argument 'input_list' is ignored when 'use_peitho_folder' is TRUE."
+      PEITHO:::logWarn("%s", warn)
+      warning(warn, immediate. = TRUE, call. = FALSE)
     }
 
     # we have duplicated validation of paths ...
     input_list <- PEITHO:::extract_input_list_from_files(workflow_file_paths$inputs_path)
+
+    if (length(steps)) {
+      warn <- "Argument 'steps' is ignored when 'use_peitho_folder' is TRUE."
+      PEITHO:::logWarn("%s", warn)
+      warning(warn, immediate. = TRUE, call. = FALSE)
+    }
 
     steps <- PEITHO:::workflow_steps_from_files(
       workflow_file_paths = workflow_file_paths,
@@ -89,23 +94,27 @@ new_workflow <- function(
     )
   } else {
     if (length(workflow_file_paths)) {
-      PEITHO:::logWarn(
-        "Argument 'workflow_file_paths' is ignored when 'use_peitho_folder' is FALSE."
-      )
+      warn <- "Argument 'workflow_file_paths' is ignored when 'use_peitho_folder' is FALSE."
+      PEITHO:::logWarn("%s", warn)
+      warning(warn, immediate. = TRUE, call. = FALSE)
     }
 
     PEITHO:::logDebug("Creating workflow from provided steps...")
     if (length(input_list) == 0L) {
-      PEITHO:::logWarn("No 'input_list' provided for workflow.")
+      warn <- "No 'input_list' provided for workflow."
+      PEITHO:::logWarn("%s", warn)
+      warning(warn, immediate. = TRUE, call. = FALSE)
     }
     if (length(steps) == 0L) {
-      PEITHO:::logWarn("No steps provided for workflow.")
+      warn <- "No steps provided for workflow."
+      PEITHO:::logWarn("%s", warn)
+      warning(warn, immediate. = TRUE, call. = FALSE)
     }
     # if not use PEITHO folder, clear file paths
     workflow_file_paths <- list()
   }
 
-  # 2) Validations
+  # 2) Validations, if not valid stopping with error
   validate_workflow_steps(steps)
   validate_unique_steps(steps)
 
@@ -379,22 +388,24 @@ update.workflow <- function(x, step, entry, value, ...) {
   x
 }
 
-rebuild_workflow_params_from_inputs <- function(x) {
-  il <- x$input_list %||% list()
+# TODO: update dependent entries
 
-  for (i in seq_along(x$steps)) {
-    step <- x$steps[[i]]
-    step$params <- extract_params_from_arg_string(
-      args_string = step$args,
-      loop = step$loop,
-      step_i = step$entry,
-      input_list = il
-    )
-    x$steps[[i]] <- step
-  }
+# rebuild_workflow_params_from_inputs <- function(x) {
+#   il <- x$input_list %||% list()
 
-  x
-}
+#   for (i in seq_along(x$steps)) {
+#     step <- x$steps[[i]]
+#     step$params <- make_param_from_arg_loop(
+#       args_string = step$args,
+#       loop = step$loop,
+#       step_i = step$entry,
+#       input_list = il
+#     )
+#     x$steps[[i]] <- step
+#   }
+
+#   x
+# }
 
 #' Update the input list of a workflow
 #'
@@ -433,10 +444,21 @@ update_input_list.workflow <- function(
     }
   }
 
-  # 3) keep steps consistent with current parsing logic
-  if (rebuild_params && length(x$steps)) {
-    x <- rebuild_workflow_params_from_inputs(x)
+  # 3) check if names of inputs exist in steps
+  inputs_from_steps <- extract_inputs(x)
+
+  if (!all(names(inputs_from_steps) %in% names(input_list))) {
+    warn <- "Not all inputs used in workflow steps were found in the inputs list."
+    PEITHO:::logWarn("%s", warn)
+    warning(warn, immediate. = TRUE, call. = FALSE)
   }
+
+  # 3) keep steps consistent with current parsing logic
+  # this will directly fail since commands file contains old inputs
+  # maybe we should add a field for warnings?
+  # if (rebuild_params && length(x$steps)) {
+  #   x <- rebuild_workflow_params_from_inputs(x)
+  # }
 
   x
 }
@@ -531,9 +553,11 @@ run.workflow <- function(
   # for now we always stop on error!!!
   stop_on_error <- TRUE
 
+  # validata workflow
   if (!inherits(x, "workflow")) {
     stop("Argument 'x' must be of class 'workflow'.")
   }
+  # check steps
   if (length(x$steps) == 0L) {
     PEITHO:::logWarn("Workflow has no steps.")
     return(
@@ -545,6 +569,7 @@ run.workflow <- function(
     )
   }
 
+  # check state or create
   if (length(state) == 0L) {
     state <- ""
     # get input param from first step
@@ -560,6 +585,38 @@ run.workflow <- function(
     state <- new_workflowstate(initial_input = state)
   }
 
+  # extract required_fields and check if exist
+  required_inputs <- unique(unlist(lapply(x$steps, function(s) {
+    x <- s[["required_inputs"]]
+    if (!is.character(x)) stop("'required_inputs' must be a character vector.")
+    x
+  }), use.names = FALSE))
+
+  required_steps <- unique(unlist(lapply(x$steps, function(s) {
+    x <- s[["required_steps"]]
+    if (!is.character(x)) stop("'required_steps' must be a character vector.")
+    x
+  }), use.names = FALSE))
+
+  # check if required inputs exist in input_list
+  missing_inputs <- setdiff(required_inputs, names(x$input_list))
+  if (length(missing_inputs)) {
+    stop(
+      "Missing required inputs: ", paste(missing_inputs, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  # check if required steps exist in steps
+  step_names <- vapply(x$steps, function(s) s$name, character(1))
+  missing_steps <- setdiff(required_steps, step_names)
+  if (length(missing_steps)) {
+    stop(
+      "Missing required steps: ", paste(missing_steps, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  # RUN workflow steps
   from <- max(1L, as.integer(from))
   to   <- min(length(x$steps), as.integer(to))
   idxs <- seq(from, to)
@@ -574,7 +631,11 @@ run.workflow <- function(
     step <- x$steps[[i]]
 
     # run the step, with env explicitly passed
-    steprun <- run(step, state, env = env, ...)
+    steprun <- run(step, state, env = env, ...) |>
+      shinyTools::shinyTryCatch(
+        errorTitle = "Running workflow steps failed",
+        warningTitle = "Warning when running workflow steps"
+      )
 
     # update workflow state and append steprun
     state <- update(state, steprun, idx = i)

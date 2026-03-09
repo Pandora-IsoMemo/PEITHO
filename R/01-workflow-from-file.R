@@ -71,20 +71,22 @@ make_param_from_arg <- function(
   cmd_loop,
   input_list
 ) {
+  if (!nzchar(arg_name)) arg_name <- NULL
+
   if (is_input_tag(arg)) {
     varname <- extract_tag_varname(arg, "^@#\\*I\\*#@(.*)@#\\*I\\*#@$")
 
-    if (!varname %in% names(input_list)) {
-      stop(
-        "Input variable '", varname, "' not found in input file.",
-        call. = FALSE
-      )
-    }
+    # if (!varname %in% names(input_list)) {
+    #   stop(
+    #     "Input variable '", varname, "' not found in input file.",
+    #     call. = FALSE
+    #   )
+    # }
     new_operationparam(
       step_id = step_i,
       position = arg_i,
       name     = arg_name,
-      value    = input_list[[varname]],
+      value    = input_list[[varname]] %||% NULL,
       type     = "input",
       label    = varname,
       loop     = cmd_loop %||% "no"
@@ -184,7 +186,7 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
   return(script_env)
 }
 
-extract_params_from_arg_string <- function(args_string, loop, step_i, input_list) {
+make_param_from_arg_loop <- function(args_string, loop, step_i, input_list) {
   parsed   <- parse_args(args_string)
   args_vec <- parsed$values
   args_names <- parsed$names
@@ -193,12 +195,10 @@ extract_params_from_arg_string <- function(args_string, loop, step_i, input_list
   params <- vector("list", length(args_vec))
   for (arg_i in seq_along(args_vec)) {
     PEITHO:::logDebug("  Processing argument %d: %s", arg_i, args_vec[[arg_i]])
-    arg_name <- args_names[arg_i]
-    if (!nzchar(arg_name)) arg_name <- NULL
 
     params[[arg_i]] <- make_param_from_arg(
       arg      = args_vec[[arg_i]],
-      arg_name = arg_name,
+      arg_name = args_names[arg_i],
       arg_i    = arg_i,
       step_i   = step_i,
       cmd_loop = loop,
@@ -226,6 +226,25 @@ extract_input_list_from_files <- function(inputs_path) {
   input_list <- load_inputs_to_list(inputs_path)
 
   input_list
+}
+
+parse_required_fields <- function(args_string) {
+  args_values <- parse_args(args_string)$values
+
+  list(
+    inputs = unique(vapply(
+      args_values[is_input_tag(args_values)],
+      extract_tag_varname,
+      FUN.VALUE = character(1),
+      pattern = "^@#\\*I\\*#@(.*)@#\\*I\\*#@$"
+    )),
+    steps = unique(vapply(
+      args_values[is_result_tag(args_values)],
+      extract_tag_varname,
+      FUN.VALUE = character(1),
+      pattern = "^@#\\*L\\*#@(.*)@#\\*L\\*#@$"
+    ))
+  )
 }
 
 #' Extract workflow steps from files in a folder
@@ -285,8 +304,11 @@ workflow_steps_from_files <- function(
   steps <- lapply(seq_along(commands_list), function(step_i) {
     cmd <- commands_list[[step_i]]
 
+    # extract required fields for this step
+    required_fields <- parse_required_fields(cmd$args)
+
     PEITHO:::logInfo("Parsing arguments for command %s for step %d", cmd$command, step_i)
-    params <- extract_params_from_arg_string(
+    params <- make_param_from_arg_loop(
       args_string = cmd$args,
       loop = cmd$loop,
       step_i = step_i,
@@ -300,6 +322,8 @@ workflow_steps_from_files <- function(
       label           = cmd$label %||% cmd$name %||% paste0("Step ", step_i),
       comments        = cmd$comments %||% "",
       command         = cmd$command,
+      required_inputs = required_fields$inputs,
+      required_steps  = required_fields$steps,
       args            = cmd$args %||% "",
       params          = params %||% list(),
       loop            = cmd$loop %||% "no",

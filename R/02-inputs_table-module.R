@@ -30,8 +30,8 @@ inputs_table_server <- function(id, wf, is_active_tab) {
       inputs <- extract_inputs(wf_val)
       if (is.null(inputs) || length(inputs) == 0) return(NULL)
       data.frame(
-        name = names(inputs),
-        value = unlist(inputs, use.names = FALSE),
+        Name = names(inputs),
+        Value = unlist(inputs, use.names = FALSE),
         stringsAsFactors = FALSE
       )
     }, rownames = FALSE)
@@ -57,6 +57,10 @@ input_edit_ui <- function(id) {
       column(
         3,
         selectInput(ns("input_select"), "Select input", choices = NULL, selected = NULL)
+      ),
+      column(
+        3,
+        selectInput(ns("field_select"), "Select field", choices = NULL, selected = NULL)
       ),
       column(
         4,
@@ -86,26 +90,37 @@ input_edit_server <- function(id, wf, is_active_tab) {
       if (is.null(wf_val)) {
         # hide the step select input when no workflow is loaded
         updateSelectInput(session, "input_select", choices = NULL, selected = NULL)
+        updateSelectInput(session, "field_select", choices = NULL, selected = NULL)
       } else {
         input_choices <- names(wf_val$input_list)
         updateSelectInput(session, "input_select", choices = input_choices, selected = NULL)
+        field_choices <- c("Name", "Value")
+        updateSelectInput(session, "field_select", choices = field_choices, selected = NULL)
       }
     })
 
     observe({
-      req(input$input_select)
+      req(input$input_select, input$field_select)
 
       wf_val <- wf()
       if (is.null(wf_val)) return()
 
-      current_value <- wf_val$input_list[[input$input_select]]
+      input_list <- wf_val$input_list
+
+      current_value <- switch(
+        input$field_select,
+        "Name" = input$input_select,
+        "Value" = input_list[[input$input_select]],
+        NULL
+      )
+
       PEITHO:::logDebug("%s: Update new_value text input", id)
       updateTextInput(session, "new_value", value = as.character(current_value))
-    }) |>
-      bindEvent(input$input_select)
+    })
 
     observe({
       req(input$input_select)
+      req(input$field_select)
       req(input$new_value)
 
       wf_val <- wf()
@@ -113,7 +128,28 @@ input_edit_server <- function(id, wf, is_active_tab) {
 
       input_list_val <- wf_val$input_list
 
-      input_list_val[[input$input_select]] <- input$new_value
+      if (input$field_select == "Name") {
+        old_name <- input$input_select
+        new_name <- trimws(as.character(input$new_value))
+
+        idx <- match(old_name, names(input_list_val))
+        if (is.na(idx)) return()
+
+        # prevent duplicates (unless it's the same name)
+        if (!identical(old_name, new_name) && new_name %in% names(input_list_val)) {
+          showNotification(
+            sprintf("Name '%s' already exists. Please choose a different name.", new_name),
+            type = "error"
+          )
+          return()
+        }
+
+        # Rename the input in the input list
+        names(input_list_val)[idx] <- new_name
+      } else if (input$field_select == "Value") {
+        # Update the value of the selected input
+        input_list_val[[input$input_select]] <- input$new_value
+      }
 
       PEITHO:::logDebug("%s: Update workflow input list", id)
       wf_val <- PEITHO:::update_input_list(

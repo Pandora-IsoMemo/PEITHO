@@ -10,6 +10,8 @@ new_workflowstep(
   name = NULL,
   label = NULL,
   comments = "",
+  required_inputs = list(),
+  required_steps = list(),
   args = "",
   params = list(),
   loop = "",
@@ -30,6 +32,10 @@ name space or in a custom script environment.}
 \item{label}{A label for the step, used in UIs. Defaults to the same as `name`.}
 
 \item{comments}{A character string with comments or description for the step.}
+
+\item{required_inputs}{A list of required inputs for this step, extracted from the argument string.}
+
+\item{required_steps}{A list of required steps for this step, extracted from the argument string.}
 
 \item{args}{The original argument string from the workflow file, for reference.}
 
