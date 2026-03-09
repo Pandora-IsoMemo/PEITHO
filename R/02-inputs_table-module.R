@@ -27,7 +27,7 @@ inputs_table_server <- function(id, wf, is_active_tab) {
       PEITHO:::logDebug("%s: Render inputs table", id)
       wf_val <- wf()
       if (is.null(wf_val)) return(NULL)
-      inputs <- extract_inputs(wf_val)
+      inputs <- wf_val$input_list
       if (is.null(inputs) || length(inputs) == 0) return(NULL)
       data.frame(
         Name = names(inputs),
@@ -84,19 +84,41 @@ input_edit_server <- function(id, wf, is_active_tab) {
 
     observe({
       req(isTRUE(is_active_tab()))
-      PEITHO:::logDebug("%s: Update input_select", id)
 
-      wf_val <- wf()
-      if (is.null(wf_val)) {
+      if (is.null(wf())) {
+        PEITHO:::logDebug("%s: Reset inputs if empty wf", id)
         # hide the step select input when no workflow is loaded
         updateSelectInput(session, "input_select", choices = NULL, selected = NULL)
         updateSelectInput(session, "field_select", choices = NULL, selected = NULL)
-      } else {
-        input_choices <- names(wf_val$input_list)
-        updateSelectInput(session, "input_select", choices = input_choices, selected = NULL)
-        field_choices <- c("Name", "Value")
-        updateSelectInput(session, "field_select", choices = field_choices, selected = NULL)
       }
+    })
+
+    observe({
+      req(isTRUE(is_active_tab()), wf())
+      PEITHO:::logDebug("%s: Update inputs", id)
+
+      wf_val <- wf()
+      input_choices <- names(wf_val$input_list)
+
+      if (isTRUE(input$input_select %in% input_choices)) {
+        selected_input <- input$input_select
+      } else {
+        selected_input <- NULL
+      }
+      updateSelectInput(
+        session, "input_select", choices = input_choices, selected = selected_input
+      )
+
+      field_choices <- c("Name", "Value")
+
+      if (isTRUE(input$field_select %in% field_choices)) {
+        selected_field <- input$field_select
+      } else {
+        selected_field <- NULL
+      }
+      updateSelectInput(
+        session, "field_select", choices = field_choices, selected = selected_field
+      )
     })
 
     observe({
@@ -154,7 +176,7 @@ input_edit_server <- function(id, wf, is_active_tab) {
       PEITHO:::logDebug("%s: Update workflow input list", id)
       wf_val <- PEITHO:::update_input_list(
         x = wf_val,
-        input_list = input_list_val
+        new_list = input_list_val
       ) |>
         shinyTools::shinyTryCatch(
           errorTitle = "Updating workflow input list failed",

@@ -388,7 +388,7 @@ update.workflow <- function(x, step, entry, value, ...) {
   x
 }
 
-# TODO: update dependent entries
+# TODO: update dependent UI entries <---
 
 # rebuild_workflow_params_from_inputs <- function(x) {
 #   il <- x$input_list %||% list()
@@ -414,7 +414,7 @@ update.workflow <- function(x, step, entry, value, ...) {
 #' has an option to rebuild the parameters of the workflow steps based on the new input list.
 #'
 #' @param x The `workflow` object to update.
-#' @param input_list A named list of input values to update in the workflow.
+#' @param new_list A named list of input values to update in the workflow.
 #' @param write_file Logical; if `TRUE`, the updated input list will be written to the
 #'  inputs file if the workflow has associated file paths.
 #' @param rebuild_params Logical; if `TRUE`, the parameters of the workflow steps will be
@@ -424,34 +424,36 @@ update.workflow <- function(x, step, entry, value, ...) {
 #' @export
 update_input_list.workflow <- function(
   x,
-  input_list,
+  new_list,
   write_file = TRUE,
   rebuild_params = TRUE,
   ...
 ) {
-  if (!is.list(input_list)) {
-    stop("'input_list' must be a list.", call. = FALSE)
+  if (!is.list(new_list)) {
+    stop("'new_list' must be a list.", call. = FALSE)
   }
 
   # 1) update in-memory
-  x$input_list <- input_list
+  x$input_list <- new_list
 
   # 2) persist to inputs file (if file-backed)
   if (write_file && length(x$workflow_file_paths)) {
     in_path <- x$workflow_file_paths$inputs_path
     if (!is.null(in_path) && nzchar(in_path)) {
-      jsonlite::write_json(input_list, in_path, auto_unbox = TRUE, pretty = TRUE)
+      jsonlite::write_json(new_list, in_path, auto_unbox = TRUE, pretty = TRUE)
     }
   }
 
   # 3) check if names of inputs exist in steps
   inputs_from_steps <- extract_inputs(x)
 
-  if (!all(names(inputs_from_steps) %in% names(input_list))) {
+  if (!all(names(inputs_from_steps) %in% names(new_list))) {
     warn <- "Not all inputs used in workflow steps were found in the inputs list."
     PEITHO:::logWarn("%s", warn)
     warning(warn, immediate. = TRUE, call. = FALSE)
   }
+
+  # TODO: update dependent UI entries <---
 
   # 3) keep steps consistent with current parsing logic
   # this will directly fail since commands file contains old inputs

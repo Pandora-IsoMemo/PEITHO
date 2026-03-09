@@ -4,12 +4,12 @@
 \alias{update_input_list.workflow}
 \title{Update the input list of a workflow}
 \usage{
-\method{update_input_list}{workflow}(x, input_list, write_file = TRUE, rebuild_params = TRUE, ...)
+\method{update_input_list}{workflow}(x, new_list, write_file = TRUE, rebuild_params = TRUE, ...)
 }
 \arguments{
 \item{x}{The `workflow` object to update.}
 
-\item{input_list}{A named list of input values to update in the workflow.}
+\item{new_list}{A named list of input values to update in the workflow.}
 
 \item{write_file}{Logical; if `TRUE`, the updated input list will be written to the
 inputs file if the workflow has associated file paths.}
