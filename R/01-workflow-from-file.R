@@ -304,17 +304,6 @@ workflow_steps_from_files <- function(
   steps <- lapply(seq_along(commands_list), function(step_i) {
     cmd <- commands_list[[step_i]]
 
-    # extract required fields for this step
-    required_fields <- parse_required_fields(cmd$args)
-
-    PEITHO:::logInfo("Parsing arguments for command %s for step %d", cmd$command, step_i)
-    params <- make_param_from_arg_loop(
-      args_string = cmd$args,
-      loop = cmd$loop,
-      step_i = step_i,
-      input_list = input_list
-    )
-
     # create workflowstep
     new_workflowstep(
       entry           = step_i,
@@ -322,10 +311,7 @@ workflow_steps_from_files <- function(
       label           = cmd$label %||% cmd$name %||% paste0("Step ", step_i),
       comments        = cmd$comments %||% "",
       command         = cmd$command,
-      required_inputs = required_fields$inputs,
-      required_steps  = required_fields$steps,
       args            = cmd$args %||% "",
-      params          = params %||% list(),
       loop            = cmd$loop %||% "no",
       env             = env
     )

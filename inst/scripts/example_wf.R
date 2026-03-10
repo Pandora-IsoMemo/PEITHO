@@ -23,8 +23,7 @@ save_as_zip(my_wf, file = zipfile_path)
 # run the workflow from step 1 to 5
 my_run_1 <- run(my_wf, from = 1, to = 11)
 
-extract_inputs(my_run_1)
-as.data.frame(my_run_1)
+as.data.frame(my_run_1$input_list)
 
 # see results
 length(my_run_1$state$last_result)

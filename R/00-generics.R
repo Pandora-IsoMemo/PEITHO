@@ -42,17 +42,6 @@ run <- function(x, state, ...) {
   UseMethod("run")
 }
 
-#' Extract inputs from a workflow
-#'
-#' This is a generic function to extract user input values from a workflow or workflow run.
-#' @param x A `workflow` object or a `workflowrun` object.
-#' @param ... Additional arguments (not used).
-#' @return A named list of input values.
-#' @export
-extract_inputs <- function(x, ...) {
-  UseMethod("extract_inputs")
-}
-
 #' Save an object as a ZIP file
 #'
 #' This is a generic function to save various objects as ZIP files.

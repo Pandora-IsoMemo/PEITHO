@@ -66,16 +66,8 @@ test_that("workflow_steps_from_files correctly returns from commands.json and in
   expect_s3_class(steps[[1]], "workflowstep")
   expect_equal(steps[[1]]$name, "Step 1")
   expect_equal(steps[[1]]$label, "First Step")
-  expect_equal(steps[[1]]$params[[1]]$type, "input")
-  expect_equal(steps[[1]]$params[[1]]$label, "myinput")
-  expect_equal(steps[[1]]$params[[1]]$value, "foo, bar")
-  expect_equal(steps[[1]]$params[[2]]$type, "literal")
-  expect_equal(steps[[1]]$params[[2]]$name, "pattern")
-  expect_equal(steps[[1]]$params[[2]]$value, ", ")
   expect_equal(steps[[2]]$command, "toupper")
-  expect_equal(steps[[2]]$params[[1]]$type, "literal")
-  expect_equal(steps[[2]]$params[[1]]$name, "x")
-  expect_equal(steps[[2]]$params[[1]]$value, "hello world")
+  expect_equal(steps[[2]]$args, "x = \"hello world\"")
   unlink(tmpdir, recursive = TRUE)
 })
 
@@ -141,33 +133,5 @@ test_that("workflow_steps_from_files supports custom file names", {
   expect_type(steps, "list")
   expect_length(steps, 1)
   expect_equal(steps[[1]]$name, "Step 1")
-  unlink(tmpdir, recursive = TRUE)
-})
-
-test_that("workflow_steps_from_files parses args as named list", {
-  commands <- list(
-    list(
-      name = "Step 1",
-      command = "strsplit",
-      args = "x = 'foo, bar', pattern = ', ', n = 2",
-      label = "First Step",
-      loop = "no"
-    )
-  )
-  inputs <- list(myinput = "foo, bar")
-  tmpdir <- create_test_files(commands = commands, inputs = inputs)
-  wf_paths <- workflow_file_paths(path = tmpdir)
-  input_list <- extract_input_list_from_files(wf_paths$inputs_path)
-  steps <- workflow_steps_from_files(
-    workflow_file_paths = wf_paths,
-    input_list = input_list
-  )
-  expect_type(steps, "list")
-  expect_length(steps, 1)
-  expect_equal(steps[[1]]$params[[1]]$name, "x")
-  expect_equal(steps[[1]]$params[[2]]$name, "pattern")
-  expect_equal(steps[[1]]$params[[3]]$name, "n")
-  expect_equal(steps[[1]]$params[[3]]$type, "literal")
-  expect_equal(steps[[1]]$params[[3]]$value, "2")
   unlink(tmpdir, recursive = TRUE)
 })

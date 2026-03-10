@@ -14,10 +14,7 @@
 #' @param name           A human-readable name for the step. Defaults to "Step <entry>".
 #' @param label          A label for the step, used in UIs. Defaults to the same as `name`.
 #' @param comments       A character string with comments or description for the step.
-#' @param required_inputs A list of required inputs for this step, extracted from the argument string.
-#' @param required_steps  A list of required steps for this step, extracted from the argument string.
 #' @param args           The original argument string from the workflow file, for reference.
-#' @param params         A list of parameters to pass to the command function.
 #' @param loop           A character string indicating if the step should be looped over.
 #'                       Can be "yes", "no", or "auto".
 #' @param env            An environment to look up the command function. Default is the parent
@@ -31,10 +28,7 @@ new_workflowstep <- function(
   name            = NULL,
   label           = NULL,
   comments        = "",
-  required_inputs = list(),      # list of required inputs for this step, extracted from args string
-  required_steps  = list(),      # list of required steps for this step, extracted from args string
   args            = "",          # original argument string from workflow file, for reference
-  params          = list(),      # free-form list for step-specific parameters
   loop            = "",          # loop variable name (if any)
   env             = parent.frame(),  # where to look up command
   ...
@@ -43,6 +37,11 @@ new_workflowstep <- function(
   if (is.null(label)) label <- name
 
   resolve_operation(command, env = env)
+
+  required_fields <- parse_required_fields(args)
+
+  required_inputs <- required_fields$inputs
+  required_steps  <- required_fields$steps
 
   structure(
     list(
@@ -54,7 +53,6 @@ new_workflowstep <- function(
       required_inputs = required_inputs,
       required_steps  = required_steps,
       args            = args,
-      params          = params,
       loop            = loop,
       env             = env,
       dots            = list(...)     # extension point
@@ -81,10 +79,7 @@ print.workflowstep <- function(x, ...) {
     cat("  comments:       ", x$comments, "\n", sep = "")
   }
   cat("  command:      ", x$command, "\n", sep = "")
-  if (length(x$params)) {
-    cat("  params:\n")
-    utils::str(x$params, indent.str = "    ")
-  }
+  cat("  args:         ", x$args, "\n", sep = "")
   cat("  available fields: $", paste(names(x), collapse = ", $"), "\n", sep = "")
   invisible(x)
 }
@@ -119,7 +114,7 @@ as.data.frame.workflowstep <- function(x, ...) {
     "Label"         = x$label,
     "Comments"      = x$comments,
     "Function"      = x$command,
-    "Parameters"    = x$args, # flatten_params(x$params),
+    "Parameters"    = x$args,
     stringsAsFactors = FALSE
   )
 }
@@ -202,18 +197,13 @@ update.workflowstep <- function(
   # update the specified field in the workflowstep object
   x[[entry]] <- value
 
-  # update related objects
+  # update required fields also here, to keep them in sync
   if (entry == "args") {
-    # update params also here, not only at runtime, to keep them in sync
-    # we should update files also here, not only at runtime, to keep them in sync
-    PEITHO:::logDebug("Loading inputs from %s", workflow_file_paths$inputs_path)
-    input_list <- load_inputs_to_list(workflow_file_paths$inputs_path)
-    x$params <- make_param_from_arg_loop(
-      args_string = value,
-      loop = x$loop,
-      step_i = x$entry,
-      input_list = input_list
-    )
+    PEITHO:::logDebug("Parsing required fields from args string for step %d", x$entry)
+    required_fields <- parse_required_fields(x$args)
+
+    x$required_inputs <- required_fields$inputs
+    x$required_steps  <- required_fields$steps
   }
 
   # update commands.json file
@@ -263,6 +253,8 @@ run_with_error <- function(fn, args) {
 #' @param state A `workflowstate` object representing the current state of the workflow.
 #' @param env   An environment to look up the command function. Defaults to the step's
 #'  own env or the caller's env.
+#' @param step_i The number of the step in the workflow, used for logging purposes.
+#' @param input_list A list of inputs for argument parsing, loaded from the workflow's inputs file.
 #' @param ...   Additional arguments (not used).
 #' @return A `workflowsteprun` object recording the execution of the step.
 #' @export
@@ -270,6 +262,8 @@ run.workflowstep <- function(
   x,
   state,
   env = NULL,  # where to look up function
+  step_i = NULL, # for logging purposes
+  input_list = NULL, # for arguments parsing
   ...
 ) {
   if (!inherits(state, "workflowstate")) {
@@ -284,7 +278,14 @@ run.workflowstep <- function(
   fn <- resolve_operation(x$command, env)
 
   # 2) assemble arguments
-  params <- x$params
+  PEITHO:::logInfo("Parsing arguments for command %s", x$command)
+  params <- make_param_from_arg_loop(
+    args_string = x$args,
+    loop = x$loop,
+    step_i = step_i,
+    input_list = input_list
+  )
+
   if (!is.list(params)) params <- list()
 
   args <- list()
@@ -301,6 +302,7 @@ run.workflowstep <- function(
   }
 
   if (length(args) == 0L) {
+    #browser()
     stop("No parameters found for workflow step.", call. = FALSE)
   }
 

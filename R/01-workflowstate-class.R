@@ -119,17 +119,6 @@ update.workflowstate <- function(x, steprun, idx, ...) {
   if (!inherits(steprun, "workflowsteprun")) {
     stop("Argument 'steprun' must be of class 'workflowsteprun'.")
   }
-  if (length(x$initial_input) == 0 && idx == 1L) {
-    # set input param from first step if not set
-    for (p in steprun$step$params) {
-      if (p$type == "input") {
-        initial_input <- p$value
-        break
-      }
-    }
-
-    x$initial_input <- initial_input
-  }
 
   # add or update steprun at index
   if (idx <= length(x$stepruns)) {

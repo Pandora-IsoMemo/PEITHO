@@ -23,16 +23,6 @@ test_that("new_workflowstep sets name and label correctly", {
   expect_equal(step2$label, "Custom Label")
 })
 
-test_that("new_workflowstep stores params", {
-  step <- new_workflowstep(
-    entry = 6,
-    command = "strsplit",
-    params = list(x = "hallo, test", split = ", ")
-  )
-  expect_equal(step$params$x, "hallo, test")
-  expect_equal(step$params$split, ", ")
-})
-
 test_that("run.workflowstep errors if state is not workflowstate", {
   step <- new_workflowstep(
     entry = 3,
@@ -43,22 +33,14 @@ test_that("run.workflowstep errors if state is not workflowstate", {
   expect_error(run.workflowstep(step, not_state), "must be a 'workflowstate' object")
 })
 
-# Test valid construction with operationparam
-test_that("new_workflowstep creates valid object with operationparam params", {
-  param1 <- new_operationparam(1, 1, "x", "hallo, test")
-  param2 <- new_operationparam(1, 2, "split", ", ")
-  step <- new_workflowstep(entry = 1, command = "strsplit", params = list(param1, param2))
-  expect_s3_class(step, "workflowstep")
-  expect_equal(step$name, "Step 1")
-  expect_equal(step$command, "strsplit")
-  expect_length(step$params, 2)
-})
-
 # Test run.workflowstep with valid operationparam
 test_that("run.workflowstep executes command and returns correct output", {
-  param1 <- new_operationparam(6, 1, "x", "hallo, test")
-  param2 <- new_operationparam(6, 2, "split", ", ")
-  step <- new_workflowstep(entry = 6, command = "strsplit", params = list(param1, param2))
+  step <- new_workflowstep(
+    entry = 7,
+    command = "strsplit",
+    args = "x = \"hallo, test\", split = \", \"",
+    loop = "auto"
+  )
   state <- new_workflowstate()
   steprun <- run.workflowstep(step, state, path_to_folder = tempdir())
   expect_s3_class(steprun, "workflowsteprun")
@@ -69,8 +51,12 @@ test_that("run.workflowstep executes command and returns correct output", {
 test_that("run.workflowstep handles command error", {
   error_fn <- function() stop("fail")
   assign("error_fn", error_fn, envir = .GlobalEnv)
-  param1 <- new_operationparam(2, 1, "x", "foo")
-  step <- new_workflowstep(entry = 2, command = "error_fn", params = list(param1))
+  step <- new_workflowstep(
+    entry = 7,
+    command = "error_fn",
+    args = "x = \"foo\"",
+    loop = "auto"
+  )
   state <- new_workflowstate()
   steprun <- run.workflowstep(step, state, path_to_folder = tempdir())
   expect_s3_class(steprun, "workflowsteprun")
@@ -80,8 +66,12 @@ test_that("run.workflowstep handles command error", {
 })
 
 test_that("run.workflowstep errors if state is not workflowstate", {
-  param1 <- new_operationparam(3, 1, "x", "foo")
-  step <- new_workflowstep(entry = 3, command = "strsplit", params = list(param1))
+  step <- new_workflowstep(
+    entry = 7,
+    command = "strsplit",
+    args = "x = \"foo\"",
+    loop = "auto"
+  )
   not_state <- list()
   expect_error(run.workflowstep(
     step,

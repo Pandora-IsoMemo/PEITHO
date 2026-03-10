@@ -209,34 +209,6 @@ get_field.workflow <- function(x, field, step_name, ...) {
   get_field(step, field)
 }
 
-#' Extract input values from a workflow
-#'
-#' This function extracts user input values from the steps of a workflow. It looks
-#' for parameters of type "input" in each step and collects their values into a named list.
-#'
-#' @param x A `workflow` object.
-#' @param ... Additional arguments (not used).
-#' @return A named list of input values extracted from the workflow steps.
-#' @export
-extract_inputs.workflow <- function(x, ...) {
-  inputs <- list()
-
-  for (step in x$steps) {
-    step_inputs <- list()
-    for (param in step$params) {
-      if (inherits(param, "operationparam") && param$type == "input") {
-        step_inputs[[param$label]] <- param$value
-      }
-    }
-
-    if (length(step_inputs) == 0) next
-
-    inputs <- c(inputs, step_inputs)
-  }
-
-  inputs
-}
-
 extract_step_names <- function(x) {
   step_entries <- vapply(x$steps, function(s) s$entry, integer(1))
   step_names <- vapply(x$steps, function(s) s$name, character(1))
@@ -388,25 +360,6 @@ update.workflow <- function(x, step, entry, value, ...) {
   x
 }
 
-# TODO: update dependent UI entries <---
-
-# rebuild_workflow_params_from_inputs <- function(x) {
-#   il <- x$input_list %||% list()
-
-#   for (i in seq_along(x$steps)) {
-#     step <- x$steps[[i]]
-#     step$params <- make_param_from_arg_loop(
-#       args_string = step$args,
-#       loop = step$loop,
-#       step_i = step$entry,
-#       input_list = il
-#     )
-#     x$steps[[i]] <- step
-#   }
-
-#   x
-# }
-
 #' Update the input list of a workflow
 #'
 #' This method updates the `input_list` of a `workflow` object and optionally writes the
@@ -443,24 +396,6 @@ update_input_list.workflow <- function(
       jsonlite::write_json(new_list, in_path, auto_unbox = TRUE, pretty = TRUE)
     }
   }
-
-  # 3) check if names of inputs exist in steps
-  inputs_from_steps <- extract_inputs(x)
-
-  if (!all(names(inputs_from_steps) %in% names(new_list))) {
-    warn <- "Not all inputs used in workflow steps were found in the inputs list."
-    PEITHO:::logWarn("%s", warn)
-    warning(warn, immediate. = TRUE, call. = FALSE)
-  }
-
-  # TODO: update dependent UI entries <---
-
-  # 3) keep steps consistent with current parsing logic
-  # this will directly fail since commands file contains old inputs
-  # maybe we should add a field for warnings?
-  # if (rebuild_params && length(x$steps)) {
-  #   x <- rebuild_workflow_params_from_inputs(x)
-  # }
 
   x
 }
@@ -571,18 +506,6 @@ run.workflow <- function(
     )
   }
 
-  # check state or create
-  if (length(state) == 0L) {
-    state <- ""
-    # get input param from first step
-    for (p in x$steps[[1]]$params) {
-      if (p$type == "input") {
-        state <- p$value
-        break
-      }
-    }
-  }
-
   if (!inherits(state, "workflowstate")) {
     state <- new_workflowstate(initial_input = state)
   }
@@ -633,11 +556,7 @@ run.workflow <- function(
     step <- x$steps[[i]]
 
     # run the step, with env explicitly passed
-    steprun <- run(step, state, env = env, ...) |>
-      shinyTools::shinyTryCatch(
-        errorTitle = "Running workflow steps failed",
-        warningTitle = "Warning when running workflow steps"
-      )
+    steprun <- run(step, state, env = env, step_i = j, input_list = x$input_list, ...)
 
     # update workflow state and append steprun
     state <- update(state, steprun, idx = i)
