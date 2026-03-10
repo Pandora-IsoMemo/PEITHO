@@ -27,7 +27,8 @@ test_that("run.workflowstep errors if state is not workflowstate", {
   step <- new_workflowstep(
     entry = 3,
     command = "strsplit",
-    params = list(x = "hallo, test", split = ", ")
+    args = "x = \"hallo, test\", split = \", \"",
+    loop = "auto"
   )
   not_state <- list()
   expect_error(run.workflowstep(step, not_state), "must be a 'workflowstate' object")
