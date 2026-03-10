@@ -14,5 +14,6 @@ utils::globalVariables(
 #' @importFrom stringr str_squish
 #' @importFrom tibble tibble
 #' @importFrom utils capture.output str
+#' @importFrom xml2 xml_remove
 #' @importFrom yaml yaml.load_file
 NULL
