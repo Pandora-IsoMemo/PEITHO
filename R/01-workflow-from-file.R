@@ -251,6 +251,8 @@ parse_required_fields <- function(args_string) {
 #'
 #' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
 #'  Default is the package's `peitho_files` folder.
+#' @param input_list A named list of input values, where names correspond to input variable names
+#'  used in the workflow steps.
 #' @param show_functions_path Logical, whether to show the path of the loaded script file.
 #' @return A list of `workflowstep` objects.
 #' @export
