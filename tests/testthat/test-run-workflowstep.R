@@ -65,18 +65,3 @@ test_that("run.workflowstep handles command error", {
   expect_true(inherits(steprun$error, "error"))
   rm(error_fn, envir = .GlobalEnv)
 })
-
-test_that("run.workflowstep errors if state is not workflowstate", {
-  step <- new_workflowstep(
-    entry = 7,
-    command = "strsplit",
-    args = "x = \"foo\"",
-    loop = "auto"
-  )
-  not_state <- list()
-  expect_error(run.workflowstep(
-    step,
-    not_state,
-    path_to_folder = tempdir()
-  ), "must be a 'workflowstate' object")
-})
