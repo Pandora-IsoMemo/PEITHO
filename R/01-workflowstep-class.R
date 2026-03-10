@@ -154,7 +154,7 @@ get_field.workflowstep <- function(x, field, with_map_field = TRUE, ...) {
 #' @param workflow_file_paths The paths to the workflow files, used for updating related files.
 #' @param value The new value to assign to the specified field.
 #' @param entry The name of the field to update. Must be one of "name", "label", "comments",
-#'  "command", "params", or "loop".
+#'  "command", "args", or "loop".
 #' @param with_map_field Logical, whether to map the field name using `map_field()`.
 #'  Defaults to `TRUE`.
 #' @param ... Additional arguments (not used).

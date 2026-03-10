@@ -14,7 +14,7 @@
 \item{value}{The new value to assign to the specified field.}
 
 \item{entry}{The name of the field to update. Must be one of "name", "label", "comments",
-"command", "params", or "loop".}
+"command", "args", or "loop".}
 
 \item{with_map_field}{Logical, whether to map the field name using `map_field()`.
 Defaults to `TRUE`.}

@@ -12,7 +12,7 @@
 \item{step}{The index of the step to update.}
 
 \item{entry}{The name of the entry to update (one of "name", "label", "comments", "command",
-"params", "loop")}
+"args", "loop")}
 
 \item{value}{The new value to assign to the specified entry.}
 

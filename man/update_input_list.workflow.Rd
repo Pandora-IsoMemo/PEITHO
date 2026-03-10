@@ -4,7 +4,7 @@
 \alias{update_input_list.workflow}
 \title{Update the input list of a workflow}
 \usage{
-\method{update_input_list}{workflow}(x, new_list, write_file = TRUE, rebuild_params = TRUE, ...)
+\method{update_input_list}{workflow}(x, new_list, write_file = TRUE, ...)
 }
 \arguments{
 \item{x}{The `workflow` object to update.}
@@ -14,9 +14,6 @@
 \item{write_file}{Logical; if `TRUE`, the updated input list will be written to the
 inputs file if the workflow has associated file paths.}
 
-\item{rebuild_params}{Logical; if `TRUE`, the parameters of the workflow steps will be
-rebuilt based on the new input list using the existing argument strings and loop settings.}
-
 \item{...}{Additional arguments (not used).}
 }
 \value{
@@ -24,6 +21,5 @@ The updated `workflow` object with the new input list and optionally updated par
 }
 \description{
 This method updates the `input_list` of a `workflow` object and optionally writes the
-updated list to the corresponding inputs file if the workflow is file-backed. It also
-has an option to rebuild the parameters of the workflow steps based on the new input list.
+updated list to the corresponding inputs file if the workflow is file-backed.
 }

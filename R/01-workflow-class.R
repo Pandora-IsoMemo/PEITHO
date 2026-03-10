@@ -345,7 +345,7 @@ import_workflow <- function(
 #' @param step The index of the step to update.
 #' @param value The new value to assign to the specified entry.
 #' @param entry The name of the entry to update (one of "name", "label", "comments", "command",
-#'  "params", "loop")
+#'  "args", "loop")
 #' @param ... Additional arguments (not used).
 #' @return The updated `workflowstep` object.
 #' @export
@@ -363,15 +363,12 @@ update.workflow <- function(x, step, entry, value, ...) {
 #' Update the input list of a workflow
 #'
 #' This method updates the `input_list` of a `workflow` object and optionally writes the
-#' updated list to the corresponding inputs file if the workflow is file-backed. It also
-#' has an option to rebuild the parameters of the workflow steps based on the new input list.
+#' updated list to the corresponding inputs file if the workflow is file-backed.
 #'
 #' @param x The `workflow` object to update.
 #' @param new_list A named list of input values to update in the workflow.
 #' @param write_file Logical; if `TRUE`, the updated input list will be written to the
 #'  inputs file if the workflow has associated file paths.
-#' @param rebuild_params Logical; if `TRUE`, the parameters of the workflow steps will be
-#'  rebuilt based on the new input list using the existing argument strings and loop settings.
 #' @param ... Additional arguments (not used).
 #' @return The updated `workflow` object with the new input list and optionally updated parameters.
 #' @export
@@ -379,7 +376,6 @@ update_input_list.workflow <- function(
   x,
   new_list,
   write_file = TRUE,
-  rebuild_params = TRUE,
   ...
 ) {
   if (!is.list(new_list)) {
