@@ -25,7 +25,8 @@ Imports:
     tibble,
     utils,
     yaml
-Suggests: 
+Suggests:
+    devtools,
     testthat,
     knitr,
     rmarkdown
