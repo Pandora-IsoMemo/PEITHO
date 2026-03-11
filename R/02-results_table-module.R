@@ -38,7 +38,11 @@ results_table_server <- function(id, wf_run, is_active_tab) {
       DT::datatable(
         df,
         rownames = TRUE,
-        options = list(pageLength = 10)
+        options = list(
+          paging = FALSE,
+          scrollY = "360px",
+          scrollCollapse = TRUE
+        )
       ) |>
         DT::formatStyle(
           columns = names(df),

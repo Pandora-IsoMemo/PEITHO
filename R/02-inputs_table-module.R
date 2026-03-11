@@ -36,7 +36,11 @@ inputs_table_server <- function(id, wf, is_active_tab) {
           stringsAsFactors = FALSE
         ),
         rownames = FALSE, # do NOT change to TRUE: the row indices will be messed up when editing
-        options = list(pageLength = 10),
+        options = list(
+          paging = FALSE,
+          scrollY = "360px",
+          scrollCollapse = TRUE
+        ),
         editable = "cell"
       )
     })
