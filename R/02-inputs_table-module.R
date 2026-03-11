@@ -8,7 +8,7 @@ inputs_table_ui <- function(id, title = "") {
   ns <- NS(id)
   tagList(
     tags$h4(title),
-    tableOutput(ns("tbl")),
+    DT::DTOutput(ns("tbl")),
     uiOutput(ns("edit"))
   )
 }
@@ -23,18 +23,22 @@ inputs_table_ui <- function(id, title = "") {
 inputs_table_server <- function(id, wf, is_active_tab) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    output$tbl <- renderTable({
+    output$tbl <- DT::renderDT({
       PEITHO:::logDebug("%s: Render inputs table", id)
       wf_val <- wf()
       if (is.null(wf_val)) return(NULL)
       inputs <- wf_val$input_list
       if (is.null(inputs) || length(inputs) == 0) return(NULL)
-      data.frame(
-        Name = names(inputs),
-        Value = unlist(inputs, use.names = FALSE),
-        stringsAsFactors = FALSE
+      DT::datatable(
+        data.frame(
+          Name = names(inputs),
+          Value = unlist(inputs, use.names = FALSE),
+          stringsAsFactors = FALSE
+        ),
+        rownames = FALSE,
+        options = list(pageLength = 10)
       )
-    }, rownames = FALSE)
+    })
 
     output$edit <- renderUI({
       # hide the edit UI when no workflow is loaded or the inputs tab is not active

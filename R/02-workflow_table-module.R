@@ -9,7 +9,7 @@ workflow_table_ui <- function(id, title = "") {
 
   tagList(
     tags$h4(title),
-    tabPanel("Workflow", tableOutput(ns("tbl"))),
+    DT::DTOutput(ns("tbl")),
     uiOutput(ns("edit"))
   )
 }
@@ -24,11 +24,15 @@ workflow_table_ui <- function(id, title = "") {
 workflow_table_server <- function(id, wf, is_active_tab) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    output$tbl <- renderTable({
+    output$tbl <- DT::renderDT({
       wf_val <- wf()
       if (is.null(wf_val)) return(NULL)
-      as.data.frame(wf_val)
-    }, rownames = TRUE)
+      DT::datatable(
+        as.data.frame(wf_val),
+        rownames = TRUE,
+        options = list(pageLength = 10)
+      )
+    })
 
     output$edit <- renderUI({
       # hide the edit UI when no workflow is loaded

@@ -12,6 +12,7 @@ RoxygenNote: 7.3.3
 Depends: R (>= 4.1.0)
 Imports: 
     DataTools (>= 26.02.0),
+    DT,
     httr2,
     futile.logger,
     jsonlite,

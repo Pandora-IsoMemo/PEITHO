@@ -8,7 +8,7 @@ results_table_ui <- function(id, title = "") {
   ns <- NS(id)
   tagList(
     tags$h4(title),
-    tableOutput(ns("results_table")),
+    DT::DTOutput(ns("results_table")),
     uiOutput(ns("select"))
   )
 }
@@ -23,11 +23,15 @@ results_table_server <- function(id, wf_run, is_active_tab) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    output$results_table <- renderTable({
+    output$results_table <- DT::renderDT({
       wfr <- wf_run()
       if (is.null(wfr)) return(NULL)
-      as.data.frame(wfr)
-    }, rownames = TRUE)
+      DT::datatable(
+        as.data.frame(wfr),
+        rownames = TRUE,
+        options = list(pageLength = 10)
+      )
+    })
 
     output$select <- renderUI({
       # hide the edit UI when no workflow is loaded
@@ -40,7 +44,11 @@ results_table_server <- function(id, wf_run, is_active_tab) {
 
     observe({
       req(isTRUE(is_active_tab()), wf_run())
-      PEITHO:::logDebug("%s: Selected field: %s", id, paste(sel$selected_row(), sel$selected_column(), sep = ", "))
+      PEITHO:::logDebug(
+        "%s: Selected field: %s",
+        id,
+        paste(sel$selected_row(), sel$selected_column(), sep = ", ")
+      )
     })
   })
 }
