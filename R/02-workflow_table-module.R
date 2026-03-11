@@ -29,7 +29,7 @@ workflow_table_server <- function(id, wf, is_active_tab) {
       if (is.null(wf_val)) return(NULL)
       DT::datatable(
         as.data.frame(wf_val),
-        rownames = FALSE,
+        rownames = FALSE, # do NOT change to TRUE: the row indices will be messed up when editing
         options = list(pageLength = 10),
         editable = "cell"
       )
@@ -41,13 +41,11 @@ workflow_table_server <- function(id, wf, is_active_tab) {
 
       info <- input$tbl_cell_edit
       row_idx <- info$row
-      col_idx_raw <- info$col
+      col_idx <- as.integer(info$col + 1L)
 
       wf_df <- as.data.frame(wf_val)
       if (row_idx < 1 || row_idx > nrow(wf_df)) return()
-
-      col_idx <- normalize_dt_edit_col_idx(col_idx_raw, n_cols = ncol(wf_df))
-      if (is.na(col_idx)) return()
+      if (col_idx < 1L || col_idx > ncol(wf_df)) return()
 
       field_name <- colnames(wf_df)[col_idx]
       old_value <- wf_df[[row_idx, col_idx]]
