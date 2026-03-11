@@ -56,11 +56,7 @@ test_that("workflow_steps_from_files correctly returns from commands.json and in
   inputs <- list(myinput = "foo, bar")
   tmpdir <- create_test_files(commands = commands, inputs = inputs)
   wf_paths <- workflow_file_paths(path = tmpdir)
-  input_list <- extract_input_list_from_files(wf_paths$inputs_path)
-  steps <- workflow_steps_from_files(
-    workflow_file_paths = wf_paths,
-    input_list = input_list
-  )
+  steps <- workflow_steps_from_files(workflow_file_paths = wf_paths)
   expect_type(steps, "list")
   expect_length(steps, 2)
   expect_s3_class(steps[[1]], "workflowstep")
@@ -74,17 +70,13 @@ test_that("workflow_steps_from_files correctly returns from commands.json and in
 test_that("workflow_steps_from_files returns empty list if commands.json missing", {
   tmpdir <- create_test_files()
   wf_paths <- workflow_file_paths(path = tmpdir)
-  input_list <- suppressWarnings(extract_input_list_from_files(wf_paths$inputs_path))
-  steps <- suppressWarnings(workflow_steps_from_files(
-    workflow_file_paths = wf_paths,
-    input_list = input_list
-  ))
+  steps <- suppressWarnings(workflow_steps_from_files(workflow_file_paths = wf_paths))
   expect_type(steps, "list")
   expect_length(steps, 0)
   unlink(tmpdir, recursive = TRUE)
 })
 
-test_that("workflow_steps_from_files returns empty list if inputs.json is missing", {
+test_that("workflow_steps_from_files returns workflow even if inputs.json is missing", {
   commands <- list(list(
     name = "Step 1",
     command = "strsplit",
@@ -93,15 +85,11 @@ test_that("workflow_steps_from_files returns empty list if inputs.json is missin
     loop = "no"
   ))
   # Provide an empty inputs.json file
-  tmpdir <- create_test_files(commands = commands)
+  tmpdir <- create_test_files(commands = commands, inputs = list())
   wf_paths <- workflow_file_paths(path = tmpdir)
-  input_list <- suppressWarnings(extract_input_list_from_files(wf_paths$inputs_path))
-  steps <- suppressWarnings(workflow_steps_from_files(
-    workflow_file_paths = wf_paths,
-    input_list = input_list
-  ))
+  steps <- suppressWarnings(workflow_steps_from_files(workflow_file_paths = wf_paths))
   expect_type(steps, "list")
-  expect_length(steps, 0)
+  expect_length(steps, 1)
   unlink(tmpdir, recursive = TRUE)
 })
 
@@ -125,11 +113,7 @@ test_that("workflow_steps_from_files supports custom file names", {
     path = tmpdir,
     commands = "custom_commands.json"
   )
-  input_list <- extract_input_list_from_files(wf_paths$inputs_path)
-  steps <- workflow_steps_from_files(
-    workflow_file_paths = wf_paths,
-    input_list = input_list
-  )
+  steps <- workflow_steps_from_files(workflow_file_paths = wf_paths)
   expect_type(steps, "list")
   expect_length(steps, 1)
   expect_equal(steps[[1]]$name, "Step 1")

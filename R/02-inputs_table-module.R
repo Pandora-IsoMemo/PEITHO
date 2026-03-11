@@ -38,7 +38,7 @@ inputs_table_server <- function(id, wf, is_active_tab) {
 
     output$edit <- renderUI({
       # hide the edit UI when no workflow is loaded or the inputs tab is not active
-      if (is.null(wf()) || !is_active_tab()) return(NULL)
+      if (is.null(wf()) || isFALSE(is_active_tab())) return(NULL)
 
       PEITHO:::logDebug("%s: Render inputs edit", id)
       input_edit_ui(ns("edit"))
@@ -79,9 +79,6 @@ input_edit_ui <- function(id) {
 
 input_edit_server <- function(id, wf, is_active_tab) {
   moduleServer(id, function(input, output, session) {
-
-    # TO DO: integrate update_input_list.workflow()
-
     observe({
       req(isTRUE(is_active_tab()))
 

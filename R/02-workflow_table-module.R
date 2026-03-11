@@ -79,7 +79,6 @@ workflow_edit_server <- function(id, wf, is_active_tab) {
 
       if (is.null(wf())) {
         PEITHO:::logDebug("%s: Reset inputs if empty wf", id)
-        # hide the step select input when no workflow is loaded
         updateSelectInput(session, "step_select", choices = NULL, selected = NULL)
         updateSelectInput(session, "field_select", choices = NULL, selected = NULL)
       }

@@ -2,12 +2,12 @@
 % Please edit documentation in R/01-workflow-class.R
 \name{update.workflow}
 \alias{update.workflow}
-\title{Update a workflow step}
+\title{Update a workflow step with a new value}
 \usage{
 \method{update}{workflow}(x, step, entry, value, ...)
 }
 \arguments{
-\item{x}{A `workflowstep` object to update.}
+\item{x}{A `workflow` object to update.}
 
 \item{step}{The index of the step to update.}
 
@@ -19,7 +19,7 @@
 \item{...}{Additional arguments (not used).}
 }
 \value{
-The updated `workflowstep` object.
+The updated `workflow` object.
 }
 \description{
 This function updates a specific entry of a `workflowstep` object with a new value. It is used

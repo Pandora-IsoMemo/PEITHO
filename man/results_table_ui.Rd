@@ -4,10 +4,12 @@
 \alias{results_table_ui}
 \title{Results Table UI Module}
 \usage{
-results_table_ui(id)
+results_table_ui(id, title = "")
 }
 \arguments{
 \item{id}{Shiny module id}
+
+\item{title}{Title to display above the table}
 }
 \value{
 Shiny UI output for the results table

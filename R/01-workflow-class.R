@@ -89,7 +89,6 @@ new_workflow <- function(
 
     steps <- PEITHO:::workflow_steps_from_files(
       workflow_file_paths = workflow_file_paths,
-      input_list = input_list,
       show_functions_path = FALSE
     )
   } else {
@@ -336,18 +335,18 @@ import_workflow <- function(
 
 # Accessor functions (some will be added later) ------------------------
 
-#' Update a workflow step
+#' Update a workflow step with a new value
 #'
 #' This function updates a specific entry of a `workflowstep` object with a new value. It is used
 #' to modify step details such as name, label, comments, command, parameters, or loop settings.
 #'
-#' @param x A `workflowstep` object to update.
+#' @param x A `workflow` object to update.
 #' @param step The index of the step to update.
 #' @param value The new value to assign to the specified entry.
 #' @param entry The name of the entry to update (one of "name", "label", "comments", "command",
 #'  "args", "loop")
 #' @param ... Additional arguments (not used).
-#' @return The updated `workflowstep` object.
+#' @return The updated `workflow` object.
 #' @export
 update.workflow <- function(x, step, entry, value, ...) {
   # pass entry & value NOT a whole step -> we need to update the wf object AND the commands json

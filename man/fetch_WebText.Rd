@@ -30,6 +30,9 @@ A `WebText` object containing the extracted text and metadata.
 }
 \description{
 This function retrieves the HTML content from the specified URL,
-extracts text based on the provided CSS selector, and returns a
-`WebText` object containing the extracted text and metadata.
+parses it to extract the main text content, and returns it as a character vector.
+It also handles errors and warnings gracefully, providing informative messages if
+the request fails or if the HTML structure is not as expected.
+By default, it returns only the extracted text blocks, but it can also return a
+full `WebText` object containing metadata if `return_text_blocks_only` is set to `FALSE`.
 }

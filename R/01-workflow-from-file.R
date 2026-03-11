@@ -251,23 +251,13 @@ parse_required_fields <- function(args_string) {
 #'
 #' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
 #'  Default is the package's `peitho_files` folder.
-#' @param input_list A named list of input values, where names correspond to input variable names
-#'  used in the workflow steps.
 #' @param show_functions_path Logical, whether to show the path of the loaded script file.
 #' @return A list of `workflowstep` objects.
 #' @export
 workflow_steps_from_files <- function(
   workflow_file_paths,
-  input_list,
   show_functions_path = TRUE
 ) {
-  # return empty wf if no inputs
-  if (length(input_list) == 0) {
-    warn_msg <- sprintf("Empty input list. Returning empty workflow.")
-    PEITHO:::logWarn("%s", warn_msg)
-    warning(warn_msg, immediate. = TRUE, call. = FALSE)
-    return(list())
-  }
   # return empty wf if no commands
   if (!file.exists(workflow_file_paths$commands_path)) {
     warn_msg <- sprintf(

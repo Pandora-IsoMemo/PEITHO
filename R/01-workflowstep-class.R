@@ -121,7 +121,7 @@ as.data.frame.workflowstep <- function(x, ...) {
 
 map_field <- function() {
   list(
-    id = "id",
+    Entry = "entry",
     Name = "name",
     Label = "label",
     Comments = "comments",
