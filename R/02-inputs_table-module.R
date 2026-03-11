@@ -53,7 +53,8 @@ inputs_table_server <- function(id, wf, is_active_tab) {
       if (is.null(input_list_val) || length(input_list_val) == 0) return()
       if (row_idx < 1 || row_idx > length(input_list_val)) return()
 
-      # DT may report col as 0-based or 1-based depending on table settings
+      # DT edit column index can shift with table config (e.g. rownames on/off),
+      # so support both 0-based and 1-based indices to keep this robust.
       n_cols <- 2L
       if (col_idx_raw >= 0 && col_idx_raw < n_cols) {
         col_idx <- as.integer(col_idx_raw + 1L)

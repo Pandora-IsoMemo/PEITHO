@@ -41,11 +41,21 @@ workflow_table_server <- function(id, wf, is_active_tab) {
 
       info <- input$tbl_cell_edit
       row_idx <- info$row
-      col_idx <- info$col
+      col_idx_raw <- info$col
 
       wf_df <- as.data.frame(wf_val)
       if (row_idx < 1 || row_idx > nrow(wf_df)) return()
-      if (col_idx < 1 || col_idx > ncol(wf_df)) return()
+
+      # DT edit column index can shift with table config (e.g. rownames on/off),
+      # so support both 0-based and 1-based indices to keep this robust.
+      n_cols <- ncol(wf_df)
+      if (col_idx_raw >= 0 && col_idx_raw < n_cols) {
+        col_idx <- as.integer(col_idx_raw + 1L)
+      } else if (col_idx_raw >= 1 && col_idx_raw <= n_cols) {
+        col_idx <- as.integer(col_idx_raw)
+      } else {
+        return()
+      }
 
       field_name <- colnames(wf_df)[col_idx]
       old_value <- wf_df[[row_idx, col_idx]]
