@@ -110,6 +110,7 @@ flatten_params <- function(params) {
 #' @export
 as.data.frame.workflowstep <- function(x, ...) {
   data.frame(
+    "Entry"         = x$entry,
     "Name"          = x$name,
     "Label"         = x$label,
     "Comments"      = x$comments,
