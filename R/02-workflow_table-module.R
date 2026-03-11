@@ -30,8 +30,31 @@ workflow_table_server <- function(id, wf, is_active_tab) {
       DT::datatable(
         as.data.frame(wf_val),
         rownames = TRUE,
-        options = list(pageLength = 10)
+        options = list(pageLength = 10),
+        editable = "cell"
       )
+    })
+
+    observeEvent(input$tbl_cell_edit, {
+      wf_val <- wf()
+      if (is.null(wf_val)) return()
+
+      info <- input$tbl_cell_edit
+      row_idx <- info$row
+      col_idx <- info$col
+
+      wf_df <- as.data.frame(wf_val)
+      if (row_idx < 1 || row_idx > nrow(wf_df)) return()
+      if (col_idx < 1 || col_idx > ncol(wf_df)) return()
+
+      field_name <- colnames(wf_df)[col_idx]
+      old_value <- wf_df[[row_idx, col_idx]]
+      new_value <- DT::coerceValue(info$value, old_value)
+
+      wf_val <- update(wf_val, row_idx, field_name, new_value) |>
+        shinyTryCatch(errorTitle = "Editing Workflow failed")
+
+      wf(wf_val)
     })
 
     output$edit <- renderUI({

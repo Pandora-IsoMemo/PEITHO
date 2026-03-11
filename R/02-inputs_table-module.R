@@ -36,8 +36,68 @@ inputs_table_server <- function(id, wf, is_active_tab) {
           stringsAsFactors = FALSE
         ),
         rownames = FALSE,
-        options = list(pageLength = 10)
+        options = list(pageLength = 10),
+        editable = "cell"
       )
+    })
+
+    observeEvent(input$tbl_cell_edit, {
+      wf_val <- wf()
+      if (is.null(wf_val)) return()
+
+      info <- input$tbl_cell_edit
+      row_idx <- info$row
+      col_idx_raw <- info$col
+
+      input_list_val <- wf_val$input_list
+      if (is.null(input_list_val) || length(input_list_val) == 0) return()
+      if (row_idx < 1 || row_idx > length(input_list_val)) return()
+
+      # DT may report col as 0-based or 1-based depending on table settings
+      n_cols <- 2L
+      if (col_idx_raw >= 0 && col_idx_raw < n_cols) {
+        col_idx <- as.integer(col_idx_raw + 1L)
+      } else if (col_idx_raw >= 1 && col_idx_raw <= n_cols) {
+        col_idx <- as.integer(col_idx_raw)
+      } else {
+        return()
+      }
+
+      if (col_idx == 1) {
+        old_name <- names(input_list_val)[row_idx]
+        new_name <- trimws(as.character(info$value))
+
+        if (identical(new_name, "")) {
+          showNotification("Input name cannot be empty.", type = "error")
+          return()
+        }
+
+        if (!identical(old_name, new_name) && new_name %in% names(input_list_val)) {
+          showNotification(
+            sprintf("Name '%s' already exists. Please choose a different name.", new_name),
+            type = "error"
+          )
+          return()
+        }
+
+        names(input_list_val)[row_idx] <- new_name
+      } else {
+        input_name <- names(input_list_val)[row_idx]
+        old_value <- input_list_val[[input_name]]
+        input_list_val[[input_name]] <- DT::coerceValue(info$value, old_value)
+      }
+
+      PEITHO:::logDebug("%s: Update workflow input list via table cell edit", id)
+      wf_val <- PEITHO:::update_input_list(
+        x = wf_val,
+        new_list = input_list_val
+      ) |>
+        shinyTools::shinyTryCatch(
+          errorTitle = "Updating workflow input list failed",
+          warningTitle = "Updating workflow input list warning"
+        )
+
+      wf(wf_val)
     })
 
     output$edit <- renderUI({
