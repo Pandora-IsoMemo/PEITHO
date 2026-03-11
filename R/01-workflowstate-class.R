@@ -30,7 +30,7 @@ truncate_one <- function(x, n_char) {
   if (nchar(x) > n_char) paste0(substr(x, 1, n_char), " ...") else x
 }
 
-truncate_many <- function(vals, n_char, n_items, collapse = ", \\n") {
+truncate_many <- function(vals, n_char, n_items, collapse = ", \n") {
   vals <- as.character(vals)
   if (length(vals) > n_items) {
     vals <- c(vals[1:n_items], paste0("... (", length(vals) - n_items, " more items)"))
@@ -87,7 +87,7 @@ print.workflowstate <- function(x, ...) {
 #' @param ... Additional arguments (not used).
 #' @return A data frame summarizing the workflow state.
 #' @export
-as.data.frame.workflowstate <- function(x, ...) {
+as.data.frame.workflowstate <- function(x, max_char = 40, max_items = 5, ...) {
   sr <- x$stepruns
 
   data.frame(
@@ -95,8 +95,8 @@ as.data.frame.workflowstate <- function(x, ...) {
     name   = vapply(sr, function(s) s$step$name, character(1)),
     label     = vapply(sr, function(s) s$step$label, character(1)),
     has_error   = vapply(sr, function(s) s$has_error, logical(1)),
-    error       = vapply(sr, function(s) if (s$has_error) trunc(s$error) else "", character(1)),
-    output      = vapply(sr, function(s) if (!s$has_error) trunc(s$output) else "", character(1)),
+    error       = vapply(sr, function(s) if (s$has_error) trunc(s$error, n_char = max_char, n_items = max_items) else "", character(1)),
+    output      = vapply(sr, function(s) if (!s$has_error) trunc(s$output, n_char = max_char, n_items = max_items) else "", character(1)),
     stringsAsFactors = FALSE
   )
 }

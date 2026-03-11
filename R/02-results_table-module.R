@@ -8,6 +8,14 @@ results_table_ui <- function(id, title = "") {
   ns <- NS(id)
   tagList(
     tags$h4(title),
+    sliderInput(
+      ns("max_char"),
+      "Max characters to display",
+      min = 10,
+      max = 1000,
+      value = 50,
+      step = 10
+    ),
     DT::DTOutput(ns("results_table")),
     uiOutput(ns("select"))
   )
@@ -26,11 +34,16 @@ results_table_server <- function(id, wf_run, is_active_tab) {
     output$results_table <- DT::renderDT({
       wfr <- wf_run()
       if (is.null(wfr)) return(NULL)
+      df <- as.data.frame(wfr, max_char = input$max_char, max_items = 5)
       DT::datatable(
-        as.data.frame(wfr),
+        df,
         rownames = TRUE,
         options = list(pageLength = 10)
-      )
+      ) |>
+        DT::formatStyle(
+          columns = names(df),
+          `white-space` = "pre-wrap"
+        )
     })
 
     output$select <- renderUI({
@@ -40,7 +53,11 @@ results_table_server <- function(id, wf_run, is_active_tab) {
       field_select_ui(ns("field_select"))
     })
 
-    sel <- field_select_server("field_select", reactive(as.data.frame(wf_run())), is_active_tab)
+    sel <- field_select_server(
+      "field_select",
+      reactive(as.data.frame(wf_run(), max_char = input$max_char, max_items = 5)),
+      is_active_tab
+    )
 
     observe({
       req(isTRUE(is_active_tab()), wf_run())
