@@ -19,9 +19,9 @@ update <- function(x, ...) {
   UseMethod("update")
 }
 
-#' Update the input list of a workflow step
+#' Update the input list of a workflow
 #'
-#' Generic method to update the input list of a workflow step.
+#' Generic method to update the input list of a workflow object.
 #' @param x The object to update.
 #' @param ... Additional arguments passed to methods.
 #' @export

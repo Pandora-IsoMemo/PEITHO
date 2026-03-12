@@ -4,14 +4,12 @@
 \alias{workflow_table_server}
 \title{Workflow Table Server}
 \usage{
-workflow_table_server(id, wf, is_active_tab)
+workflow_table_server(id, wf)
 }
 \arguments{
 \item{id}{Module ID}
 
 \item{wf}{Reactive expression containing the workflow object}
-
-\item{is_active_tab}{Reactive expression indicating whether the inputs tab is active}
 }
 \value{
 Shiny server logic for rendering the workflow table

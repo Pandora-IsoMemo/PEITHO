@@ -2,7 +2,7 @@
 % Please edit documentation in R/00-generics.R
 \name{update_input_list}
 \alias{update_input_list}
-\title{Update the input list of a workflow step}
+\title{Update the input list of a workflow}
 \usage{
 update_input_list(x, ...)
 }
@@ -12,5 +12,5 @@ update_input_list(x, ...)
 \item{...}{Additional arguments passed to methods.}
 }
 \description{
-Generic method to update the input list of a workflow step.
+Generic method to update the input list of a workflow object.
 }

@@ -17,10 +17,9 @@ workflow_table_ui <- function(id, title = "") {
 #'
 #' @param id Module ID
 #' @param wf Reactive expression containing the workflow object
-#' @param is_active_tab Reactive expression indicating whether the inputs tab is active
 #' @return Shiny server logic for rendering the workflow table
 #' @export
-workflow_table_server <- function(id, wf, is_active_tab) {
+workflow_table_server <- function(id, wf) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$tbl <- DT::renderDT({
@@ -51,7 +50,7 @@ workflow_table_server <- function(id, wf, is_active_tab) {
       if (col_idx < 1L || col_idx > ncol(wf_df)) return()
 
       field_name <- colnames(wf_df)[col_idx]
-      old_value <- wf_df[[row_idx, col_idx]]
+      old_value <- wf_df[[col_idx]][row_idx]
       new_value <- DT::coerceValue(info$value, old_value)
 
       wf_val <- update(wf_val, row_idx, field_name, new_value) |>

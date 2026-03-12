@@ -49,10 +49,9 @@ results_table_ui <- function(id, title = "") {
 #'
 #' @param id Shiny module id
 #' @param wf_run reactive workflow run object
-#' @param is_active_tab Reactive expression indicating whether the inputs tab is active
 #' @return None. Registers output$results_table
 #' @export
-results_table_server <- function(id, wf_run, is_active_tab) {
+results_table_server <- function(id, wf_run) {
   moduleServer(id, function(input, output, session) {
     max_rows_cell_applied <- reactiveVal(5)
 

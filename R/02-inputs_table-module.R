@@ -16,10 +16,9 @@ inputs_table_ui <- function(id, title = "") {
 #'
 #' @param id Module ID
 #' @param wf Reactive expression containing the workflow object
-#' @param is_active_tab Reactive expression indicating whether the inputs tab is active
 #' @return Shiny server logic for rendering the inputs table
 #' @export
-inputs_table_server <- function(id, wf, is_active_tab) {
+inputs_table_server <- function(id, wf) {
   moduleServer(id, function(input, output, session) {
     output$tbl <- DT::renderDT({
       PEITHO:::logDebug("%s: Render inputs table", id)

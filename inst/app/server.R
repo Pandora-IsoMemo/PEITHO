@@ -121,11 +121,7 @@ shinyServer(function(input, output, session) {
     }
   )
 
-  workflow_table_server("wf_table", wf, is_active_tab = reactive(input$main_tabs == "Workflow"))
-  inputs_table_server("inputs_table", wf, is_active_tab = reactive(input$main_tabs == "Inputs"))
-  results_table_server(
-    "results_table",
-    wf_run,
-    is_active_tab = reactive(input$main_tabs == "Results")
-  )
+  workflow_table_server("wf_table", wf)
+  inputs_table_server("inputs_table", wf)
+  results_table_server("results_table", wf_run)
 })
