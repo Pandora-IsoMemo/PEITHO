@@ -27,12 +27,16 @@ new_workflowstate <- function(initial_input = NULL) {
 
 # helper for truncating
 truncate_one <- function(x, n_char) {
-  if (!is.null(n_char) && nchar(x) > n_char) paste0(substr(x, 1, n_char), " ...") else x
+  if (!is.null(n_char) && is.numeric(n_char) && nchar(x) > n_char && n_char > 0)  {
+    paste0(substr(x, 1, n_char), " ...")
+  } else {
+    x
+  }
 }
 
 truncate_many <- function(vals, n_char, n_items, collapse = ", \n") {
   vals <- as.character(vals)
-  if (!is.null(n_items) && length(vals) > n_items) {
+  if (!is.null(n_items) && is.numeric(n_items) && length(vals) > n_items && n_items > 0) {
     vals <- c(vals[1:n_items], paste0("... (", length(vals) - n_items, " more items)"))
   }
   paste(vapply(vals, truncate_one, character(1), n_char = n_char), collapse = collapse)

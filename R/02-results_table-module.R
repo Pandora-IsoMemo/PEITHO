@@ -10,7 +10,7 @@ results_table_ui <- function(id, title = "") {
     tags$h4(title),
     sliderInput(
       ns("max_char"),
-      "Max characters to display",
+      "Max characters to display for error and output fields",
       min = 10,
       max = 1000,
       value = 50,
@@ -19,6 +19,12 @@ results_table_ui <- function(id, title = "") {
     DT::DTOutput(ns("results_table")),
     tags$hr(),
     tags$h5("Selected Cell Content"),
+    numericInput(
+      ns("max_rows_cell"),
+      "Max rows to display for selected cell",
+      min = 1,
+      value = 5
+    ),
     verbatimTextOutput(ns("selected_cell_value"), placeholder = TRUE)
   )
 }
@@ -64,7 +70,7 @@ results_table_server <- function(id, wf_run, is_active_tab) {
       }
 
       # Resolve the clicked location against the untruncated data to show full content.
-      df_full <- as.data.frame(wfr, max_char = NULL, max_items = NULL)
+      df_full <- as.data.frame(wfr, max_char = NULL, max_items = input$max_rows_cell)
 
       row_idx <- click$row
       col_idx <- click$col
@@ -74,13 +80,12 @@ results_table_server <- function(id, wf_run, is_active_tab) {
       }
 
       full_value <- df_full[[col_idx]][[row_idx]]
-      full_text <- paste(capture.output(print(full_value)), collapse = "\n")
 
-      if (!nzchar(full_text)) {
-        return(as.character(full_value))
+      if (is.character(full_value)) {
+        return(full_value)
       }
 
-      full_text
+      as.character(full_value)
     })
   })
 }
