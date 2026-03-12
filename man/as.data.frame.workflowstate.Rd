@@ -4,10 +4,15 @@
 \alias{as.data.frame.workflowstate}
 \title{Convert a workflowstate to a data frame}
 \usage{
-\method{as.data.frame}{workflowstate}(x, ...)
+\method{as.data.frame}{workflowstate}(x, max_char = 50, max_items = 5, ...)
 }
 \arguments{
 \item{x}{A `workflowstate` object.}
+
+\item{max_char}{maximum number of characters to display for error and output fields
+(default: 50).}
+
+\item{max_items}{maximum number of items to display for error and output fields (default: 5).}
 
 \item{...}{Additional arguments (not used).}
 }

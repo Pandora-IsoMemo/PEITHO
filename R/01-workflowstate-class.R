@@ -84,10 +84,13 @@ print.workflowstate <- function(x, ...) {
 #' into a data frame.
 #' 
 #' @param x A `workflowstate` object.
+#' @param max_char maximum number of characters to display for error and output fields
+#'  (default: 50).
+#' @param max_items maximum number of items to display for error and output fields (default: 5).
 #' @param ... Additional arguments (not used).
 #' @return A data frame summarizing the workflow state.
 #' @export
-as.data.frame.workflowstate <- function(x, max_char = 40, max_items = 5, ...) {
+as.data.frame.workflowstate <- function(x, max_char = 50, max_items = 5, ...) {
   sr <- x$stepruns
 
   data.frame(

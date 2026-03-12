@@ -9,8 +9,7 @@ workflow_table_ui <- function(id, title = "") {
 
   tagList(
     tags$h4(title),
-    DT::DTOutput(ns("tbl")),
-    uiOutput(ns("edit"))
+    DT::DTOutput(ns("tbl"))
   )
 }
 
@@ -60,122 +59,5 @@ workflow_table_server <- function(id, wf, is_active_tab) {
 
       wf(wf_val)
     })
-
-    output$edit <- renderUI({
-      # hide the edit UI when no workflow is loaded
-      if (is.null(wf())) return(NULL)
-
-      workflow_edit_ui(ns("edit"))
-    })
-
-    workflow_edit_server("edit", wf, is_active_tab)
-  })
-}
-
-workflow_edit_ui <- function(id) {
-  ns <- NS(id)
-  tagList(
-    tags$hr(),
-    tags$h4("Edit Workflow Step"),
-    fluidRow(
-      column(
-        3,
-        selectInput(ns("step_select"), "Select step", choices = NULL, selected = NULL)
-      ),
-      column(
-        3,
-        selectInput(ns("field_select"), "Select field", choices = NULL, selected = NULL)
-      ),
-      column(
-        4,
-        style = "margin-top: 1em;",
-        textInput(ns("new_value"), label = NULL, value = "", width = "100%")
-      ),
-      column(
-        2,
-        align = "left",
-        style = "margin-top: 1em;",
-        actionButton(ns("edit_btn"), "Edit")
-      )
-    )
-  )
-}
-
-workflow_edit_server <- function(id, wf, is_active_tab) {
-  moduleServer(id, function(input, output, session) {
-    ns <- session$ns
-
-    observe({
-      req(isTRUE(is_active_tab()))
-
-      if (is.null(wf())) {
-        PEITHO:::logDebug("%s: Reset inputs if empty wf", id)
-        updateSelectInput(session, "step_select", choices = NULL, selected = NULL)
-        updateSelectInput(session, "field_select", choices = NULL, selected = NULL)
-      }
-    })
-
-    observe({
-      req(isTRUE(is_active_tab()), wf())
-      PEITHO:::logDebug("%s: Update inputs", id)
-
-      wf_val <- wf()
-      wf_df <- as.data.frame(wf_val)
-      step_choices <- wf_df[["Name"]]
-      if (isTRUE(input$step_select %in% step_choices)) {
-        selected_input <- input$step_select
-      } else {
-        selected_input <- NULL
-      }
-      updateSelectInput(session, "step_select", choices = step_choices, selected = selected_input)
-
-      field_choices <- colnames(wf_df)
-      if (isTRUE(input$field_select %in% field_choices)) {
-        selected_field <- input$field_select
-      } else {
-        selected_field <- NULL
-      }
-      updateSelectInput(session, "field_select", choices = field_choices, selected = selected_field)
-    })
-
-    observe({
-      req(input$step_select)
-      req(input$field_select)
-
-      wf_val <- wf()
-      if (is.null(wf_val)) return()
-
-      wf_df <- as.data.frame(wf_val)
-
-      step_idx <- which(wf_df[["Name"]] == input$step_select)
-      if (length(step_idx) == 0) return()
-
-      current_value <- wf_df[[step_idx, input$field_select]]
-      updateTextInput(session, "new_value", value = as.character(current_value))
-    }) |>
-      bindEvent(input$step_select, input$field_select)
-
-    observe({
-      req(input$step_select)
-      req(input$field_select)
-      req(input$new_value)
-
-      wf_val <- wf()
-      if (is.null(wf_val)) return()
-
-      step_idx <- which(as.data.frame(wf_val)[["Name"]] == input$step_select)
-      if (length(step_idx) == 0) return()
-
-      field_name <- input$field_select
-      new_value <- input$new_value
-
-      # Update the workflow object with the new value
-      wf_val <- update(wf_val, step_idx, field_name, new_value) |>
-        shinyTryCatch(errorTitle = "Editing Workflow failed")
-
-      # Trigger reactive update by assigning the modified workflow back to the reactive value
-      wf(wf_val)
-    }) |>
-      bindEvent(input$edit_btn)
   })
 }
