@@ -2,8 +2,8 @@
 
 ## New Features
 - Refactored workflowstep from operation/params to command/args and added required-field tracking for input/result tags.
-- Added Shiny table modules (workflow/inputs/results) including UI for editing step fields and input values.
 - Updated workflow file-loading helpers and associated tests/docs; adjusted WebText fetching to a structural extraction approach.
+- Added Shiny table modules (workflow/inputs/results) including option for editing step fields and input values, and the option to display full result content when clicked (#21).
 
 # PEITHO 26.02.3
 
