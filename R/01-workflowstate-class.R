@@ -83,18 +83,23 @@ print.workflowstate <- function(x, ...) {
 }
 
 #' Convert a workflowstate to a data frame
-#' 
+#'
 #' This function summarizes the workflow state by converting the list of step runs
-#' into a data frame.
-#' 
+#' into a data frame. Truncation of error and output fields can be controlled via
+#' `max_char` and `max_items` passed through `...`.
+#'
 #' @param x A `workflowstate` object.
-#' @param max_char maximum number of characters to display for error and output fields
-#'  (default: 50).
-#' @param max_items maximum number of items to display for error and output fields (default: 5).
-#' @param ... Additional arguments (not used).
+#' @param row.names `NULL` or a character vector giving the row names for the data frame.
+#' @param optional Logical, if `TRUE`, column names are not syntactically adjusted.
+#' @param ... Additional arguments. Supports `max_char` (default: 50) and
+#'   `max_items` (default: 5) to control truncation of error and output fields.
 #' @return A data frame summarizing the workflow state.
 #' @export
-as.data.frame.workflowstate <- function(x, max_char = 50, max_items = 5, ...) {
+as.data.frame.workflowstate <- function(x, row.names = NULL, optional = FALSE, ...) {
+  dots <- list(...)
+  max_char <- if ("max_char" %in% names(dots)) dots$max_char else 50
+  max_items <- if ("max_items" %in% names(dots)) dots$max_items else 5
+
   sr <- x$stepruns
 
   data.frame(
@@ -104,6 +109,8 @@ as.data.frame.workflowstate <- function(x, max_char = 50, max_items = 5, ...) {
     has_error   = vapply(sr, function(s) s$has_error, logical(1)),
     error       = vapply(sr, function(s) if (s$has_error) trunc(s$error, n_char = max_char, n_items = max_items) else "", character(1)),
     output      = vapply(sr, function(s) if (!s$has_error) trunc(s$output, n_char = max_char, n_items = max_items) else "", character(1)),
+    row.names = row.names,
+    check.names = !isTRUE(optional),
     stringsAsFactors = FALSE
   )
 }

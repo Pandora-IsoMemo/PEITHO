@@ -4,22 +4,23 @@
 \alias{as.data.frame.workflowstate}
 \title{Convert a workflowstate to a data frame}
 \usage{
-\method{as.data.frame}{workflowstate}(x, max_char = 50, max_items = 5, ...)
+\method{as.data.frame}{workflowstate}(x, row.names = NULL, optional = FALSE, ...)
 }
 \arguments{
 \item{x}{A `workflowstate` object.}
 
-\item{max_char}{maximum number of characters to display for error and output fields
-(default: 50).}
+\item{row.names}{`NULL` or a character vector giving the row names for the data frame.}
 
-\item{max_items}{maximum number of items to display for error and output fields (default: 5).}
+\item{optional}{Logical, if `TRUE`, column names are not syntactically adjusted.}
 
-\item{...}{Additional arguments (not used).}
+\item{...}{Additional arguments. Supports `max_char` (default: 50) and
+`max_items` (default: 5) to control truncation of error and output fields.}
 }
 \value{
 A data frame summarizing the workflow state.
 }
 \description{
 This function summarizes the workflow state by converting the list of step runs
-into a data frame.
+into a data frame. Truncation of error and output fields can be controlled via
+`max_char` and `max_items` passed through `...`.
 }
