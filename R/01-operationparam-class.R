@@ -92,7 +92,7 @@ extract_arg_list <- function(
     if (is.null(ref) || !nzchar(ref)) {
       stop(
         "Invalid result label: missing 'label' for step_id=",
-        operationparam$step_id, ", position=", operationparam$position,
+        operationparam$step_id, ", position=", operationparam$position, # using step_id only here
         call. = FALSE
       )
     }

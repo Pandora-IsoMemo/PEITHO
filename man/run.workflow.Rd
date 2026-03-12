@@ -15,7 +15,7 @@
 
 \item{to}{An integer index of the step to end at.}
 
-\item{env}{An environment to look up operation functions. Defaults to `NULL`, which uses
+\item{env}{An environment to look up command functions. Defaults to `NULL`, which uses
 each step's own env or the caller's env.}
 
 \item{...}{Additional arguments passed to `run.workflowstep()`.}

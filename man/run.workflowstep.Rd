@@ -4,15 +4,19 @@
 \alias{run.workflowstep}
 \title{Run a workflow step}
 \usage{
-\method{run}{workflowstep}(x, state, env = NULL, ...)
+\method{run}{workflowstep}(x, state, env = NULL, step_i = NULL, input_list = NULL, ...)
 }
 \arguments{
 \item{x}{A `workflowstep` object representing the step to execute.}
 
 \item{state}{A `workflowstate` object representing the current state of the workflow.}
 
-\item{env}{An environment to look up the operation function. Defaults to the step's
+\item{env}{An environment to look up the command function. Defaults to the step's
 own env or the caller's env.}
+
+\item{step_i}{The number of the step in the workflow, used for logging purposes.}
+
+\item{input_list}{A list of inputs for argument parsing, loaded from the workflow's inputs file.}
 
 \item{...}{Additional arguments (not used).}
 }

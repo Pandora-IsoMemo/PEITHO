@@ -5,36 +5,37 @@
 \title{Create a new workflow step object}
 \usage{
 new_workflowstep(
-  id,
-  operation,
+  entry,
+  command,
   name = NULL,
   label = NULL,
   comments = "",
-  params = list(),
+  args = "",
   loop = "",
   env = parent.frame(),
   ...
 )
 }
 \arguments{
-\item{id}{An integer identifier for the step.}
+\item{entry}{An integer representing the step's position in the workflow.
+This should be unique for each step.}
 
-\item{operation}{A character string specifying the name of the function to execute for
+\item{command}{A character string specifying the name of the function to execute for
 this step, e.g. "strsplit". This function must exist in the loaded
 name space or in a custom script environment.}
 
-\item{name}{A human-readable name for the step. Defaults to "Step <id>".}
+\item{name}{A human-readable name for the step. Defaults to "Step <entry>".}
 
 \item{label}{A label for the step, used in UIs. Defaults to the same as `name`.}
 
 \item{comments}{A character string with comments or description for the step.}
 
-\item{params}{A list of parameters to pass to the operation function.}
+\item{args}{The original argument string from the workflow file, for reference.}
 
 \item{loop}{A character string indicating if the step should be looped over.
 Can be "yes", "no", or "auto".}
 
-\item{env}{An environment to look up the operation function. Default is the parent
+\item{env}{An environment to look up the command function. Default is the parent
 frame.}
 
 \item{...}{Additional metadata to store with the step.}
@@ -44,5 +45,5 @@ A `workflowstep` object.
 }
 \description{
 This object defines a single step within a workflow,
-including its unique identifier, name, operation, parameters, and other metadata.
+including its unique identifier, name, command, parameters, and other metadata.
 }

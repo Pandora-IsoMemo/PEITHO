@@ -17,16 +17,6 @@ test_that("fetch_WebText handles invalid URL gracefully", {
   )
 })
 
-test_that("fetch_WebText warns if CSS selector matches nothing", {
-  obj <- fetch_WebText(
-    "https://httpbin.org/html",
-    css_selector = "notarealcssselector",
-    return_text_blocks_only = FALSE
-  )
-  expect_true(is_WebText(obj))
-  expect_true(any(grepl("No elements matched CSS selector", obj$warnings)))
-})
-
 test_that("fetch_WebText can return text blocks only", {
   text_blocks <- fetch_WebText(
     "https://httpbin.org/html",

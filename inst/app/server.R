@@ -8,7 +8,6 @@ shinyServer(function(input, output, session) {
     ignoreWarnings = TRUE,
     defaultSource = config()[["defaultSource"]],
     importType = "zip",
-    fileExtension = config()[["fileExtension"]],
     options = DataTools::importOptions(rPackageName = config()[["rPackageName"]])
   )
 
@@ -45,8 +44,7 @@ shinyServer(function(input, output, session) {
     wf_file_paths <- workflow_file_paths(path = temp_dir)
     wv_value <- new_workflow(
       name = wf_name,
-      workflow_file_paths = wf_file_paths,
-      use_peitho_folder = TRUE
+      workflow_file_paths = wf_file_paths
     ) |>
       shinyTools::shinyTryCatch(
         errorTitle = "Error creating workflow",
@@ -123,28 +121,7 @@ shinyServer(function(input, output, session) {
     }
   )
 
-  output$wf_table <- renderTable({
-    wf_val <- wf()
-    if (is.null(wf_val)) return(NULL)
-    as.data.frame(wf_val)
-  }, rownames = TRUE)
-
-  output$inputs_table <- renderTable({
-    wf_val <- wf()
-    if (is.null(wf_val)) return(NULL)
-    inputs <- extract_inputs(wf_val)
-    if (is.null(inputs) || length(inputs) == 0) return(NULL)
-    # Convert named list to data.frame for display
-    data.frame(
-      name = names(inputs),
-      value = unlist(inputs, use.names = FALSE),
-      stringsAsFactors = FALSE
-    )
-  }, rownames = FALSE)
-
-  output$results_table <- renderTable({
-    wfr <- wf_run()
-    if (is.null(wfr)) return(NULL)
-    as.data.frame(wfr)
-  }, rownames = TRUE)
+  workflow_table_server("wf_table", wf)
+  inputs_table_server("inputs_table", wf)
+  results_table_server("results_table", wf_run)
 })

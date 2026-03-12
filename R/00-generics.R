@@ -1,14 +1,32 @@
-#' Update a workflow state after running a step
+#' Get a specific field
 #'
-#' This is a generic function to update a workflow state after executing a step.
-#' @param x A `workflowstate` object.
-#' @param steprun A `workflowsteprun` object representing the result of the executed step.
-#' @param idx The index of the step run to update.
-#' @param ... Additional arguments (not used).
-#' @return The updated `workflowstate` object.
+#' Generic get method for workflow-related objects.
+#' @param x The object to extract the field from.
+#' @param field The name of the field to retrieve.
+#' @param ... Additional arguments passed to methods.
 #' @export
-update <- function(x, steprun, idx, ...) {
+get_field <- function(x, field, ...) {
+  UseMethod("get_field")
+}
+
+#' Update an object
+#'
+#' Generic update method for workflow-related objects.
+#' @param x The object to update.
+#' @param ... Additional arguments passed to methods.
+#' @export
+update <- function(x, ...) {
   UseMethod("update")
+}
+
+#' Update the input list of a workflow
+#'
+#' Generic method to update the input list of a workflow object.
+#' @param x The object to update.
+#' @param ... Additional arguments passed to methods.
+#' @export
+update_input_list <- function(x, ...) {
+  UseMethod("update_input_list")
 }
 
 #' Run a workflow step
@@ -22,17 +40,6 @@ update <- function(x, steprun, idx, ...) {
 #' @export
 run <- function(x, state, ...) {
   UseMethod("run")
-}
-
-#' Extract inputs from a workflow
-#'
-#' This is a generic function to extract user input values from a workflow or workflow run.
-#' @param x A `workflow` object or a `workflowrun` object.
-#' @param ... Additional arguments (not used).
-#' @return A named list of input values.
-#' @export
-extract_inputs <- function(x, ...) {
-  UseMethod("extract_inputs")
 }
 
 #' Save an object as a ZIP file

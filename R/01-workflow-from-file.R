@@ -15,17 +15,16 @@ read_json_if_exists <- function(path) {
   jsonlite::fromJSON(path, simplifyVector = FALSE)
 }
 
-get_inputs <- function(
-  path_to_folder,
-  inputs_file,
+load_inputs_to_list <- function(
+  input_path,
   pattern = "@#\\*I\\*#@"
 ) {
-  input_path <- file.path(path_to_folder, inputs_file)
-
   # load input.json or input.txt
   if (grepl("\\.json$", input_path)) {
+    # load input.json
     input_list <- read_json_if_exists(input_path)
   } else if (grepl("\\.txt$", input_path)) {
+    # load input.txt
     if (file.exists(input_path)) {
       lines <- readLines(input_path)
       tag_list_indx <- grepl(paste0("^", pattern, ".*", pattern, "$"), lines)
@@ -38,8 +37,9 @@ get_inputs <- function(
         if (is.na(end_indx)) {
           end_indx <- length(lines)
         }
-
+        # get variable name
         varname <- extract_tag_varname(tag, paste0("^", pattern, "(.*)", pattern, "$"))
+        # get value in between tags and store in list
         input_list[[varname]] <- paste(lines[start_indx:end_indx], collapse = "\n")
       }
     } else {
@@ -69,24 +69,24 @@ make_param_from_arg <- function(
   step_i,
   arg_i,
   cmd_loop,
-  path_to_folder,
-  inputs_file
+  input_list
 ) {
+  if (!nzchar(arg_name)) arg_name <- NULL
+
   if (is_input_tag(arg)) {
     varname <- extract_tag_varname(arg, "^@#\\*I\\*#@(.*)@#\\*I\\*#@$")
-    input_list <- get_inputs(path_to_folder = path_to_folder, inputs_file = inputs_file)
 
-    if (!varname %in% names(input_list)) {
-      stop(
-        "Input variable '", varname, "' not found in input file.",
-        call. = FALSE
-      )
-    }
+    # if (!varname %in% names(input_list)) {
+    #   stop(
+    #     "Input variable '", varname, "' not found in input file.",
+    #     call. = FALSE
+    #   )
+    # }
     new_operationparam(
       step_id = step_i,
       position = arg_i,
       name     = arg_name,
-      value    = input_list[[varname]],
+      value    = input_list[[varname]] %||% NULL,
       type     = "input",
       label    = varname,
       loop     = cmd_loop %||% "no"
@@ -186,6 +186,67 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
   return(script_env)
 }
 
+make_param_from_arg_loop <- function(args_string, loop, step_i, input_list) {
+  parsed   <- parse_args(args_string)
+  args_vec <- parsed$values
+  args_names <- parsed$names
+
+  # create params
+  params <- vector("list", length(args_vec))
+  for (arg_i in seq_along(args_vec)) {
+    PEITHO:::logDebug("  Processing argument %d: %s", arg_i, args_vec[[arg_i]])
+
+    params[[arg_i]] <- make_param_from_arg(
+      arg      = args_vec[[arg_i]],
+      arg_name = args_names[arg_i],
+      arg_i    = arg_i,
+      step_i   = step_i,
+      cmd_loop = loop,
+      input_list = input_list
+    )
+  }
+
+  params
+}
+
+extract_input_list_from_files <- function(inputs_path) {
+  # return empty wf if no inputs
+  if (!file.exists(inputs_path)) {
+    warn_msg <- sprintf(
+      "%s not found in folder '%s'. Returning empty workflow.",
+      basename(inputs_path),
+      dirname(inputs_path)
+    )
+    PEITHO:::logWarn("%s", warn_msg)
+    warning(warn_msg, immediate. = TRUE, call. = FALSE)
+    return(list())
+  }
+
+  PEITHO:::logDebug("Loading inputs from %s", inputs_path)
+  input_list <- load_inputs_to_list(inputs_path)
+
+  input_list
+}
+
+parse_required_fields <- function(args_string) {
+  args_values <- parse_args(args_string)$values
+
+  list(
+    inputs = unique(vapply(
+      args_values[is_input_tag(args_values)],
+      extract_tag_varname,
+      FUN.VALUE = character(1),
+      pattern = "^@#\\*I\\*#@(.*)@#\\*I\\*#@$"
+    )),
+    steps = unique(vapply(
+      args_values[is_result_tag(args_values)],
+      extract_tag_varname,
+      FUN.VALUE = character(1),
+      pattern = "^@#\\*L\\*#@(.*)@#\\*L\\*#@$"
+    ))
+  )
+}
+
 #' Extract workflow steps from files in a folder
 #'
 #' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
@@ -193,29 +254,10 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
 #' @param show_functions_path Logical, whether to show the path of the loaded script file.
 #' @return A list of `workflowstep` objects.
 #' @export
-extract_workflow_from_files <- function(workflow_file_paths, show_functions_path = TRUE) {
-  # if folder not found return empty list and warn
-  if (!dir.exists(workflow_file_paths$path_to_folder)) {
-    PEITHO:::logWarn(
-      "PEITHO files not found. No folder '%s'. Returning empty workflow.",
-      workflow_file_paths$path_to_folder
-    )
-    return(list())
-  }
-
-  # check if all files exist
-
-  # return empty wf if no inputs
-  if (!file.exists(workflow_file_paths$inputs_path)) {
-    warn_msg <- sprintf(
-      "%s not found in folder '%s'. Returning empty workflow.",
-      basename(workflow_file_paths$inputs_path),
-      workflow_file_paths$path_to_folder
-    )
-    PEITHO:::logWarn("%s", warn_msg)
-    warning(warn_msg, immediate. = TRUE, call. = FALSE)
-    return(list())
-  }
+workflow_steps_from_files <- function(
+  workflow_file_paths,
+  show_functions_path = TRUE
+) {
   # return empty wf if no commands
   if (!file.exists(workflow_file_paths$commands_path)) {
     warn_msg <- sprintf(
@@ -254,37 +296,14 @@ extract_workflow_from_files <- function(workflow_file_paths, show_functions_path
   steps <- lapply(seq_along(commands_list), function(step_i) {
     cmd <- commands_list[[step_i]]
 
-    PEITHO:::logInfo("Parsing command %s for step %d", cmd$command, step_i)
-    parsed   <- parse_args(cmd$args)
-    args_vec <- parsed$values
-    args_names <- parsed$names
-
-    # create params
-    params <- vector("list", length(args_vec))
-    for (arg_i in seq_along(args_vec)) {
-      PEITHO:::logDebug("  Processing argument %d: %s", arg_i, args_vec[[arg_i]])
-      arg_name <- args_names[arg_i]
-      if (!nzchar(arg_name)) arg_name <- NULL
-
-      params[[arg_i]] <- make_param_from_arg(
-        arg      = args_vec[[arg_i]],
-        arg_name = arg_name,
-        arg_i    = arg_i,
-        step_i   = step_i,
-        cmd_loop = cmd$loop,
-        path_to_folder = workflow_file_paths$path_to_folder,
-        inputs_file = basename(workflow_file_paths$inputs_path)
-      )
-    }
-
     # create workflowstep
     new_workflowstep(
-      id              = step_i,
+      entry           = step_i,
       name            = cmd$name %||% paste0("Step ", step_i),
       label           = cmd$label %||% cmd$name %||% paste0("Step ", step_i),
       comments        = cmd$comments %||% "",
-      operation       = cmd$command,
-      params          = params %||% list(),
+      command         = cmd$command,
+      args            = cmd$args %||% "",
       loop            = cmd$loop %||% "no",
       env             = env
     )

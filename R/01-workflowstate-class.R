@@ -27,12 +27,16 @@ new_workflowstate <- function(initial_input = NULL) {
 
 # helper for truncating
 truncate_one <- function(x, n_char) {
-  if (nchar(x) > n_char) paste0(substr(x, 1, n_char), " ...") else x
+  if (!is.null(n_char) && is.numeric(n_char) && nchar(x) > n_char && n_char > 0)  {
+    paste0(substr(x, 1, n_char), " ...")
+  } else {
+    x
+  }
 }
 
-truncate_many <- function(vals, n_char, n_items, collapse = ", \\n") {
+truncate_many <- function(vals, n_char, n_items, collapse = ", \n") {
   vals <- as.character(vals)
-  if (length(vals) > n_items) {
+  if (!is.null(n_items) && is.numeric(n_items) && length(vals) > n_items && n_items > 0) {
     vals <- c(vals[1:n_items], paste0("... (", length(vals) - n_items, " more items)"))
   }
   paste(vapply(vals, truncate_one, character(1), n_char = n_char), collapse = collapse)
@@ -79,24 +83,34 @@ print.workflowstate <- function(x, ...) {
 }
 
 #' Convert a workflowstate to a data frame
-#' 
+#'
 #' This function summarizes the workflow state by converting the list of step runs
-#' into a data frame.
-#' 
+#' into a data frame. Truncation of error and output fields can be controlled via
+#' `max_char` and `max_items` passed through `...`.
+#'
 #' @param x A `workflowstate` object.
-#' @param ... Additional arguments (not used).
+#' @param row.names `NULL` or a character vector giving the row names for the data frame.
+#' @param optional Logical, if `TRUE`, column names are not syntactically adjusted.
+#' @param ... Additional arguments. Supports `max_char` (default: 50) and
+#'   `max_items` (default: 5) to control truncation of error and output fields.
 #' @return A data frame summarizing the workflow state.
 #' @export
-as.data.frame.workflowstate <- function(x, ...) {
+as.data.frame.workflowstate <- function(x, row.names = NULL, optional = FALSE, ...) {
+  dots <- list(...)
+  max_char <- if ("max_char" %in% names(dots)) dots$max_char else 50
+  max_items <- if ("max_items" %in% names(dots)) dots$max_items else 5
+
   sr <- x$stepruns
 
   data.frame(
-    entry     = vapply(sr, function(s) s$step$id, integer(1)),
+    entry     = vapply(sr, function(s) s$step$entry, integer(1)),
     name   = vapply(sr, function(s) s$step$name, character(1)),
     label     = vapply(sr, function(s) s$step$label, character(1)),
     has_error   = vapply(sr, function(s) s$has_error, logical(1)),
-    error       = vapply(sr, function(s) if (s$has_error) trunc(s$error) else "", character(1)),
-    output      = vapply(sr, function(s) if (!s$has_error) trunc(s$output) else "", character(1)),
+    error       = vapply(sr, function(s) if (s$has_error) trunc(s$error, n_char = max_char, n_items = max_items) else "", character(1)),
+    output      = vapply(sr, function(s) if (!s$has_error) trunc(s$output, n_char = max_char, n_items = max_items) else "", character(1)),
+    row.names = row.names,
+    check.names = !isTRUE(optional),
     stringsAsFactors = FALSE
   )
 }
@@ -119,17 +133,6 @@ update.workflowstate <- function(x, steprun, idx, ...) {
   if (!inherits(steprun, "workflowsteprun")) {
     stop("Argument 'steprun' must be of class 'workflowsteprun'.")
   }
-  if (length(x$initial_input) == 0 && idx == 1L) {
-    # set input param from first step if not set
-    for (p in steprun$step$params) {
-      if (p$type == "input") {
-        initial_input <- p$value
-        break
-      }
-    }
-
-    x$initial_input <- initial_input
-  }
 
   # add or update steprun at index
   if (idx <= length(x$stepruns)) {
@@ -146,7 +149,7 @@ update.workflowstate <- function(x, steprun, idx, ...) {
     x$last_result <- steprun$output
 
     # cache with stable keys
-    sid <- steprun$step$id
+    sid <- steprun$step$entry
     sname <- steprun$step$name
 
     x$last_result_id <- sid

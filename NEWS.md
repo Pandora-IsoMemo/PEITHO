@@ -1,13 +1,20 @@
+# PEITHO 26.03.0
+
+## New Features
+- Refactored workflowstep from operation/params to command/args and added required-field tracking for input/result tags.
+- Updated workflow file-loading helpers and associated tests/docs; adjusted WebText fetching to a structural extraction approach.
+- Added Shiny table modules (workflow/inputs/results) including option for editing step fields and input values, and the option to display full result content when clicked (#21).
+
 # PEITHO 26.02.3
 
-# New Features
+## New Features
 
 - Integrated workflow import and export functionality into the PEITHO Shiny application, enabling users to upload workflows from zip files and download them for sharing or backup. (#21)
 - Added a centralized YAML configuration file (inst/config.yaml) to manage app settings such as allowed file types and default import sources.
 
 # PEITHO 26.02.2
 
-# Updates
+## Updates
 
 - Removed 'host' argument from `startApplication()` function, as it is no longer needed.
 

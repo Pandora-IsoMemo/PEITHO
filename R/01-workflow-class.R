@@ -1,10 +1,10 @@
 # ---- workflow class ----
 
 #' Helper to get file paths for PEITHO workflow files
-#' 
+#'
 #' This function constructs full file paths for the workflow files located in a specified folder.
-#' Validation of file existence is performed in `extract_workflow_from_files()`.
-#' 
+#' Validation of file existence is performed in `workflow_steps_from_files()`.
+#'
 #' @param path Path to folder containing workflow files (default: PEITHO example folder).
 #' @param inputs Name of the inputs file (default: "inputs.json").
 #' @param commands Name of the commands file (default: "commands.json").
@@ -44,19 +44,22 @@ workflow_file_paths <- function(
 #' This object represents a workflow, consisting of a sequence of workflow steps,
 #' the current step index, and additional metadata.
 #' @param name    A name for the workflow.
+#' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
+#' @param use_peitho_folder Logical; if `TRUE`, load steps from PEITHO example folder. If `FALSE`,
+#'  use provided `steps` and ignore `workflow_file_paths`, useful for testing.
+#' @param input_list A list of inputs for the workflow steps.
 #' @param steps   A list of `workflowstep` objects defining the steps of the workflow.
 #' @param current The index of the current step in the workflow.
-#' @param use_peitho_folder Logical; if `TRUE`, load steps from PEITHO example folder.
-#' @param workflow_file_paths A list of file paths for workflow files (see `workflow_file_paths()`).
 #' @param ...     Additional metadata to store with the workflow.
 #' @return A `workflow` object.
 #' @export
 new_workflow <- function(
   name    = "Untitled workflow",
+  workflow_file_paths = list(),
+  use_peitho_folder = TRUE,
+  input_list = list(),
   steps = list(),
   current = if (length(steps)) 1L else NA_integer_,
-  use_peitho_folder = TRUE,
-  workflow_file_paths = list(),
   ...
 ) {
   # 1) Decide where steps come from
@@ -69,26 +72,50 @@ new_workflow <- function(
 
     validate_workflow_file_paths(workflow_file_paths)
 
-    if (length(steps)) {
-      PEITHO:::logWarn("Argument 'steps' is ignored when 'use_peitho_folder' is TRUE.")
+    if (length(input_list)) {
+      warn <- "Argument 'input_list' is ignored when 'use_peitho_folder' is TRUE."
+      PEITHO:::logWarn("%s", warn)
+      warning(warn, immediate. = TRUE, call. = FALSE)
     }
 
-    steps <- PEITHO:::extract_workflow_from_files(
+    # we have duplicated validation of paths ...
+    input_list <- PEITHO:::extract_input_list_from_files(workflow_file_paths$inputs_path)
+
+    if (length(steps)) {
+      warn <- "Argument 'steps' is ignored when 'use_peitho_folder' is TRUE."
+      PEITHO:::logWarn("%s", warn)
+      warning(warn, immediate. = TRUE, call. = FALSE)
+    }
+
+    steps <- PEITHO:::workflow_steps_from_files(
       workflow_file_paths = workflow_file_paths,
       show_functions_path = FALSE
     )
   } else {
+    if (length(workflow_file_paths)) {
+      warn <- "Argument 'workflow_file_paths' is ignored when 'use_peitho_folder' is FALSE."
+      PEITHO:::logWarn("%s", warn)
+      warning(warn, immediate. = TRUE, call. = FALSE)
+    }
+
     PEITHO:::logDebug("Creating workflow from provided steps...")
+    if (length(input_list) == 0L) {
+      warn <- "No 'input_list' provided for workflow."
+      PEITHO:::logWarn("%s", warn)
+      warning(warn, immediate. = TRUE, call. = FALSE)
+    }
     if (length(steps) == 0L) {
-      PEITHO:::logWarn("No steps provided for workflow.")
+      warn <- "No steps provided for workflow."
+      PEITHO:::logWarn("%s", warn)
+      warning(warn, immediate. = TRUE, call. = FALSE)
     }
     # if not use PEITHO folder, clear file paths
     workflow_file_paths <- list()
   }
 
-  # 2) Validations
+  # 2) Validations, if not valid stopping with error
   validate_workflow_steps(steps)
-  validate_unique_step_names(steps)
+  validate_unique_steps(steps)
 
   # 3) Determine current step
   current <- validate_current_index(current, length(steps))
@@ -97,81 +124,13 @@ new_workflow <- function(
   structure(
     list(
       name           = name,
+      input_list     = input_list,
       steps          = steps,
       current        = current,
       workflow_file_paths = workflow_file_paths,
       dots           = list(...)
     ),
     class = c("workflow", "list")
-  )
-}
-
-# user-facing helper (function with more validation) -----------------------
-
-workflow <- function(steps = list(), name = "Untitled workflow", current = 1L, ...) {
-  new_workflow(steps = steps, name = name, current = current, ...)
-}
-
-#' Extract input values from a workflow
-#'
-#' This function extracts user input values from the steps of a workflow. It looks for parameters of type "input" in each step and collects their values into a named list.
-#'
-#' @param x A `workflow` object.
-#' @param ... Additional arguments (not used).
-#' @return A named list of input values extracted from the workflow steps.
-#' @export
-extract_inputs.workflow <- function(x, ...) {
-  inputs <- list()
-
-  for (step in x$steps) {
-    step_inputs <- list()
-    for (param in step$params) {
-      if (inherits(param, "operationparam") && param$type == "input") {
-        step_inputs[[param$label]] <- param$value
-      }
-    }
-
-    if (length(step_inputs) == 0) next
-
-    inputs <- c(inputs, step_inputs)
-  }
-
-  inputs
-}
-
-#' Convert a workflow object to a data frame
-#'
-#' This method converts a `workflow` object into a data frame summarizing its steps.
-#'
-#' @param x A `workflow` object.
-#' @param ... Additional arguments (not used).
-#' @return A data frame summarizing the workflow steps.
-#' @export
-as.data.frame.workflow <- function(x, ...) {
-  steps <- x$steps
-  data.frame(
-    name = vapply(steps, function(s) s$name, character(1)),
-    label = vapply(steps, function(s) s$label, character(1)),
-    comments = vapply(steps, function(s) s$comments, character(1)),
-    operation = vapply(steps, function(s) s$operation, character(1)),
-    params = vapply(steps, function(s) flatten_params(s$params), character(1)),
-    stringsAsFactors = FALSE
-  )
-}
-
-flatten_params <- function(params) {
-  if (length(params) == 0) return("")
-  paste(
-    vapply(params, function(p) {
-      if (!is.null(p$name) && p$type %in% c("input", "result")) {
-        paste0(p$name, "=", p$tag, toString(p$label), p$tag)
-      } else if (!is.null(p$name) && p$type == "literal") {
-        paste0(p$name, "=", toString(p$value))
-      } else {
-        ""
-      }
-    }, character(1)),
-    collapse = ", "
   )
 }
 
@@ -194,8 +153,8 @@ print.workflow <- function(x, ...) {
       is_curr <- if (i == x$current) "*" else " "
       cat(
         sprintf(
-          "   %s [%d] %s (operation: %s)\n",
-          is_curr, s$id, s$name, s$operation
+          "   %s [%d] %s (command: %s)\n",
+          is_curr, s$entry, s$name, s$command
         )
       )
     }
@@ -212,6 +171,51 @@ print.workflow <- function(x, ...) {
   invisible(x)
 }
 
+#' Convert a workflow object to a data frame
+#'
+#' This method converts a `workflow` object into a data frame summarizing its steps.
+#'
+#' @param x A `workflow` object.
+#' @param ... Additional arguments (not used).
+#' @return A data frame summarizing the workflow steps.
+#' @export
+as.data.frame.workflow <- function(x, ...) {
+  steps <- x$steps
+  df_list <- lapply(steps, as.data.frame.workflowstep)
+  do.call(rbind, df_list)
+}
+
+step_name_to_position <- function(x, step_name) {
+  step_names <- vapply(x$steps, function(s) s$name, character(1))
+  match(step_name, step_names)
+
+}
+
+#' Get a specific field from a workflow
+#'
+#' @param x  A `workflow` object.
+#' @param field The name of the field to retrieve (e.g., "Name", "Comments").
+#' @param step_name Name of the step to retrieve the field from.
+#' @param ... Additional arguments (not used).
+#' @return The value of the specified field from the workflow or a specific step.
+#' @export
+get_field.workflow <- function(x, field, step_name, ...) {
+  step_position <- step_name_to_position(x, step_name)
+  if (is.na(step_position)) {
+    stop("Step with name '", step_name, "' not found in workflow.")
+  }
+  step <- x$steps[[step_position]]
+  get_field(step, field)
+}
+
+extract_step_names <- function(x) {
+  step_entries <- vapply(x$steps, function(s) s$entry, integer(1))
+  step_names <- vapply(x$steps, function(s) s$name, character(1))
+  names(step_entries) <- step_names
+  # return named vector for selectInput
+  step_entries
+}
+
 # -------------------------------------------------------------------------
 # Validation helpers for workflow construction
 # -------------------------------------------------------------------------
@@ -220,7 +224,7 @@ print.workflow <- function(x, ...) {
 # for other constructors/helpers that may create/modify workflows later.
 
 validate_workflow_file_paths <- function(workflow_file_paths) {
-  # Minimal structural validation; actual file existence is checked in extract_workflow_from_files()
+  # Minimal structural validation; actual file existence is checked in workflow_steps_from_files()
   if (!is.list(workflow_file_paths)) {
     stop("'workflow_file_paths' must be a list.", call. = FALSE)
   }
@@ -230,6 +234,7 @@ validate_workflow_file_paths <- function(workflow_file_paths) {
   if (is.null(workflow_file_paths$path_to_folder) || !nzchar(workflow_file_paths$path_to_folder)) {
     stop("'workflow_file_paths$path_to_folder' must be a non-empty string.", call. = FALSE)
   }
+
   if (!dir.exists(workflow_file_paths$path_to_folder)) {
     stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
   }
@@ -250,13 +255,18 @@ validate_workflow_steps <- function(steps) {
   invisible(TRUE)
 }
 
-validate_unique_step_names <- function(steps) {
+validate_unique_steps <- function(steps, id_fields = c("entry", "name")) {
   if (!length(steps)) return(invisible(TRUE))
-  nms <- vapply(steps, `[[`, character(1), "name")
-
-  if (anyDuplicated(nms)) {
-    dup <- unique(nms[duplicated(nms)])
-    stop("Workflow has duplicate step names: ", paste(dup, collapse = ", "), call. = FALSE)
+  for (field in id_fields) {
+    vals <- vapply(steps, function(s) as.character(s[[field]]), character(1))
+    if (anyDuplicated(vals)) {
+      dup <- unique(vals[duplicated(vals)])
+      stop(sprintf(
+        "Workflow has duplicate step %s(s): %s",
+        field,
+        paste(dup, collapse = ", ")
+      ), call. = FALSE)
+    }
   }
   invisible(TRUE)
 }
@@ -325,6 +335,66 @@ import_workflow <- function(
 
 # Accessor functions (some will be added later) ------------------------
 
+#' Update a workflow step with a new value
+#'
+#' This function updates a specific entry of a `workflowstep` object with a new value. It is used
+#' to modify step details such as name, label, comments, command, parameters, or loop settings.
+#'
+#' @param x A `workflow` object to update.
+#' @param step The index of the step to update.
+#' @param value The new value to assign to the specified entry.
+#' @param entry The name of the entry to update (one of "name", "label", "comments", "command",
+#'  "args", "loop")
+#' @param ... Additional arguments (not used).
+#' @return The updated `workflow` object.
+#' @export
+update.workflow <- function(x, step, entry, value, ...) {
+  # pass entry & value NOT a whole step -> we need to update the wf object AND the commands json
+  # get commands file path
+  wf_file_paths <- x$workflow_file_paths
+  # update the steps
+  updated_step <- update(x$steps[[step]], wf_file_paths, entry = entry, value = value,  ...)
+  x$steps[[step]] <- updated_step
+  # return updated workflow
+  x
+}
+
+#' Update the input list of a workflow
+#'
+#' This method updates the `input_list` of a `workflow` object and optionally writes the
+#' updated list to the corresponding inputs file if the workflow is file-backed.
+#'
+#' @param x The `workflow` object to update.
+#' @param new_list A named list of input values to update in the workflow.
+#' @param write_file Logical; if `TRUE`, the updated input list will be written to the
+#'  inputs file if the workflow has associated file paths.
+#' @param ... Additional arguments (not used).
+#' @return The updated `workflow` object with the new input list and optionally updated parameters.
+#' @export
+update_input_list.workflow <- function(
+  x,
+  new_list,
+  write_file = TRUE,
+  ...
+) {
+  if (!is.list(new_list)) {
+    stop("'new_list' must be a list.", call. = FALSE)
+  }
+
+  # 1) update in-memory
+  x$input_list <- new_list
+
+  # 2) persist to inputs file (if file-backed)
+  if (write_file && length(x$workflow_file_paths)) {
+    in_path <- x$workflow_file_paths$inputs_path
+    if (!is.null(in_path) && nzchar(in_path)) {
+      jsonlite::write_json(new_list, in_path, auto_unbox = TRUE, pretty = TRUE)
+    }
+  }
+
+  x
+}
+
 # current_step.workflow <- function(x, ...) {
 #   if (length(x$steps) == 0L || is.na(x$current)) {
 #     return(NULL)
@@ -376,7 +446,7 @@ import_workflow <- function(
 #   }
 
 #   if (!is.null(id)) {
-#     ids <- vapply(x$steps, function(s) s$id, integer(1))
+#     ids <- vapply(x$steps, function(s) s$entry, integer(1))
 #     idx <- which(ids == as.integer(id))
 #     if (length(idx) == 1L) {
 #       x$current <- idx
@@ -396,7 +466,7 @@ import_workflow <- function(
 #' @param state A `workflowstate` object representing the initial state.
 #' @param from An integer index of the step to start from.
 #' @param to An integer index of the step to end at.
-#' @param env An environment to look up operation functions. Defaults to `NULL`, which uses
+#' @param env An environment to look up command functions. Defaults to `NULL`, which uses
 #'  each step's own env or the caller's env.
 #' @param ... Additional arguments passed to `run.workflowstep()`.
 #' @return A list containing the final workflow, state, and results of each step.
@@ -415,9 +485,11 @@ run.workflow <- function(
   # for now we always stop on error!!!
   stop_on_error <- TRUE
 
+  # validata workflow
   if (!inherits(x, "workflow")) {
     stop("Argument 'x' must be of class 'workflow'.")
   }
+  # check steps
   if (length(x$steps) == 0L) {
     PEITHO:::logWarn("Workflow has no steps.")
     return(
@@ -429,21 +501,42 @@ run.workflow <- function(
     )
   }
 
-  if (length(state) == 0L) {
-    state <- ""
-    # get input param from first step
-    for (p in x$steps[[1]]$params) {
-      if (p$type == "input") {
-        state <- p$value
-        break
-      }
-    }
-  }
-
   if (!inherits(state, "workflowstate")) {
     state <- new_workflowstate(initial_input = state)
   }
 
+  # extract required_fields and check if exist
+  required_inputs <- unique(unlist(lapply(x$steps, function(s) {
+    x <- s[["required_inputs"]]
+    if (!is.character(x)) stop("'required_inputs' must be a character vector.")
+    x
+  }), use.names = FALSE))
+
+  required_steps <- unique(unlist(lapply(x$steps, function(s) {
+    x <- s[["required_steps"]]
+    if (!is.character(x)) stop("'required_steps' must be a character vector.")
+    x
+  }), use.names = FALSE))
+
+  # check if required inputs exist in input_list
+  missing_inputs <- setdiff(required_inputs, names(x$input_list))
+  if (length(missing_inputs)) {
+    stop(
+      "Missing required inputs: ", paste(missing_inputs, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  # check if required steps exist in steps
+  step_names <- vapply(x$steps, function(s) s$name, character(1))
+  missing_steps <- setdiff(required_steps, step_names)
+  if (length(missing_steps)) {
+    stop(
+      "Missing required steps: ", paste(missing_steps, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  # RUN workflow steps
   from <- max(1L, as.integer(from))
   to   <- min(length(x$steps), as.integer(to))
   idxs <- seq(from, to)
@@ -458,7 +551,7 @@ run.workflow <- function(
     step <- x$steps[[i]]
 
     # run the step, with env explicitly passed
-    steprun <- run(step, state, env = env, ...)
+    steprun <- run(step, state, env = env, step_i = j, input_list = x$input_list, ...)
 
     # update workflow state and append steprun
     state <- update(state, steprun, idx = i)
@@ -486,7 +579,7 @@ run.workflow <- function(
 
     if (stop_on_error && !(length(steprun_summary$errors) == 1 && steprun_summary$errors == "")) {
       stop(
-        "step ", i, " (id=", step$id, "): ", paste(steprun_summary$errors, collapse = "; "),
+        "step ", i, " (entry=", step$entry, "): ", paste(steprun_summary$errors, collapse = "; "),
         call. = FALSE
       )
     }
