@@ -8,22 +8,39 @@ results_table_ui <- function(id, title = "") {
   ns <- NS(id)
   tagList(
     tags$h4(title),
-    sliderInput(
-      ns("max_char"),
-      "Max characters to display for error and output fields",
-      min = 10,
-      max = 1000,
-      value = 50,
-      step = 10
+    fluidRow(
+      column(
+        4,
+        sliderInput(
+          ns("max_char"),
+          "Max characters to display for error and output fields",
+          min = 10,
+          max = 1000,
+          value = 50,
+          step = 10,
+          width = "100%"
+        )
+      )
     ),
     DT::DTOutput(ns("results_table")),
     tags$hr(),
     tags$h5("Selected Cell Content"),
-    numericInput(
-      ns("max_rows_cell"),
-      "Max rows to display for selected cell",
-      min = 1,
-      value = 5
+    fluidRow(
+      column(
+        4,
+        numericInput(
+          ns("max_rows_cell"),
+          "Max rows to display for selected cell",
+          min = 1,
+          value = 5,
+          width = "100%"
+        )
+      ),
+      column(
+        4,
+        br(),
+        actionButton(ns("apply_max_rows_cell"), "Apply")
+      )
     ),
     verbatimTextOutput(ns("selected_cell_value"), placeholder = TRUE)
   )
@@ -37,6 +54,12 @@ results_table_ui <- function(id, title = "") {
 #' @export
 results_table_server <- function(id, wf_run, is_active_tab) {
   moduleServer(id, function(input, output, session) {
+    max_rows_cell_applied <- reactiveVal(5)
+
+    observeEvent(input$apply_max_rows_cell, {
+      max_rows_cell_applied(input$max_rows_cell)
+    })
+
     output$results_table <- DT::renderDT({
       wfr <- wf_run()
       if (is.null(wfr)) return(NULL)
@@ -70,7 +93,7 @@ results_table_server <- function(id, wf_run, is_active_tab) {
       }
 
       # Resolve the clicked location against the untruncated data to show full content.
-      df_full <- as.data.frame(wfr, max_char = NULL, max_items = input$max_rows_cell)
+      df_full <- as.data.frame(wfr, max_char = NULL, max_items = max_rows_cell_applied())
 
       row_idx <- click$row
       col_idx <- click$col
