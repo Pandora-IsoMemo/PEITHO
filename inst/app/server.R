@@ -8,7 +8,6 @@ shinyServer(function(input, output, session) {
     ignoreWarnings = TRUE,
     defaultSource = config()[["defaultSource"]],
     importType = "zip",
-    fileExtension = config()[["fileExtension"]],
     options = DataTools::importOptions(rPackageName = config()[["rPackageName"]])
   )
 
