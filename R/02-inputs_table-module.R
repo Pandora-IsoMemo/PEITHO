@@ -27,12 +27,13 @@ inputs_table_server <- function(id, wf, is_active_tab) {
       if (is.null(wf_val)) return(NULL)
       inputs <- wf_val$input_list
       if (is.null(inputs) || length(inputs) == 0) return(NULL)
+      df <- data.frame(
+        Name = names(inputs),
+        Value = unlist(inputs, use.names = FALSE),
+        stringsAsFactors = FALSE
+      )
       DT::datatable(
-        data.frame(
-          Name = names(inputs),
-          Value = unlist(inputs, use.names = FALSE),
-          stringsAsFactors = FALSE
-        ),
+        df,
         rownames = FALSE, # do NOT change to TRUE: the row indices will be messed up when editing
         options = list(
           paging = FALSE,
@@ -40,7 +41,11 @@ inputs_table_server <- function(id, wf, is_active_tab) {
           scrollCollapse = TRUE
         ),
         editable = "cell"
-      )
+      ) |>
+        DT::formatStyle(
+          columns = names(df),
+          `white-space` = "pre-wrap"
+        )
     })
 
     observeEvent(input$tbl_cell_edit, {
