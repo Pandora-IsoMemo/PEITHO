@@ -222,7 +222,12 @@ update.workflowstep <- function(
   # do all entries match?
   # align id <> entry? Can we update the id right now? -> no, cannot yet change order or id/entry
   commands_list[[x$entry]][[entry]] <- value
-  write_json(commands_list, path = workflow_file_paths$commands_path, auto_unbox = TRUE)
+  write_json(
+    commands_list,
+    path = workflow_file_paths$commands_path,
+    auto_unbox = TRUE,
+    pretty = TRUE
+  )
 
   # return updated workflowstep
   x

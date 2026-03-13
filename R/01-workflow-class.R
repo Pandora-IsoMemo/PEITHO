@@ -248,8 +248,10 @@ validate_workflow_file_paths <- function(workflow_file_paths) {
   invisible(TRUE)
 }
 
-validate_workflow_steps <- function(steps, error_on_warn = c(TRUE, FALSE)) {
-  error_on_warn <- match.arg(error_on_warn)
+validate_workflow_steps <- function(steps, error_on_warn = TRUE) {
+  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
+    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
+  }
   if (!is.list(steps)) {
     msg <- "'steps' must be a list."
     if (error_on_warn) {
@@ -273,10 +275,12 @@ validate_workflow_steps <- function(steps, error_on_warn = c(TRUE, FALSE)) {
 validate_unique_steps <- function(
   steps,
   id_fields = c("entry", "name"),
-  error_on_warn = c(TRUE, FALSE)
+  error_on_warn = TRUE
 ) {
   if (!length(steps)) return(invisible(TRUE))
-  error_on_warn <- match.arg(error_on_warn)
+  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
+    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
+  }
 
   for (field in id_fields) {
     vals <- vapply(steps, function(s) as.character(s[[field]]), character(1))
@@ -296,9 +300,11 @@ validate_unique_steps <- function(
   invisible(TRUE)
 }
 
-validate_numeric_entries <- function(steps, error_on_warn = c(TRUE, FALSE)) {
+validate_numeric_entries <- function(steps, error_on_warn = TRUE) {
   if (!length(steps)) return(invisible(TRUE))
-  error_on_warn <- match.arg(error_on_warn)
+  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
+    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
+  }
   entries <- vapply(steps, function(s) s$entry, integer(1))
   if (any(is.na(entries))) {
     msg <- "All steps must have a numeric 'entry' field."
@@ -310,9 +316,11 @@ validate_numeric_entries <- function(steps, error_on_warn = c(TRUE, FALSE)) {
   invisible(TRUE)
 }
 
-validate_required_inputs <- function(steps, input_list, error_on_warn = c(TRUE, FALSE)) {
+validate_required_inputs <- function(steps, input_list, error_on_warn = TRUE) {
   if (!length(steps)) return(invisible(TRUE))
-  error_on_warn <- match.arg(error_on_warn)
+  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
+    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
+  }
   # extract required_fields and check if exist
   required_inputs <- unique(unlist(lapply(steps, function(s) {
     x <- s[["required_inputs"]]
@@ -337,9 +345,11 @@ validate_required_inputs <- function(steps, input_list, error_on_warn = c(TRUE, 
   }
 }
 
-validate_required_steps <- function(steps, error_on_warn = c(TRUE, FALSE)) {
+validate_required_steps <- function(steps, error_on_warn = TRUE) {
   if (!length(steps)) return(invisible(TRUE))
-  error_on_warn <- match.arg(error_on_warn)
+  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
+    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
+  }
   required_steps <- unique(unlist(lapply(steps, function(s) {
     x <- s[["required_steps"]]
     if (!is.character(x)) {
@@ -763,7 +773,8 @@ update_json_summary <- function(
   # write into results file
   jsonlite::write_json(
     results,
-    file.path(path_to_folder, results_file), auto_unbox = TRUE, pretty = TRUE
+    file.path(path_to_folder, results_file),
+    auto_unbox = TRUE,
+    pretty = TRUE
   )
 }
-
