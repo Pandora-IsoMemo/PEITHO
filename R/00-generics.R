@@ -32,22 +32,24 @@ update_input_list <- function(x, ...) {
 #' Add a step to a workflow
 #'
 #' Generic method to add a step to a workflow object.
-#' @param workflow The workflow object to which the step will be added.
-#' @param step The step to add to the workflow.
+#' @param x The workflow object to which the step will be added.
+#' @param new_step The step to add to the workflow.
+#' @param position The position in the workflow where the new step should be added.
+#' @param ... Additional arguments passed to methods.
 #' @return The updated workflow object with the new step added.
 #' @export
-add_step <- function(workflow, step) {
+add_step <- function(x, new_step, position, ...) {
   UseMethod("add_step")
 }
 
 #' Remove a step from a workflow
 #'
 #' Generic method to remove a step from a workflow object.
-#' @param workflow The workflow object from which the step will be removed.
-#' @param step_name The name of the step to remove from the workflow.
+#' @param x The workflow object from which the step will be removed.
+#' @param position The position of the step to remove from the workflow.
 #' @return The updated workflow object with the specified step removed.
 #' @export
-remove_step <- function(workflow, step_name) {
+remove_step <- function(x, position) {
   UseMethod("remove_step")
 }
 

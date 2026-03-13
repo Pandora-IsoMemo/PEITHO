@@ -4,12 +4,16 @@
 \alias{add_step}
 \title{Add a step to a workflow}
 \usage{
-add_step(workflow, step)
+add_step(x, new_step, position, ...)
 }
 \arguments{
-\item{workflow}{The workflow object to which the step will be added.}
+\item{x}{The workflow object to which the step will be added.}
 
-\item{step}{The step to add to the workflow.}
+\item{new_step}{The step to add to the workflow.}
+
+\item{position}{The position in the workflow where the new step should be added.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 The updated workflow object with the new step added.

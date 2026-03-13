@@ -206,11 +206,11 @@ step_name_to_position <- function(x, step_name) {
 #' @return The value of the specified field from the workflow or a specific step.
 #' @export
 get_field.workflow <- function(x, field, step_name, ...) {
-  step_position <- step_name_to_position(x, step_name)
-  if (is.na(step_position)) {
+  position <- step_name_to_position(x, step_name)
+  if (is.na(position)) {
     stop("Step with name '", step_name, "' not found in workflow.")
   }
-  step <- x$steps[[step_position]]
+  step <- x$steps[[position]]
   get_field(step, field)
 }
 
@@ -551,16 +551,16 @@ add_step.workflow <- function(x, new_step, position = length(x$steps) + 1L, ...)
 #' entries of all steps to maintain consistency.
 #'
 #' @param x The `workflow` object to update.
-#' @param step An integer index specifying which step to remove.
+#' @param position An integer index specifying which step to remove.
 #' @param ... Additional arguments (not used).
 #' @return The updated `workflow` object with the specified step removed.
 #' @export
-remove_step.workflow <- function(x, step, ...) {
-  step <- as.integer(step)
-  if (step < 1L || step > length(x$steps)) {
+remove_step.workflow <- function(x, position, ...) {
+  position <- as.integer(position)
+  if (position < 1L || position > length(x$steps)) {
     stop("Step index must be between 1 and ", length(x$steps), ".", call. = FALSE)
   }
-  x$steps <- x$steps[-step]
+  x$steps <- x$steps[-position]
   # validate workflow after removing step
   validate_unique_steps(x$steps, error_on_warn = FALSE)
   validate_numeric_entries(x$steps, error_on_warn = FALSE)
@@ -568,9 +568,9 @@ remove_step.workflow <- function(x, step, ...) {
   validate_required_steps(x$steps, error_on_warn = FALSE)
   # update current index if needed
   if (!is.na(x$current)) {
-    if (x$current == step) {
+    if (x$current == position) {
       x$current <- NA_integer_
-    } else if (x$current > step) {
+    } else if (x$current > position) {
       x$current <- x$current - 1L
     }
   }

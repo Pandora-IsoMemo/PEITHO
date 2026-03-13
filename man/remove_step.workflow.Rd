@@ -4,12 +4,12 @@
 \alias{remove_step.workflow}
 \title{Remove a step from the workflow}
 \usage{
-\method{remove_step}{workflow}(x, step, ...)
+\method{remove_step}{workflow}(x, position, ...)
 }
 \arguments{
 \item{x}{The `workflow` object to update.}
 
-\item{step}{An integer index specifying which step to remove.}
+\item{position}{An integer index specifying which step to remove.}
 
 \item{...}{Additional arguments (not used).}
 }
