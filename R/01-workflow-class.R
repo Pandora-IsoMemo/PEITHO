@@ -493,6 +493,85 @@ update_input_list.workflow <- function(
   x
 }
 
+#' Add a new step to the workflow
+#'
+#' This method adds a new `workflowstep` to the `steps` list of a `workflow` object at a specified
+#' position. It also performs validation after adding the step and updates the current index and
+#' entries of all steps to maintain consistency.
+#'
+#' @param x The `workflow` object to update.
+#' @param new_step A `workflowstep` object to add to the workflow.
+#' @param position An integer index specifying where to insert the new step (default: at the end
+#'  of the steps list).
+#' @param ... Additional arguments (not used).
+#' @return The updated `workflow` object with the new step added.
+#' @export
+add_step.workflow <- function(x, new_step, position = length(x$steps) + 1L, ...) {
+  if (!inherits(new_step, "workflowstep")) {
+    stop("'new_step' must be of class 'workflowstep'.", call. = FALSE)
+  }
+  position <- as.integer(position)
+  if (position < 1L || position > length(x$steps) + 1L) {
+    stop("Position must be between 1 and ", length(x$steps) + 1L, ".", call. = FALSE)
+  }
+  x$steps <- append(x$steps, list(new_step), after = position - 1L)
+  # validate workflow after adding step
+  validate_unique_steps(x$steps, error_on_warn = FALSE)
+  validate_numeric_entries(x$steps, error_on_warn = FALSE)
+  validate_required_inputs(x$steps, x$input_list, error_on_warn = FALSE)
+  validate_required_steps(x$steps, error_on_warn = FALSE)
+  # update current index if needed
+  if (is.na(x$current)) {
+    x$current <- position
+  } else if (position <= x$current) {
+    x$current <- x$current + 1L
+  }
+  # update entries of all steps to maintain numeric order
+  for (i in seq_along(x$steps)) {
+    x$steps[[i]]$entry <- i
+  }
+  # return updated workflow
+  x
+}
+
+#' Remove a step from the workflow
+#' 
+#' This method removes a `workflowstep` from the `steps` list of a `workflow` object at a specified
+#' position. It also performs validation after removing the step and updates the current index and
+#' entries of all steps to maintain consistency.
+#'
+#' @param x The `workflow` object to update.
+#' @param step An integer index specifying which step to remove.
+#' @param ... Additional arguments (not used).
+#' @return The updated `workflow` object with the specified step removed.
+#' @export
+remove_step.workflow <- function(x, step, ...) {
+  step <- as.integer(step)
+  if (step < 1L || step > length(x$steps)) {
+    stop("Step index must be between 1 and ", length(x$steps), ".", call. = FALSE)
+  }
+  x$steps <- x$steps[-step]
+  # validate workflow after removing step
+  validate_unique_steps(x$steps, error_on_warn = FALSE)
+  validate_numeric_entries(x$steps, error_on_warn = FALSE)
+  validate_required_inputs(x$steps, x$input_list, error_on_warn = FALSE)
+  validate_required_steps(x$steps, error_on_warn = FALSE)
+  # update current index if needed
+  if (!is.na(x$current)) {
+    if (x$current == step) {
+      x$current <- NA_integer_
+    } else if (x$current > step) {
+      x$current <- x$current - 1L
+    }
+  }
+  # update entries of all steps to maintain numeric order
+  for (i in seq_along(x$steps)) {
+    x$steps[[i]]$entry <- i
+  }
+  # return updated workflow
+  x
+}
+
 # current_step.workflow <- function(x, ...) {
 #   if (length(x$steps) == 0L || is.na(x$current)) {
 #     return(NULL)

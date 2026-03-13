@@ -29,6 +29,28 @@ update_input_list <- function(x, ...) {
   UseMethod("update_input_list")
 }
 
+#' Add a step to a workflow
+#'
+#' Generic method to add a step to a workflow object.
+#' @param workflow The workflow object to which the step will be added.
+#' @param step The step to add to the workflow.
+#' @return The updated workflow object with the new step added.
+#' @export
+add_step <- function(workflow, step) {
+  UseMethod("add_step")
+}
+
+#' Remove a step from a workflow
+#'
+#' Generic method to remove a step from a workflow object.
+#' @param workflow The workflow object from which the step will be removed.
+#' @param step_name The name of the step to remove from the workflow.
+#' @return The updated workflow object with the specified step removed.
+#' @export
+remove_step <- function(workflow, step_name) {
+  UseMethod("remove_step")
+}
+
 #' Run a workflow step
 #'
 #' This is a generic function to run a workflow step or an entire workflow.
