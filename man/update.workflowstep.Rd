@@ -4,7 +4,7 @@
 \alias{update.workflowstep}
 \title{Update a workflow step}
 \usage{
-\method{update}{workflowstep}(x, workflow_file_paths, value, entry, with_map_field = TRUE, ...)
+\method{update}{workflowstep}(x, workflow_file_paths, value, field, with_map_field = TRUE, ...)
 }
 \arguments{
 \item{x}{The `workflowstep` object to update.}
@@ -13,7 +13,7 @@
 
 \item{value}{The new value to assign to the specified field.}
 
-\item{entry}{The name of the field to update. Must be one of "name", "label", "comments",
+\item{field}{The name of the field to update. Must be one of "name", "label", "comments",
 "command", "args", or "loop".}
 
 \item{with_map_field}{Logical, whether to map the field name using `map_field()`.

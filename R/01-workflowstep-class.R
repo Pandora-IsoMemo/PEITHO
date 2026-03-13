@@ -154,7 +154,7 @@ get_field.workflowstep <- function(x, field, with_map_field = TRUE, ...) {
 #' @param x The `workflowstep` object to update.
 #' @param workflow_file_paths The paths to the workflow files, used for updating related files.
 #' @param value The new value to assign to the specified field.
-#' @param entry The name of the field to update. Must be one of "name", "label", "comments",
+#' @param field The name of the field to update. Must be one of "name", "label", "comments",
 #'  "command", "args", or "loop".
 #' @param with_map_field Logical, whether to map the field name using `map_field()`.
 #'  Defaults to `TRUE`.
@@ -165,41 +165,44 @@ update.workflowstep <- function(
   x,
   workflow_file_paths,
   value,
-  entry,
+  field,
   with_map_field = TRUE,
   ...
 ) {
-  # validate entry
+  # validate field
   if (with_map_field) {
-    if (!entry %in% names(map_field())) {
+    if (!field %in% names(map_field())) {
       allowed_entries <- names(map_field())
       stop(sprintf(
-        "Invalid entry '%s'. Must be one of %s.",
-        entry,
+        "Invalid field '%s'. Must be one of %s.",
+        field,
         paste(allowed_entries, collapse = ", ")
       ), call. = FALSE)
     }
-    entry <- map_field()[[entry]]
+    field <- map_field()[[field]]
   }
-  if (!entry %in% c(unlist(map_field(), use.names = FALSE), "loop")) {
+  if (!field %in% c(unlist(map_field(), use.names = FALSE), "loop")) {
     allowed_entries <- c(unlist(map_field(), use.names = FALSE), "loop")
     stop(sprintf(
-      "Invalid entry '%s'. Must be one of %s.",
-      entry,
+      "Invalid field '%s'. Must be one of %s.",
+      field,
       paste(allowed_entries, collapse = ", ")
     ), call. = FALSE)
   }
 
   # validate value
-  if (!is.character(value) || length(value) != 1L) {
-    stop(sprintf("'%s' must be a single character string.", entry), call. = FALSE)
+  if (field != "entry" && !is.character(value) || length(value) != 1L) {
+    stop(sprintf("'%s' must be a single character string.", field), call. = FALSE)
+  }
+  if (field == "entry" && !is.integer(value) || length(value) != 1L) {
+    stop(sprintf("'%s' must be a single integer.", field), call. = FALSE)
   }
 
   # update the specified field in the workflowstep object
-  x[[entry]] <- value
+  x[[field]] <- value
 
   # update required fields also here, to keep them in sync
-  if (entry == "args") {
+  if (field == "args") {
     PEITHO:::logDebug("Parsing required fields from args string for step %d", x$entry)
     required_fields <- parse_required_fields(x$args)
 
@@ -213,15 +216,14 @@ update.workflowstep <- function(
 
   # update i-th step
   logDebug(
-    "Updating workflow file '%s': step %d, entry '%s' with value '%s'",
+    "Updating workflow file '%s': step %d, field '%s' with value '%s'",
     basename(workflow_file_paths$commands_path),
     x$entry,
-    entry,
+    field,
     value
   )
-  # do all entries match?
-  # align id <> entry? Can we update the id right now? -> no, cannot yet change order or id/entry
-  commands_list[[x$entry]][[entry]] <- value
+  commands_list[[x$entry]][[field]] <- value
+  # write back to file
   write_json(
     commands_list,
     path = workflow_file_paths$commands_path,

@@ -33,7 +33,10 @@ workflow_table_server <- function(id, wf) {
           scrollY = "360px",
           scrollCollapse = TRUE
         ),
-        editable = "cell"
+        editable = list(
+          target = "cell",
+          disable = list(columns = c(0))  # except first column
+        )
       )
     })
 

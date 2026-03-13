@@ -4,17 +4,17 @@
 \alias{update.workflow}
 \title{Update a workflow step with a new value}
 \usage{
-\method{update}{workflow}(x, step, entry, value, ...)
+\method{update}{workflow}(x, step, field, value, ...)
 }
 \arguments{
 \item{x}{A `workflow` object to update.}
 
 \item{step}{The index of the step to update.}
 
-\item{entry}{The name of the entry to update (one of "name", "label", "comments", "command",
+\item{field}{The name of the field to update (one of "name", "label", "comments", "command",
 "args", "loop")}
 
-\item{value}{The new value to assign to the specified entry.}
+\item{value}{The new value to assign to the specified field.}
 
 \item{...}{Additional arguments (not used).}
 }
@@ -22,6 +22,6 @@
 The updated `workflow` object.
 }
 \description{
-This function updates a specific entry of a `workflowstep` object with a new value. It is used
+This function updates a specific field of a `workflowstep` object with a new value. It is used
 to modify step details such as name, label, comments, command, parameters, or loop settings.
 }

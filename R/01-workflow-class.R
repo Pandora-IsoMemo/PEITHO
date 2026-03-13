@@ -440,23 +440,23 @@ import_workflow <- function(
 
 #' Update a workflow step with a new value
 #'
-#' This function updates a specific entry of a `workflowstep` object with a new value. It is used
+#' This function updates a specific field of a `workflowstep` object with a new value. It is used
 #' to modify step details such as name, label, comments, command, parameters, or loop settings.
 #'
 #' @param x A `workflow` object to update.
 #' @param step The index of the step to update.
-#' @param value The new value to assign to the specified entry.
-#' @param entry The name of the entry to update (one of "name", "label", "comments", "command",
+#' @param value The new value to assign to the specified field.
+#' @param field The name of the field to update (one of "name", "label", "comments", "command",
 #'  "args", "loop")
 #' @param ... Additional arguments (not used).
 #' @return The updated `workflow` object.
 #' @export
-update.workflow <- function(x, step, entry, value, ...) {
-  # pass entry & value NOT a whole step -> we need to update the wf object AND the commands json
+update.workflow <- function(x, step, field, value, ...) {
+  # pass field & value NOT a whole step -> we need to update the wf object AND the commands json
   # get commands file path
   wf_file_paths <- x$workflow_file_paths
   # update the steps
-  updated_step <- update(x$steps[[step]], wf_file_paths, entry = entry, value = value,  ...)
+  updated_step <- update(x$steps[[step]], wf_file_paths, field = field, value = value,  ...)
   x$steps[[step]] <- updated_step
   # validate updated workflow
   validate_unique_steps(x$steps, error_on_warn = FALSE)
