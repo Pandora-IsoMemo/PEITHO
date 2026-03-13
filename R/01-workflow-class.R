@@ -50,6 +50,8 @@ workflow_file_paths <- function(
 #' @param input_list A list of inputs for the workflow steps.
 #' @param steps   A list of `workflowstep` objects defining the steps of the workflow.
 #' @param current The index of the current step in the workflow.
+#' @param error_on_warn Logical; if `TRUE`, validation issues will raise errors.
+#'  If `FALSE`, they will raise warnings instead.
 #' @param ...     Additional metadata to store with the workflow.
 #' @return A `workflow` object.
 #' @export
@@ -60,6 +62,7 @@ new_workflow <- function(
   input_list = list(),
   steps = list(),
   current = if (length(steps)) 1L else NA_integer_,
+  error_on_warn = FALSE,
   ...
 ) {
   # 1) Decide where steps come from
@@ -114,8 +117,11 @@ new_workflow <- function(
   }
 
   # 2) Validations, if not valid stopping with error
-  validate_workflow_steps(steps)
-  validate_unique_steps(steps)
+  validate_workflow_steps(steps, error_on_warn = TRUE)
+  validate_unique_steps(steps, error_on_warn = error_on_warn)
+  validate_numeric_entries(steps, error_on_warn = error_on_warn)
+  validate_required_inputs(steps, input_list, error_on_warn = error_on_warn)
+  validate_required_steps(steps, error_on_warn = error_on_warn)
 
   # 3) Determine current step
   current <- validate_current_index(current, length(steps))
@@ -242,33 +248,120 @@ validate_workflow_file_paths <- function(workflow_file_paths) {
   invisible(TRUE)
 }
 
-validate_workflow_steps <- function(steps) {
+validate_workflow_steps <- function(steps, error_on_warn = c(TRUE, FALSE)) {
+  error_on_warn <- match.arg(error_on_warn)
   if (!is.list(steps)) {
-    stop("'steps' must be a list.", call. = FALSE)
+    msg <- "'steps' must be a list."
+    if (error_on_warn) {
+      stop(msg, call. = FALSE)
+    }
+    warning(msg, immediate. = TRUE, call. = FALSE)
   }
   if (length(steps) == 0L) return(invisible(TRUE))
 
   ok <- vapply(steps, inherits, logical(1), what = "workflowstep")
   if (!all(ok)) {
-    stop("All elements of 'steps' must be of class 'workflowstep'.", call. = FALSE)
+    msg <- "All elements of 'steps' must be of class 'workflowstep'."
+    if (error_on_warn) {
+      stop(msg, call. = FALSE)
+    }
+    warning(msg, immediate. = TRUE, call. = FALSE)
   }
   invisible(TRUE)
 }
 
-validate_unique_steps <- function(steps, id_fields = c("entry", "name")) {
+validate_unique_steps <- function(
+  steps,
+  id_fields = c("entry", "name"),
+  error_on_warn = c(TRUE, FALSE)
+) {
   if (!length(steps)) return(invisible(TRUE))
+  error_on_warn <- match.arg(error_on_warn)
+
   for (field in id_fields) {
     vals <- vapply(steps, function(s) as.character(s[[field]]), character(1))
     if (anyDuplicated(vals)) {
       dup <- unique(vals[duplicated(vals)])
-      stop(sprintf(
+      msg <- sprintf(
         "Workflow has duplicate step %s(s): %s",
         field,
         paste(dup, collapse = ", ")
-      ), call. = FALSE)
+      )
+      if (error_on_warn) {
+        stop(msg, call. = FALSE)
+      }
+      warning(msg, immediate. = TRUE, call. = FALSE)
     }
   }
   invisible(TRUE)
+}
+
+validate_numeric_entries <- function(steps, error_on_warn = c(TRUE, FALSE)) {
+  if (!length(steps)) return(invisible(TRUE))
+  error_on_warn <- match.arg(error_on_warn)
+  entries <- vapply(steps, function(s) s$entry, integer(1))
+  if (any(is.na(entries))) {
+    msg <- "All steps must have a numeric 'entry' field."
+    if (error_on_warn) {
+      stop(msg, call. = FALSE)
+    }
+    warning(msg, immediate. = TRUE, call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+validate_required_inputs <- function(steps, input_list, error_on_warn = c(TRUE, FALSE)) {
+  if (!length(steps)) return(invisible(TRUE))
+  error_on_warn <- match.arg(error_on_warn)
+  # extract required_fields and check if exist
+  required_inputs <- unique(unlist(lapply(steps, function(s) {
+    x <- s[["required_inputs"]]
+    if (!is.character(x)) {
+      msg <- sprintf("'required_inputs' in step '%s' must be a character vector.", s$name)
+      if (error_on_warn) {
+        stop(msg, call. = FALSE)
+      }
+      warning(msg, immediate. = TRUE, call. = FALSE)
+    }
+    x
+  }), use.names = FALSE))
+
+  # check if required inputs exist in input_list
+  missing_inputs <- setdiff(required_inputs, names(input_list))
+  if (length(missing_inputs)) {
+    msg <- sprintf("Missing required inputs: %s", paste(missing_inputs, collapse = ", "))
+    if (error_on_warn) {
+      stop(msg, call. = FALSE)
+    }
+    warning(msg, immediate. = TRUE, call. = FALSE)
+  }
+}
+
+validate_required_steps <- function(steps, error_on_warn = c(TRUE, FALSE)) {
+  if (!length(steps)) return(invisible(TRUE))
+  error_on_warn <- match.arg(error_on_warn)
+  required_steps <- unique(unlist(lapply(steps, function(s) {
+    x <- s[["required_steps"]]
+    if (!is.character(x)) {
+      msg <- sprintf("'required_steps' in step '%s' must be a character vector.", s$name)
+      if (error_on_warn) {
+        stop(msg, call. = FALSE)
+      }
+      warning(msg, immediate. = TRUE, call. = FALSE)
+    }
+    x
+  }), use.names = FALSE))
+
+  # check if required steps exist in steps
+  step_names <- vapply(steps, function(s) s$name, character(1))
+  missing_steps <- setdiff(required_steps, step_names)
+  if (length(missing_steps)) {
+    msg <- sprintf("Missing required steps: %s", paste(missing_steps, collapse = ", "))
+    if (error_on_warn) {
+      stop(msg, call. = FALSE)
+    }
+    warning(msg, immediate. = TRUE, call. = FALSE)
+  }
 }
 
 validate_current_index <- function(current, n_steps) {
@@ -355,6 +448,11 @@ update.workflow <- function(x, step, entry, value, ...) {
   # update the steps
   updated_step <- update(x$steps[[step]], wf_file_paths, entry = entry, value = value,  ...)
   x$steps[[step]] <- updated_step
+  # validate updated workflow
+  validate_unique_steps(x$steps, error_on_warn = FALSE)
+  validate_numeric_entries(x$steps, error_on_warn = FALSE)
+  validate_required_inputs(x$steps, x$input_list, error_on_warn = FALSE)
+  validate_required_steps(x$steps, error_on_warn = FALSE)
   # return updated workflow
   x
 }
@@ -505,36 +603,10 @@ run.workflow <- function(
     state <- new_workflowstate(initial_input = state)
   }
 
-  # extract required_fields and check if exist
-  required_inputs <- unique(unlist(lapply(x$steps, function(s) {
-    x <- s[["required_inputs"]]
-    if (!is.character(x)) stop("'required_inputs' must be a character vector.")
-    x
-  }), use.names = FALSE))
-
-  required_steps <- unique(unlist(lapply(x$steps, function(s) {
-    x <- s[["required_steps"]]
-    if (!is.character(x)) stop("'required_steps' must be a character vector.")
-    x
-  }), use.names = FALSE))
-
-  # check if required inputs exist in input_list
-  missing_inputs <- setdiff(required_inputs, names(x$input_list))
-  if (length(missing_inputs)) {
-    stop(
-      "Missing required inputs: ", paste(missing_inputs, collapse = ", "),
-      call. = FALSE
-    )
-  }
-  # check if required steps exist in steps
-  step_names <- vapply(x$steps, function(s) s$name, character(1))
-  missing_steps <- setdiff(required_steps, step_names)
-  if (length(missing_steps)) {
-    stop(
-      "Missing required steps: ", paste(missing_steps, collapse = ", "),
-      call. = FALSE
-    )
-  }
+  validate_unique_steps(x$steps, error_on_warn = TRUE)
+  validate_numeric_entries(x$steps, error_on_warn = TRUE)
+  validate_required_inputs(x$steps, x$input_list, error_on_warn = TRUE)
+  validate_required_steps(x$steps, error_on_warn = TRUE)
 
   # RUN workflow steps
   from <- max(1L, as.integer(from))
