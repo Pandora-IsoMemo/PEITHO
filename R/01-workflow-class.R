@@ -323,7 +323,7 @@ validate_numeric_entries <- function(steps, error_on_warn = TRUE) {
   if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
     stop("'error_on_warn' must be a single logical value.", call. = FALSE)
   }
-  entries <- vapply(steps, function(s) s$entry, integer(1))
+  entries <- vapply(steps, function(s) as.integer(s$entry), integer(1))
   if (any(is.na(entries))) {
     msg <- "All steps must have a numeric 'entry' field."
     if (error_on_warn) {
