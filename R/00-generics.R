@@ -57,9 +57,10 @@ add_step <- function(x, new_step, position, ...) {
 #' Generic method to remove a step from a workflow object.
 #' @param x The workflow object from which the step will be removed.
 #' @param position The position of the step to remove from the workflow.
+#' @param ... Additional arguments passed to methods.
 #' @return The updated workflow object with the specified step removed.
 #' @export
-remove_step <- function(x, position) {
+remove_step <- function(x, position, ...) {
   UseMethod("remove_step")
 }
 
