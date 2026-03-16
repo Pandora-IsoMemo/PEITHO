@@ -610,12 +610,17 @@ remove_step.workflow <- function(x, position, ...) {
   # update the commands.json
   updated_commands <- as.commands_record(x)
 
-  write_json(
-    updated_commands,
-    path = x$workflow_file_paths$commands_path,
-    auto_unbox = TRUE,
-    pretty = TRUE
-  )
+  # Only write to disk for file-backed workflows with a valid commands_path
+  if (!is.null(x$workflow_file_paths) &&
+      length(x$workflow_file_paths) > 0L &&
+      !is.null(x$workflow_file_paths$commands_path)) {
+    write_json(
+      updated_commands,
+      path = x$workflow_file_paths$commands_path,
+      auto_unbox = TRUE,
+      pretty = TRUE
+    )
+  }
 
   # return updated workflow
   x
