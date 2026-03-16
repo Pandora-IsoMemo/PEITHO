@@ -275,6 +275,7 @@ validate_workflow_steps <- function(steps, error_on_warn = TRUE) {
       stop(msg, call. = FALSE)
     }
     warning(msg, immediate. = TRUE, call. = FALSE)
+    return(invisible(TRUE))
   }
   if (length(steps) == 0L) return(invisible(TRUE))
 
