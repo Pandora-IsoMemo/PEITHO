@@ -122,23 +122,22 @@ as.data.frame.workflowstep <- function(x, ...) {
 
 #' Convert a workflowstep to commands.json record format
 #'
-#' This method converts a `workflowstep` object into a one-row data frame matching
-#' the schema expected by commands.json.
+#' This method converts a `workflowstep` object into a list format suitable for writing
+#' to a `commands.json` file, which is used to define the workflow steps in a structured way.
 #' @param x A `workflowstep` object.
 #' @param ... Additional arguments (not used).
-#' @return A data frame with one row representing the workflow step for commands.json.
+#' @return A list representing the workflow step for commands.json.
 #' @export
 as.commands_record.workflowstep <- function(x, ...) {
-  data.frame(
-    "entry"         = x$entry,
-    "name"          = x$name,
-    "label"         = x$label,
-    "comments"      = x$comments,
-    "command"       = x$command,
-    "args"          = x$args,
-    "loop"          = x$loop,
-    "prompt"        = "",
-    stringsAsFactors = FALSE
+  list(
+    entry    = as.integer(x$entry),
+    name     = as.character(x$name),
+    label    = as.character(x$label),
+    comments = as.character(x$comments),
+    command  = as.character(x$command),
+    args     = as.character(x$args),
+    loop     = as.character(x$loop),
+    prompt   = ""
   )
 }
 

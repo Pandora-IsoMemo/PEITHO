@@ -193,17 +193,16 @@ as.data.frame.workflow <- function(x, ...) {
 
 #' Convert a workflow object to commands.json record format
 #'
-#' This method converts a `workflow` object into a data frame summarizing its steps
-#' in commands.json format.
+#' This method converts a `workflow` object into a list format suitable for writing to a
+#' `commands.json` file, which is used to define the workflow steps in a structured way.
+#' It applies the conversion to each step in the workflow.
 #'
 #' @param x A `workflow` object.
 #' @param ... Additional arguments (not used).
-#' @return A data frame summarizing workflow steps for commands.json.
+#' @return A list summarizing workflow steps for commands.json.
 #' @export
 as.commands_record.workflow <- function(x, ...) {
-  steps <- x$steps
-  df_list <- lapply(steps, as.commands_record.workflowstep)
-  do.call(rbind, df_list)
+  lapply(x$steps, as.commands_record.workflowstep)
 }
 
 step_name_to_position <- function(x, step_name) {

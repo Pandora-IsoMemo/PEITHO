@@ -12,9 +12,9 @@
 \item{...}{Additional arguments (not used).}
 }
 \value{
-A data frame with one row representing the workflow step for commands.json.
+A list representing the workflow step for commands.json.
 }
 \description{
-This method converts a `workflowstep` object into a one-row data frame matching
-the schema expected by commands.json.
+This method converts a `workflowstep` object into a list format suitable for writing
+to a `commands.json` file, which is used to define the workflow steps in a structured way.
 }

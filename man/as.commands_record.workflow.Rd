@@ -12,9 +12,10 @@
 \item{...}{Additional arguments (not used).}
 }
 \value{
-A data frame summarizing workflow steps for commands.json.
+A list summarizing workflow steps for commands.json.
 }
 \description{
-This method converts a `workflow` object into a data frame summarizing its steps
-in commands.json format.
+This method converts a `workflow` object into a list format suitable for writing to a
+`commands.json` file, which is used to define the workflow steps in a structured way.
+It applies the conversion to each step in the workflow.
 }
