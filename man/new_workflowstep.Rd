@@ -11,7 +11,7 @@ new_workflowstep(
   label = NULL,
   comments = "",
   args = "",
-  loop = "",
+  loop = "auto",
   env = parent.frame(),
   ...
 )

@@ -29,7 +29,7 @@ new_workflowstep <- function(
   label           = NULL,
   comments        = "",
   args            = "",          # original argument string from workflow file, for reference
-  loop            = "",          # loop variable name (if any)
+  loop            = "auto",          # loop variable name (if any)
   env             = parent.frame(),  # where to look up command
   ...
 ) {

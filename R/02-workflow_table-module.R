@@ -12,12 +12,10 @@ workflow_table_ui <- function(id, title = "") {
     fluidRow(
       column(
         width = 4,
-        style = "margin-bottom: -3em",
         selectInput(ns("selected_row"), "Select row", choices = NULL, width = "100%")
       ),
       column(
         width = 4,
-        style = "margin-bottom: -3em",
         br(),
         div(
           class = "d-flex justify-content-end gap-2",
@@ -26,6 +24,7 @@ workflow_table_ui <- function(id, title = "") {
         )
       )
     ),
+    br(),
     DT::DTOutput(ns("tbl"))
   )
 }
@@ -45,6 +44,7 @@ workflow_table_server <- function(id, wf) {
         as.data.frame(wf_val),
         rownames = FALSE, # do NOT change to TRUE: the row indices will be messed up when editing
         options = list(
+          dom = "t",              # hide default search/length/pagination row
           paging = FALSE,
           scrollY = "360px",
           scrollCollapse = TRUE

@@ -540,20 +540,21 @@ add_step.workflow <- function(x, new_step, position = length(x$steps) + 1L, ...)
     stop("Position must be between 1 and ", length(x$steps) + 1L, ".", call. = FALSE)
   }
   x$steps <- append(x$steps, list(new_step), after = position - 1L)
+  # update entries of all steps to maintain numeric order
+  for (i in seq_along(x$steps)) {
+    x$steps[[i]]$entry <- i
+  }
   # validate workflow after adding step
   validate_unique_steps(x$steps, error_on_warn = FALSE)
   validate_numeric_entries(x$steps, error_on_warn = FALSE)
   validate_required_inputs(x$steps, x$input_list, error_on_warn = FALSE)
   validate_required_steps(x$steps, error_on_warn = FALSE)
+
   # update current index if needed
   if (is.na(x$current)) {
     x$current <- position
   } else if (position <= x$current) {
     x$current <- x$current + 1L
-  }
-  # update entries of all steps to maintain numeric order
-  for (i in seq_along(x$steps)) {
-    x$steps[[i]]$entry <- i
   }
 
   # update the commands.json
