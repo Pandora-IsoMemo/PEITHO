@@ -21,7 +21,8 @@ workflow_file_paths(
 
 \item{results}{Name of the results summary file (default: "results.json").}
 
-\item{functions}{Name of the R script file containing custom functions (default: "functions.R").}
+\item{functions}{Name of the R script file containing custom functions (default: "functions.R").
+Use `NULL` to skip loading a custom functions file.}
 }
 \value{
 A list with full paths to the specified files.

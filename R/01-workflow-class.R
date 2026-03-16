@@ -10,6 +10,7 @@
 #' @param commands Name of the commands file (default: "commands.json").
 #' @param results Name of the results summary file (default: "results.json").
 #' @param functions Name of the R script file containing custom functions (default: "functions.R").
+#'  Use `NULL` to skip loading a custom functions file.
 #' @return A list with full paths to the specified files.
 #' @export
 workflow_file_paths <- function(
@@ -28,14 +29,16 @@ workflow_file_paths <- function(
   if (inputs == "")    inputs    <- cfg$inputs
   if (commands == "")  commands  <- cfg$commands
   if (results == "")   results   <- cfg$results
-  if (functions == "") functions <- cfg$functions
+  if (!is.null(functions) && functions == "") functions <- cfg$functions
+
+  functions_path <- if (is.null(functions)) NULL else file.path(path, functions)
 
   list(
     path_to_folder = path,
     inputs_path    = file.path(path, inputs),
     commands_path  = file.path(path, commands),
     results_path   = file.path(path, results),
-    functions_path = file.path(path, functions)
+    functions_path = functions_path
   )
 }
 
