@@ -1,7 +1,7 @@
 [
   {
     "entry": 1,
-    "name": "1_Split",
+    "name": "Split",
     "label": "Split addresses",
     "comments": "",
     "command": "simple_split",
@@ -11,47 +11,47 @@
   },
   {
     "entry": 2,
-    "name": "2_get_content",
+    "name": "get_content",
     "label": "get_content",
     "comments": "",
     "command": "fetch_WebText",
-    "args": "url=@#*L*#@1_Split@#*L*#@",
+    "args": "url=@#*L*#@Split@#*L*#@",
     "loop": "auto",
     "prompt": ""
   },
   {
     "entry": 3,
-    "name": "3_paste_urls",
+    "name": "paste_urls",
     "label": "paste_urls",
     "comments": "",
     "command": "paste",
-    "args": "x=@#*L*#@2_get_content@#*L*#@, collapse=\\n",
+    "args": "x=@#*L*#@get_content@#*L*#@, collapse=\\n",
     "loop": "no",
     "prompt": ""
   },
   {
     "entry": 4,
-    "name": "4_substitute_content",
+    "name": "substitute_content",
     "label": "substitute_content",
     "comments": "",
     "command": "gsub",
-    "args": "pattern=\"e\", replacement=\"HALLO\", x=@#*L*#@3_paste_urls@#*L*#@",
+    "args": "pattern=\"e\", replacement=\"HALLO\", x=@#*L*#@paste_urls@#*L*#@",
     "loop": "no",
     "prompt": ""
   },
   {
     "entry": 5,
-    "name": "5_split_content",
+    "name": "split_content",
     "label": "split_content",
     "comments": "",
     "command": "simple_split",
-    "args": "x=@#*L*#@4_substitute_content@#*L*#@, split=\"HALLO\"",
+    "args": "x=@#*L*#@substitute_content@#*L*#@, split=\"HALLO\"",
     "loop": "no",
     "prompt": ""
   },
   {
     "entry": 6,
-    "name": "6_Split",
+    "name": "Split_2",
     "label": "Split addresses",
     "comments": "",
     "command": "simple_split",
@@ -61,31 +61,31 @@
   },
   {
     "entry": 7,
-    "name": "7_get_content",
+    "name": "get_content_2",
     "label": "get_content",
     "comments": "",
     "command": "fetch_WebText",
-    "args": "url=@#*L*#@6_Split@#*L*#@",
+    "args": "url=@#*L*#@Split_2@#*L*#@",
     "loop": "auto",
     "prompt": ""
   },
   {
     "entry": 8,
-    "name": "8_paste_urls",
+    "name": "paste_urls_2",
     "label": "paste_urls",
     "comments": "",
     "command": "paste",
-    "args": "x=@#*L*#@7_get_content@#*L*#@, collapse=\\n",
+    "args": "x=@#*L*#@get_content_2@#*L*#@, collapse=\\n",
     "loop": "no",
     "prompt": ""
   },
   {
     "entry": 9,
-    "name": "9_paste_content",
+    "name": "paste_content",
     "label": "paste_content",
     "comments": "",
     "command": "paste",
-    "args": "x=@#*L*#@4_substitute_content@#*L*#@, y=@#*L*#@8_paste_urls@#*L*#@, sep=\\n---\\n",
+    "args": "x=@#*L*#@substitute_content@#*L*#@, y=@#*L*#@paste_urls_2@#*L*#@, sep=\\n---\\n",
     "loop": "no",
     "prompt": ""
   }

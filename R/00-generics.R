@@ -29,6 +29,41 @@ update_input_list <- function(x, ...) {
   UseMethod("update_input_list")
 }
 
+#' Convert an object to commands.json record format
+#'
+#' Generic method to create records matching the commands.json schema.
+#' @param x The object to convert.
+#' @param ... Additional arguments passed to methods.
+#' @export
+as.commands_record <- function(x, ...) {
+  UseMethod("as.commands_record")
+}
+
+#' Add a step to a workflow
+#'
+#' Generic method to add a step to a workflow object.
+#' @param x The workflow object to which the step will be added.
+#' @param new_step The step to add to the workflow.
+#' @param position The position in the workflow where the new step should be added.
+#' @param ... Additional arguments passed to methods.
+#' @return The updated workflow object with the new step added.
+#' @export
+add_step <- function(x, new_step, position, ...) {
+  UseMethod("add_step")
+}
+
+#' Remove a step from a workflow
+#'
+#' Generic method to remove a step from a workflow object.
+#' @param x The workflow object from which the step will be removed.
+#' @param position The position of the step to remove from the workflow.
+#' @param ... Additional arguments passed to methods.
+#' @return The updated workflow object with the specified step removed.
+#' @export
+remove_step <- function(x, position, ...) {
+  UseMethod("remove_step")
+}
+
 #' Run a workflow step
 #'
 #' This is a generic function to run a workflow step or an entire workflow.

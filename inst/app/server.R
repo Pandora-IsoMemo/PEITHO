@@ -56,7 +56,10 @@ shinyServer(function(input, output, session) {
     bindEvent(imported_wf())
 
   observeEvent(input$example, {
-    example_wf <- new_workflow(name = "example_workflow") |>
+    example_wf <- new_workflow(
+      name = "example_workflow",
+      workflow_file_paths = PEITHO:::workflow_file_paths(functions = NULL)
+    ) |>
       shinyTools::shinyTryCatch(
         errorTitle = "Error creating workflow",
         warningTitle = "Warning creating workflow"

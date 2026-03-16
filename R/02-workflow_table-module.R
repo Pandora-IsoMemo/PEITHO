@@ -9,6 +9,22 @@ workflow_table_ui <- function(id, title = "") {
 
   tagList(
     tags$h4(title),
+    fluidRow(
+      column(
+        width = 4,
+        selectInput(ns("selected_row"), "Select row", choices = NULL, width = "100%")
+      ),
+      column(
+        width = 4,
+        br(),
+        div(
+          class = "d-flex justify-content-end gap-2",
+          actionButton(ns("add_after"), "Add new row after", icon = icon("plus")),
+          actionButton(ns("remove_row"), "Remove row",    icon = icon("trash"))
+        )
+      )
+    ),
+    br(),
     DT::DTOutput(ns("tbl"))
   )
 }
@@ -21,7 +37,6 @@ workflow_table_ui <- function(id, title = "") {
 #' @export
 workflow_table_server <- function(id, wf) {
   moduleServer(id, function(input, output, session) {
-    ns <- session$ns
     output$tbl <- DT::renderDT({
       wf_val <- wf()
       if (is.null(wf_val)) return(NULL)
@@ -29,11 +44,40 @@ workflow_table_server <- function(id, wf) {
         as.data.frame(wf_val),
         rownames = FALSE, # do NOT change to TRUE: the row indices will be messed up when editing
         options = list(
+          dom = "t",              # hide default search/length/pagination row
           paging = FALSE,
           scrollY = "360px",
           scrollCollapse = TRUE
         ),
-        editable = "cell"
+        editable = list(
+          target = "cell",
+          disable = list(columns = c(0))  # except first column
+        )
+      )
+    })
+
+    observe({
+      wf_val <- wf()
+      if (is.null(wf_val)) {
+        updateSelectInput(session, "selected_row", choices = character(0), selected = character(0))
+        return()
+      }
+
+      wf_df <- as.data.frame(wf_val)
+      n <- nrow(wf_df)
+      if (n == 0L) {
+        updateSelectInput(session, "selected_row", choices = character(0), selected = character(0))
+        return()
+      }
+
+      selected <- resolve_selected_row(isolate(input$selected_row), n_rows = n)
+      choices <- build_row_selector_choices(wf_df)
+
+      updateSelectInput(
+        session,
+        "selected_row",
+        choices = choices,
+        selected = selected
       )
     })
 
@@ -56,6 +100,38 @@ workflow_table_server <- function(id, wf) {
       wf_val <- update(wf_val, row_idx, field_name, new_value) |>
         shinyTryCatch(errorTitle = "Editing Workflow failed")
 
+      wf(wf_val)
+    })
+
+    observeEvent(input$remove_row, {
+      wf_val <- wf()
+      if (is.null(wf_val)) return()
+
+      row_idx <- as.integer(input$selected_row)
+      wf_df <- as.data.frame(wf_val)
+      if (is.na(row_idx) || row_idx < 1L || row_idx > nrow(wf_df)) return()
+
+      wf_val <- remove_step(wf_val, row_idx) |>
+        shinyTryCatch(errorTitle = "Removing step failed")
+      wf(wf_val)
+    })
+
+    observeEvent(input$add_after, {
+      wf_val <- wf()
+      if (is.null(wf_val)) return()
+
+      row_idx <- as.integer(input$selected_row)
+      wf_df <- as.data.frame(wf_val)
+      if (is.na(row_idx) || row_idx < 1L || row_idx > nrow(wf_df)) return()
+
+      new_step <- new_workflowstep(
+        entry   = row_idx + 1L,
+        command = "identity",   # placeholder — user edits via cell
+        name    = paste("Step", row_idx + 1L)
+      )
+
+      wf_val <- add_step(wf_val, new_step, position = row_idx + 1L) |>
+        shinyTryCatch(errorTitle = "Adding step failed")
       wf(wf_val)
     })
   })

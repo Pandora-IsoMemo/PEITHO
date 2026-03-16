@@ -10,6 +10,7 @@
 #' @param commands Name of the commands file (default: "commands.json").
 #' @param results Name of the results summary file (default: "results.json").
 #' @param functions Name of the R script file containing custom functions (default: "functions.R").
+#'  Use `NULL` to skip loading a custom functions file.
 #' @return A list with full paths to the specified files.
 #' @export
 workflow_file_paths <- function(
@@ -28,14 +29,16 @@ workflow_file_paths <- function(
   if (inputs == "")    inputs    <- cfg$inputs
   if (commands == "")  commands  <- cfg$commands
   if (results == "")   results   <- cfg$results
-  if (functions == "") functions <- cfg$functions
+  if (!is.null(functions) && functions == "") functions <- cfg$functions
+
+  functions_path <- if (is.null(functions)) NULL else file.path(path, functions)
 
   list(
     path_to_folder = path,
     inputs_path    = file.path(path, inputs),
     commands_path  = file.path(path, commands),
     results_path   = file.path(path, results),
-    functions_path = file.path(path, functions)
+    functions_path = functions_path
   )
 }
 
@@ -50,6 +53,8 @@ workflow_file_paths <- function(
 #' @param input_list A list of inputs for the workflow steps.
 #' @param steps   A list of `workflowstep` objects defining the steps of the workflow.
 #' @param current The index of the current step in the workflow.
+#' @param error_on_warn Logical; if `TRUE`, validation issues will raise errors.
+#'  If `FALSE`, they will raise warnings instead.
 #' @param ...     Additional metadata to store with the workflow.
 #' @return A `workflow` object.
 #' @export
@@ -60,6 +65,7 @@ new_workflow <- function(
   input_list = list(),
   steps = list(),
   current = if (length(steps)) 1L else NA_integer_,
+  error_on_warn = FALSE,
   ...
 ) {
   # 1) Decide where steps come from
@@ -114,8 +120,11 @@ new_workflow <- function(
   }
 
   # 2) Validations, if not valid stopping with error
-  validate_workflow_steps(steps)
-  validate_unique_steps(steps)
+  validate_workflow_steps(steps, error_on_warn = TRUE)
+  validate_unique_steps(steps, error_on_warn = error_on_warn)
+  validate_numeric_entries(steps, error_on_warn = error_on_warn)
+  validate_required_inputs(steps, input_list, error_on_warn = error_on_warn)
+  validate_required_steps(steps, error_on_warn = error_on_warn)
 
   # 3) Determine current step
   current <- validate_current_index(current, length(steps))
@@ -185,6 +194,20 @@ as.data.frame.workflow <- function(x, ...) {
   do.call(rbind, df_list)
 }
 
+#' Convert a workflow object to commands.json record format
+#'
+#' This method converts a `workflow` object into a list format suitable for writing to a
+#' `commands.json` file, which is used to define the workflow steps in a structured way.
+#' It applies the conversion to each step in the workflow.
+#'
+#' @param x A `workflow` object.
+#' @param ... Additional arguments (not used).
+#' @return A list summarizing workflow steps for commands.json.
+#' @export
+as.commands_record.workflow <- function(x, ...) {
+  lapply(x$steps, as.commands_record.workflowstep)
+}
+
 step_name_to_position <- function(x, step_name) {
   step_names <- vapply(x$steps, function(s) s$name, character(1))
   match(step_name, step_names)
@@ -200,11 +223,11 @@ step_name_to_position <- function(x, step_name) {
 #' @return The value of the specified field from the workflow or a specific step.
 #' @export
 get_field.workflow <- function(x, field, step_name, ...) {
-  step_position <- step_name_to_position(x, step_name)
-  if (is.na(step_position)) {
+  position <- step_name_to_position(x, step_name)
+  if (is.na(position)) {
     stop("Step with name '", step_name, "' not found in workflow.")
   }
-  step <- x$steps[[step_position]]
+  step <- x$steps[[position]]
   get_field(step, field)
 }
 
@@ -242,33 +265,131 @@ validate_workflow_file_paths <- function(workflow_file_paths) {
   invisible(TRUE)
 }
 
-validate_workflow_steps <- function(steps) {
+validate_workflow_steps <- function(steps, error_on_warn = TRUE) {
+  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
+    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
+  }
   if (!is.list(steps)) {
-    stop("'steps' must be a list.", call. = FALSE)
+    msg <- "'steps' must be a list."
+    if (error_on_warn) {
+      stop(msg, call. = FALSE)
+    }
+    warning(msg, immediate. = TRUE, call. = FALSE)
+    return(invisible(TRUE))
   }
   if (length(steps) == 0L) return(invisible(TRUE))
 
   ok <- vapply(steps, inherits, logical(1), what = "workflowstep")
   if (!all(ok)) {
-    stop("All elements of 'steps' must be of class 'workflowstep'.", call. = FALSE)
+    msg <- "All elements of 'steps' must be of class 'workflowstep'."
+    if (error_on_warn) {
+      stop(msg, call. = FALSE)
+    }
+    warning(msg, immediate. = TRUE, call. = FALSE)
   }
   invisible(TRUE)
 }
 
-validate_unique_steps <- function(steps, id_fields = c("entry", "name")) {
+validate_unique_steps <- function(
+  steps,
+  id_fields = c("entry", "name"),
+  error_on_warn = TRUE
+) {
   if (!length(steps)) return(invisible(TRUE))
+  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
+    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
+  }
+
   for (field in id_fields) {
     vals <- vapply(steps, function(s) as.character(s[[field]]), character(1))
     if (anyDuplicated(vals)) {
       dup <- unique(vals[duplicated(vals)])
-      stop(sprintf(
+      msg <- sprintf(
         "Workflow has duplicate step %s(s): %s",
         field,
         paste(dup, collapse = ", ")
-      ), call. = FALSE)
+      )
+      if (error_on_warn) {
+        stop(msg, call. = FALSE)
+      }
+      warning(msg, immediate. = TRUE, call. = FALSE)
     }
   }
   invisible(TRUE)
+}
+
+validate_numeric_entries <- function(steps, error_on_warn = TRUE) {
+  if (!length(steps)) return(invisible(TRUE))
+  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
+    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
+  }
+  entries <- vapply(steps, function(s) as.integer(s$entry), integer(1))
+  if (any(is.na(entries))) {
+    msg <- "All steps must have a numeric 'entry' field."
+    if (error_on_warn) {
+      stop(msg, call. = FALSE)
+    }
+    warning(msg, immediate. = TRUE, call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+validate_required_inputs <- function(steps, input_list, error_on_warn = TRUE) {
+  if (!length(steps)) return(invisible(TRUE))
+  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
+    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
+  }
+  # extract required_fields and check if exist
+  required_inputs <- unique(unlist(lapply(steps, function(s) {
+    x <- s[["required_inputs"]]
+    if (!is.character(x)) {
+      msg <- sprintf("'required_inputs' in step '%s' must be a character vector.", s$name)
+      if (error_on_warn) {
+        stop(msg, call. = FALSE)
+      }
+      warning(msg, immediate. = TRUE, call. = FALSE)
+    }
+    x
+  }), use.names = FALSE))
+
+  # check if required inputs exist in input_list
+  missing_inputs <- setdiff(required_inputs, names(input_list))
+  if (length(missing_inputs)) {
+    msg <- sprintf("Missing required inputs: %s", paste(missing_inputs, collapse = ", "))
+    if (error_on_warn) {
+      stop(msg, call. = FALSE)
+    }
+    warning(msg, immediate. = TRUE, call. = FALSE)
+  }
+}
+
+validate_required_steps <- function(steps, error_on_warn = TRUE) {
+  if (!length(steps)) return(invisible(TRUE))
+  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
+    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
+  }
+  required_steps <- unique(unlist(lapply(steps, function(s) {
+    x <- s[["required_steps"]]
+    if (!is.character(x)) {
+      msg <- sprintf("'required_steps' in step '%s' must be a character vector.", s$name)
+      if (error_on_warn) {
+        stop(msg, call. = FALSE)
+      }
+      warning(msg, immediate. = TRUE, call. = FALSE)
+    }
+    x
+  }), use.names = FALSE))
+
+  # check if required steps exist in steps
+  step_names <- vapply(steps, function(s) s$name, character(1))
+  missing_steps <- setdiff(required_steps, step_names)
+  if (length(missing_steps)) {
+    msg <- sprintf("Missing required steps: %s", paste(missing_steps, collapse = ", "))
+    if (error_on_warn) {
+      stop(msg, call. = FALSE)
+    }
+    warning(msg, immediate. = TRUE, call. = FALSE)
+  }
 }
 
 validate_current_index <- function(current, n_steps) {
@@ -337,24 +458,29 @@ import_workflow <- function(
 
 #' Update a workflow step with a new value
 #'
-#' This function updates a specific entry of a `workflowstep` object with a new value. It is used
+#' This function updates a specific field of a `workflowstep` object with a new value. It is used
 #' to modify step details such as name, label, comments, command, parameters, or loop settings.
 #'
 #' @param x A `workflow` object to update.
 #' @param step The index of the step to update.
-#' @param value The new value to assign to the specified entry.
-#' @param entry The name of the entry to update (one of "name", "label", "comments", "command",
+#' @param value The new value to assign to the specified field.
+#' @param field The name of the field to update (one of "name", "label", "comments", "command",
 #'  "args", "loop")
 #' @param ... Additional arguments (not used).
 #' @return The updated `workflow` object.
 #' @export
-update.workflow <- function(x, step, entry, value, ...) {
-  # pass entry & value NOT a whole step -> we need to update the wf object AND the commands json
+update.workflow <- function(x, step, field, value, ...) {
+  # pass field & value NOT a whole step -> we need to update the wf object AND the commands json
   # get commands file path
   wf_file_paths <- x$workflow_file_paths
   # update the steps
-  updated_step <- update(x$steps[[step]], wf_file_paths, entry = entry, value = value,  ...)
+  updated_step <- update(x$steps[[step]], wf_file_paths, field = field, value = value,  ...)
   x$steps[[step]] <- updated_step
+  # validate updated workflow
+  validate_unique_steps(x$steps, error_on_warn = FALSE)
+  validate_numeric_entries(x$steps, error_on_warn = FALSE)
+  validate_required_inputs(x$steps, x$input_list, error_on_warn = FALSE)
+  validate_required_steps(x$steps, error_on_warn = FALSE)
   # return updated workflow
   x
 }
@@ -392,6 +518,115 @@ update_input_list.workflow <- function(
     }
   }
 
+  x
+}
+
+#' Add a new step to the workflow
+#'
+#' This method adds a new `workflowstep` to the `steps` list of a `workflow` object at a specified
+#' position. It also performs validation after adding the step and updates the current index and
+#' entries of all steps to maintain consistency.
+#'
+#' @param x The `workflow` object to update.
+#' @param new_step A `workflowstep` object to add to the workflow.
+#' @param position An integer index specifying where to insert the new step (default: at the end
+#'  of the steps list).
+#' @param ... Additional arguments (not used).
+#' @return The updated `workflow` object with the new step added.
+#' @export
+add_step.workflow <- function(x, new_step, position = length(x$steps) + 1L, ...) {
+  if (!inherits(new_step, "workflowstep")) {
+    stop("'new_step' must be of class 'workflowstep'.", call. = FALSE)
+  }
+  position <- as.integer(position)
+  if (position < 1L || position > length(x$steps) + 1L) {
+    stop("Position must be between 1 and ", length(x$steps) + 1L, ".", call. = FALSE)
+  }
+  x$steps <- append(x$steps, list(new_step), after = position - 1L)
+  # update entries of all steps to maintain numeric order
+  for (i in seq_along(x$steps)) {
+    x$steps[[i]]$entry <- i
+  }
+  # validate workflow after adding step
+  validate_unique_steps(x$steps, error_on_warn = FALSE)
+  validate_numeric_entries(x$steps, error_on_warn = FALSE)
+  validate_required_inputs(x$steps, x$input_list, error_on_warn = FALSE)
+  validate_required_steps(x$steps, error_on_warn = FALSE)
+
+  # update current index if needed
+  if (is.na(x$current)) {
+    x$current <- position
+  } else if (position <= x$current) {
+    x$current <- x$current + 1L
+  }
+
+  # update the commands.json (only if the workflow is file-backed)
+  if (length(x$workflow_file_paths) && !is.null(x$workflow_file_paths$commands_path)) {
+    updated_commands <- as.commands_record(x)
+
+    write_json(
+      updated_commands,
+      path = x$workflow_file_paths$commands_path,
+      auto_unbox = TRUE,
+      pretty = TRUE
+    )
+  }
+
+  # return updated workflow
+  x
+}
+
+#' Remove a step from the workflow
+#'
+#' This method removes a `workflowstep` from the `steps` list of a `workflow` object at a specified
+#' position. It also performs validation after removing the step and updates the current index and
+#' entries of all steps to maintain consistency.
+#'
+#' @param x The `workflow` object to update.
+#' @param position An integer index specifying which step to remove.
+#' @param ... Additional arguments (not used).
+#' @return The updated `workflow` object with the specified step removed.
+#' @export
+remove_step.workflow <- function(x, position, ...) {
+  position <- as.integer(position)
+  if (position < 1L || position > length(x$steps)) {
+    stop("Step index must be between 1 and ", length(x$steps), ".", call. = FALSE)
+  }
+  x$steps <- x$steps[-position]
+  # validate workflow after removing step
+  validate_unique_steps(x$steps, error_on_warn = FALSE)
+  validate_numeric_entries(x$steps, error_on_warn = FALSE)
+  validate_required_inputs(x$steps, x$input_list, error_on_warn = FALSE)
+  validate_required_steps(x$steps, error_on_warn = FALSE)
+  # update current index if needed
+  if (!is.na(x$current)) {
+    if (x$current == position) {
+      x$current <- NA_integer_
+    } else if (x$current > position) {
+      x$current <- x$current - 1L
+    }
+  }
+  # update entries of all steps to maintain numeric order
+  for (i in seq_along(x$steps)) {
+    x$steps[[i]]$entry <- i
+  }
+
+  # update the commands.json
+  updated_commands <- as.commands_record(x)
+
+  # Only write to disk for file-backed workflows with a valid commands_path
+  if (!is.null(x$workflow_file_paths) &&
+      length(x$workflow_file_paths) > 0L &&
+      !is.null(x$workflow_file_paths$commands_path)) {
+    write_json(
+      updated_commands,
+      path = x$workflow_file_paths$commands_path,
+      auto_unbox = TRUE,
+      pretty = TRUE
+    )
+  }
+
+  # return updated workflow
   x
 }
 
@@ -505,36 +740,10 @@ run.workflow <- function(
     state <- new_workflowstate(initial_input = state)
   }
 
-  # extract required_fields and check if exist
-  required_inputs <- unique(unlist(lapply(x$steps, function(s) {
-    x <- s[["required_inputs"]]
-    if (!is.character(x)) stop("'required_inputs' must be a character vector.")
-    x
-  }), use.names = FALSE))
-
-  required_steps <- unique(unlist(lapply(x$steps, function(s) {
-    x <- s[["required_steps"]]
-    if (!is.character(x)) stop("'required_steps' must be a character vector.")
-    x
-  }), use.names = FALSE))
-
-  # check if required inputs exist in input_list
-  missing_inputs <- setdiff(required_inputs, names(x$input_list))
-  if (length(missing_inputs)) {
-    stop(
-      "Missing required inputs: ", paste(missing_inputs, collapse = ", "),
-      call. = FALSE
-    )
-  }
-  # check if required steps exist in steps
-  step_names <- vapply(x$steps, function(s) s$name, character(1))
-  missing_steps <- setdiff(required_steps, step_names)
-  if (length(missing_steps)) {
-    stop(
-      "Missing required steps: ", paste(missing_steps, collapse = ", "),
-      call. = FALSE
-    )
-  }
+  validate_unique_steps(x$steps, error_on_warn = TRUE)
+  validate_numeric_entries(x$steps, error_on_warn = TRUE)
+  validate_required_inputs(x$steps, x$input_list, error_on_warn = TRUE)
+  validate_required_steps(x$steps, error_on_warn = TRUE)
 
   # RUN workflow steps
   from <- max(1L, as.integer(from))
@@ -612,7 +821,8 @@ update_json_summary <- function(
   # write into results file
   jsonlite::write_json(
     results,
-    file.path(path_to_folder, results_file), auto_unbox = TRUE, pretty = TRUE
+    file.path(path_to_folder, results_file),
+    auto_unbox = TRUE,
+    pretty = TRUE
   )
 }
-

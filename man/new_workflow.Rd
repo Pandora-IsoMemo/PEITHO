@@ -11,6 +11,7 @@ new_workflow(
   input_list = list(),
   steps = list(),
   current = if (length(steps)) 1L else NA_integer_,
+  error_on_warn = FALSE,
   ...
 )
 }
@@ -27,6 +28,9 @@ use provided `steps` and ignore `workflow_file_paths`, useful for testing.}
 \item{steps}{A list of `workflowstep` objects defining the steps of the workflow.}
 
 \item{current}{The index of the current step in the workflow.}
+
+\item{error_on_warn}{Logical; if `TRUE`, validation issues will raise errors.
+If `FALSE`, they will raise warnings instead.}
 
 \item{...}{Additional metadata to store with the workflow.}
 }
