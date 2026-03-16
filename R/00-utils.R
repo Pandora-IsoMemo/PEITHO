@@ -50,6 +50,7 @@ resolve_selected_row <- function(selected, n_rows, default_last = TRUE) {
 
 # Generate a unique input name for a named list.
 next_unique_input_name <- function(existing_names, base_name = "new_input") {
+  existing_names <- existing_names %||% character(0)
   if (!(base_name %in% existing_names)) return(base_name)
 
   i <- 2L
