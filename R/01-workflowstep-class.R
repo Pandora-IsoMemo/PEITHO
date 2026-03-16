@@ -213,10 +213,10 @@ update.workflowstep <- function(
   }
 
   # validate value
-  if (field != "entry" && !is.character(value) || length(value) != 1L) {
+  if (field != "entry" && (!is.character(value) || length(value) != 1L)) {
     stop(sprintf("'%s' must be a single character string.", field), call. = FALSE)
   }
-  if (field == "entry" && !is.integer(value) || length(value) != 1L) {
+  if (field == "entry" && (!is.integer(value) || length(value) != 1L)) {
     stop(sprintf("'%s' must be a single integer.", field), call. = FALSE)
   }
 
