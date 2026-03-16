@@ -556,15 +556,17 @@ add_step.workflow <- function(x, new_step, position = length(x$steps) + 1L, ...)
     x$current <- x$current + 1L
   }
 
-  # update the commands.json
-  updated_commands <- as.commands_record(x)
+  # update the commands.json (only if the workflow is file-backed)
+  if (length(x$workflow_file_paths) && !is.null(x$workflow_file_paths$commands_path)) {
+    updated_commands <- as.commands_record(x)
 
-  write_json(
-    updated_commands,
-    path = x$workflow_file_paths$commands_path,
-    auto_unbox = TRUE,
-    pretty = TRUE
-  )
+    write_json(
+      updated_commands,
+      path = x$workflow_file_paths$commands_path,
+      auto_unbox = TRUE,
+      pretty = TRUE
+    )
+  }
 
   # return updated workflow
   x
