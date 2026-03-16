@@ -1,3 +1,10 @@
+# PEITHO 26.03.1
+
+## New Features
+- Added `add_step()` / `remove_step()` S3 generics + workflow methods and wire them into the Shiny workflow table UI (#28)
+- Add configurable workflow validation (`error_on_warn`) and additional validation checks (unique steps, numeric entries, required inputs/steps).
+- Introduced `as.commands_record()` generic + methods and update `commands.json` writing behavior; update docs and example `commands.json`.
+
 # PEITHO 26.03.0
 
 ## New Features
