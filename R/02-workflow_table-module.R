@@ -72,10 +72,24 @@ workflow_table_server <- function(id, wf) {
       if (is.null(selected) || !nzchar(selected) || !selected %in% as.character(seq_len(n))) {
         selected <- as.character(n)
       }
+
+      row_values <- as.character(seq_len(n))
+      if ("Name" %in% colnames(wf_df)) {
+        row_names <- as.character(wf_df$Name)
+        row_names[is.na(row_names)] <- ""
+        row_labels <- ifelse(
+          nzchar(row_names),
+          paste0(row_values, " - ", row_names),
+          row_values
+        )
+      } else {
+        row_labels <- row_values
+      }
+
       updateSelectInput(
         session,
         "selected_row",
-        choices = as.character(seq_len(n)),
+        choices = stats::setNames(row_values, row_labels),
         selected = selected
       )
     })
