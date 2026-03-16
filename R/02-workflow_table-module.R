@@ -12,10 +12,12 @@ workflow_table_ui <- function(id, title = "") {
     fluidRow(
       column(
         width = 4,
+        style = "margin-bottom: -3em",
         selectInput(ns("selected_row"), "Select row", choices = NULL, width = "100%")
       ),
       column(
         width = 4,
+        style = "margin-bottom: -3em",
         br(),
         div(
           class = "d-flex justify-content-end gap-2",
