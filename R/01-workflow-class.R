@@ -556,23 +556,22 @@ add_step.workflow <- function(x, new_step, position = length(x$steps) + 1L, ...)
     x$steps[[i]]$entry <- i
   }
 
-  # we also must update the json 
-  # browser()
-  # commands_list <- read_json_if_exists(path = workflow_file_paths$commands_path)
+  # update the commands.json
+  updated_commands <- as.commands_record(x)
 
-  # write_json(
-  #   commands_list,
-  #   path = workflow_file_paths$commands_path,
-  #   auto_unbox = TRUE,
-  #   pretty = TRUE
-  # )
+  write_json(
+    updated_commands,
+    path = x$workflow_file_paths$commands_path,
+    auto_unbox = TRUE,
+    pretty = TRUE
+  )
 
   # return updated workflow
   x
 }
 
 #' Remove a step from the workflow
-#' 
+#'
 #' This method removes a `workflowstep` from the `steps` list of a `workflow` object at a specified
 #' position. It also performs validation after removing the step and updates the current index and
 #' entries of all steps to maintain consistency.
@@ -606,7 +605,15 @@ remove_step.workflow <- function(x, position, ...) {
     x$steps[[i]]$entry <- i
   }
 
-  # we also must update the json 
+  # update the commands.json
+  updated_commands <- as.commands_record(x)
+
+  write_json(
+    updated_commands,
+    path = x$workflow_file_paths$commands_path,
+    auto_unbox = TRUE,
+    pretty = TRUE
+  )
 
   # return updated workflow
   x
