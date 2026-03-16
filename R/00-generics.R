@@ -29,6 +29,16 @@ update_input_list <- function(x, ...) {
   UseMethod("update_input_list")
 }
 
+#' Convert an object to commands.json record format
+#'
+#' Generic method to create records matching the commands.json schema.
+#' @param x The object to convert.
+#' @param ... Additional arguments passed to methods.
+#' @export
+as.commands_record <- function(x, ...) {
+  UseMethod("as.commands_record")
+}
+
 #' Add a step to a workflow
 #'
 #' Generic method to add a step to a workflow object.
