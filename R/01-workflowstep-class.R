@@ -231,26 +231,28 @@ update.workflowstep <- function(
     x$required_steps  <- required_fields$steps
   }
 
-  # update commands.json file
-  # get i-th entry from commands file, update it and write back to file
-  commands_list <- read_json_if_exists(path = workflow_file_paths$commands_path)
+  # update the commands.json (only if the workflow is file-backed)
+  if (length(x$workflow_file_paths) && !is.null(x$workflow_file_paths$commands_path)) {
+    # get i-th entry from commands file, update it and write back to file
+    commands_list <- read_json_if_exists(path = workflow_file_paths$commands_path)
 
-  # update i-th step
-  logDebug(
-    "Updating workflow file '%s': step %d, field '%s' with value '%s'",
-    basename(workflow_file_paths$commands_path),
-    x$entry,
-    field,
-    value
-  )
-  commands_list[[x$entry]] <- as.commands_record(x)
-  # write back to file
-  write_json(
-    commands_list,
-    path = workflow_file_paths$commands_path,
-    auto_unbox = TRUE,
-    pretty = TRUE
-  )
+    # update i-th step
+    logDebug(
+      "Updating workflow file '%s': step %d, field '%s' with value '%s'",
+      basename(workflow_file_paths$commands_path),
+      x$entry,
+      field,
+      value
+    )
+    commands_list[[x$entry]] <- as.commands_record(x)
+    # write back to file
+    write_json(
+      commands_list,
+      path = workflow_file_paths$commands_path,
+      auto_unbox = TRUE,
+      pretty = TRUE
+    )
+  }
 
   # return updated workflowstep
   x
