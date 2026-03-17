@@ -11,6 +11,7 @@ utils::globalVariables(
 #' @importFrom jsonlite fromJSON toJSON write_json
 #' @importFrom rvest html_element html_elements html_text2
 #' @importFrom shinyTools shinyTryCatch
+#' @importFrom shinyTree renderTree shinyTree
 #' @importFrom stats setNames
 #' @importFrom stringr str_squish
 #' @importFrom tibble tibble
