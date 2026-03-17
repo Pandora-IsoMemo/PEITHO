@@ -3,19 +3,6 @@ shinyServer(function(input, output, session) {
   wf <- reactiveVal(NULL)
   wf_run <- reactiveVal(NULL)
 
-  build_file_tree <- function(path) {
-    entries <- list.files(path, full.names = TRUE, no.. = TRUE)
-    tree <- lapply(entries, function(entry) {
-      if (dir.exists(entry)) {
-        structure(build_file_tree(entry), sticon = "folder")
-      } else {
-        structure("", sticon = "file")
-      }
-    })
-    names(tree) <- basename(entries)
-    tree
-  }
-
   imported_wf <- DataTools::importServer(
     id = "import_wf",
     ckanFileTypes = cfg[["fileExtension"]],
@@ -46,10 +33,7 @@ shinyServer(function(input, output, session) {
     active_temp_dir_is_managed(FALSE)
   }
 
-  output$file_tree <- shinyTree::renderTree({
-    req(active_temp_dir(), dir.exists(active_temp_dir()))
-    build_file_tree(active_temp_dir())
-  })
+  workflow_files_server("workflow_files", active_temp_dir)
 
   observe({
     PEITHO:::logDebug("%s: Observing 'imported_wf'", session$ns("imported_wf"))

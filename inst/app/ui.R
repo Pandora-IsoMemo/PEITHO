@@ -26,7 +26,7 @@ tagList(
         ),
         mainPanel(
           tabsetPanel(id = "main_tabs",
-            tabPanel("Files", shinyTree::shinyTree("file_tree", search = TRUE, theme = "proton")),
+            tabPanel("Files", workflow_files_ui("workflow_files")),
             tabPanel("Workflow", workflow_table_ui("wf_table", title = "Workflow commands")),
             tabPanel("Inputs", inputs_table_ui("inputs_table", title = "Workflow inputs")),
             tabPanel("Results", results_table_ui("results_table", title = "Workflow results"))
