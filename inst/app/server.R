@@ -44,7 +44,7 @@ shinyServer(function(input, output, session) {
     wf_name <- tools::file_path_sans_ext(names(imported_wf())[1])
 
     # unzip the file to a temporary directory and get the paths of the workflow files
-    temp_dir <- tempfile(pattern = "workflow_")
+    temp_dir <- tempfile(pattern = sprintf("%s_", wf_name))
     dir.create(temp_dir, showWarnings = FALSE, recursive = TRUE)
     # do not use on.exit here because we want to keep the unzipped files around while the workflow
     # is loaded, and only delete them when a new workflow is loaded.
