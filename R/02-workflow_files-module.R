@@ -9,7 +9,9 @@ workflow_files_ui <- function(id, title = "") {
 
   tagList(
     if (nzchar(title)) tags$h4(title) else NULL,
-    shinyTree::shinyTree(ns("file_tree"), search = TRUE, theme = "proton")
+    br(),
+    htmlOutput(ns("wf_dir")),
+    shinyTree::shinyTree(ns("file_tree"), search = FALSE, theme = "proton")
   )
 }
 
@@ -33,6 +35,11 @@ workflow_files_server <- function(id, active_dir) {
       names(tree) <- basename(entries)
       tree
     }
+
+    output$wf_dir <- renderText({
+      req(active_dir(), dir.exists(active_dir()))
+      paste(basename(active_dir()))
+    })
 
     output$file_tree <- shinyTree::renderTree({
       req(active_dir(), dir.exists(active_dir()))
