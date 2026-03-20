@@ -55,6 +55,9 @@ load_inputs_to_list <- function(
   input_list
 }
 
+input_pattern <- function() "^@#\\*I\\*#@(.*)@#\\*I\\*#@$"
+result_pattern <- function() "^@#\\*L\\*#@(.*)@#\\*L\\*#@$"
+
 is_input_tag <- function(x) {
   grepl("^@#\\*I\\*#@.*@#\\*I\\*#@$", x)
 }
@@ -74,46 +77,29 @@ make_param_from_arg <- function(
   if (!nzchar(arg_name)) arg_name <- NULL
 
   if (is_input_tag(arg)) {
-    varname <- extract_tag_varname(arg, "^@#\\*I\\*#@(.*)@#\\*I\\*#@$")
-
-    # if (!varname %in% names(input_list)) {
-    #   stop(
-    #     "Input variable '", varname, "' not found in input file.",
-    #     call. = FALSE
-    #   )
-    # }
-    new_operationparam(
-      step_id = step_i,
-      position = arg_i,
-      name     = arg_name,
-      value    = input_list[[varname]] %||% NULL,
-      type     = "input",
-      label    = varname,
-      loop     = cmd_loop %||% "no"
-    )
+    type <- "input"
+    label <- extract_tag_varname(arg, input_pattern())
+    value <- input_list[[label]] %||% NULL
   } else if (is_result_tag(arg)) {
-    varname <- extract_tag_varname(arg, "^@#\\*L\\*#@(.*)@#\\*L\\*#@$")
-
-    new_operationparam(
-      step_id = step_i,
-      position = arg_i,
-      name     = arg_name,
-      value    = NULL,
-      type     = "result",
-      label    = varname,
-      loop     = cmd_loop %||% "no"
-    )
+    type <- "result"
+    label <- extract_tag_varname(arg, result_pattern())
+    value <- NULL
   } else {
     # literal without name (no tag)
-    new_operationparam(
-      step_id = step_i,
-      position = arg_i,
-      name     = arg_name,
-      value    = strip_outer_quotes(arg),
-      type     = "literal",
-      loop     = cmd_loop %||% "no"
-    )
+    type <- "literal"
+    label <- ""
+    value <- strip_outer_quotes(arg)
   }
+
+  new_operationparam(
+    step_id = step_i,
+    position = arg_i,
+    name     = arg_name,
+    value    = value,
+    type     = type,
+    label    = label,
+    loop     = cmd_loop %||% "no"
+  )
 }
 
 parse_args <- function(arg_string) {
@@ -236,13 +222,13 @@ parse_required_fields <- function(args_string) {
       args_values[is_input_tag(args_values)],
       extract_tag_varname,
       FUN.VALUE = character(1),
-      pattern = "^@#\\*I\\*#@(.*)@#\\*I\\*#@$"
+      pattern = input_pattern()
     )),
     steps = unique(vapply(
       args_values[is_result_tag(args_values)],
       extract_tag_varname,
       FUN.VALUE = character(1),
-      pattern = "^@#\\*L\\*#@(.*)@#\\*L\\*#@$"
+      pattern = result_pattern()
     ))
   )
 }
