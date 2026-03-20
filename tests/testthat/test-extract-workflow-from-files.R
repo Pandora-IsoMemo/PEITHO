@@ -122,6 +122,7 @@ test_that("workflow_steps_from_files supports custom file names", {
 
 test_that("is_input_tag identifies valid and invalid input tags", {
   expect_true(PEITHO:::is_input_tag("@#*I*#@myinput@#*I*#@"))
+  expect_false(PEITHO:::is_input_tag("@#*I*#@myinput@#*I*#@@#*I*#@"))
   expect_true(PEITHO:::is_input_tag("@#*I*#@@#*I*#@"))
   expect_false(PEITHO:::is_input_tag("@#*L*#@myinput@#*L*#@"))
   expect_false(PEITHO:::is_input_tag("myinput"))
@@ -138,6 +139,7 @@ test_that("is_input_tag identifies valid and invalid input tags", {
 test_that("is_result_tag identifies valid and invalid result tags", {
   expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@"))
   expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@[2]")) # new format
+  expect_false(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@[2]@#*L*#@"))
   expect_true(PEITHO:::is_result_tag("@#*L*#@@#*L*#@"))
   expect_false(PEITHO:::is_result_tag("@#*I*#@step_1@#*I*#@"))
   expect_false(PEITHO:::is_result_tag("step_1"))
