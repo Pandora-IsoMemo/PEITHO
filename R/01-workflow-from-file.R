@@ -6,7 +6,7 @@ normalize_varname <- function(x) {
 }
 
 extract_tag_varname <- function(x, pattern) {
-  varname <- sub(pattern, "\\1", x)
+  varname <- sub(pattern, "\\1\\2", x)
   normalize_varname(varname)
 }
 
@@ -56,14 +56,14 @@ load_inputs_to_list <- function(
 }
 
 input_pattern <- function() "^@#\\*I\\*#@(.*)@#\\*I\\*#@$"
-result_pattern <- function() "^@#\\*L\\*#@(.*)@#\\*L\\*#@$"
+result_pattern <- function() "^@#\\*L\\*#@(.*?)@#\\*L\\*#@(\\[\\d+\\])?$"
 
 is_input_tag <- function(x) {
-  grepl("^@#\\*I\\*#@.*@#\\*I\\*#@$", x)
+  grepl(input_pattern(), x)
 }
 
 is_result_tag <- function(x) {
-  grepl("^@#\\*L\\*#@.*@#\\*L\\*#@$", x)
+  grepl(result_pattern(), x)
 }
 
 make_param_from_arg <- function(

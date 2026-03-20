@@ -137,7 +137,7 @@ test_that("is_input_tag identifies valid and invalid input tags", {
 
 test_that("is_result_tag identifies valid and invalid result tags", {
   expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@"))
-  #expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@[2]")) # new format
+  expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@[2]")) # new format
   expect_true(PEITHO:::is_result_tag("@#*L*#@@#*L*#@"))
   expect_false(PEITHO:::is_result_tag("@#*I*#@step_1@#*I*#@"))
   expect_false(PEITHO:::is_result_tag("step_1"))
@@ -160,15 +160,10 @@ test_that("extract_tag_varname extracts and normalizes tag variable names", {
     PEITHO:::extract_tag_varname("@#*L*#@  step label  @#*L*#@", result_pattern()),
     "step_label"
   )
-  # expect_equal(
-  #   PEITHO:::extract_tag_varname("@#*L*#@my step label@#*L*#@[2]", result_pattern()), # new format
-  #   "my_step_label[2]"
-  # )
-
-  # expect_equal(
-  #   PEITHO:::extract_tag_varname("@#*L*#@my step label@#*L*#@[2]@#*L*#@", result_pattern()),
-  #   "@#*L*#@my step label@#*L*#@[2]@#*L*#@"
-  # )
+  expect_equal(
+    PEITHO:::extract_tag_varname("@#*L*#@my step label@#*L*#@[2]", result_pattern()), # new format
+    "my_step_label[2]"
+  )
 
   tags <- c("@#*I*#@a b@#*I*#@", "@#*I*#@ c d @#*I*#@")
   expect_equal(
