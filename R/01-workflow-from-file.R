@@ -2,7 +2,44 @@
 
 normalize_varname <- function(x) {
   x <- trimws(x)
-  gsub(" ", "_", x)
+
+  # Keep selector semantics in optional trailing [...] by removing whitespace
+  # there, while normalizing label spaces to underscores.
+  has_selector <- grepl("\\[[^\\]]*\\]$", x, perl = TRUE)
+  selector <- ifelse(
+    has_selector,
+    sub("^.*(\\[[^\\]]*\\])$", "\\1", x, perl = TRUE),
+    ""
+  )
+  base <- ifelse(has_selector, sub("\\[[^\\]]*\\]$", "", x, perl = TRUE), x)
+
+  base <- gsub(" ", "_", base)
+  selector <- gsub("\\s+", "", selector, perl = TRUE)
+
+  paste0(base, selector)
+}
+
+normalize_name_part <- function(x) {
+  gsub(" ", "_", trimws(x))
+}
+
+extract_result_ref <- function(x) {
+  m <- regexec(result_pattern(), x, perl = TRUE)
+  captures <- regmatches(x, m)[[1]]
+
+  if (!length(captures)) {
+    stop("Invalid result tag reference: ", x, call. = FALSE)
+  }
+
+  label <- normalize_name_part(captures[[2]])
+  selector <- NULL
+
+  if (length(captures) >= 3L && nzchar(captures[[3]])) {
+    selector <- gsub("\\s+", "", captures[[3]], perl = TRUE)
+    selector <- substr(selector, 2L, nchar(selector) - 1L)
+  }
+
+  list(label = label, selector = selector)
 }
 
 extract_tag_varname <- function(x, pattern) {
@@ -56,7 +93,7 @@ load_inputs_to_list <- function(
 }
 
 input_pattern <- function() "^@#\\*I\\*#@((?:(?!@#\\*I\\*#@).)*)@#\\*I\\*#@$"
-result_pattern <- function() "^@#\\*L\\*#@((?:(?!@#\\*L\\*#@).)*)@#\\*L\\*#@(\\[\\d+\\])?$"
+result_pattern <- function() "^@#\\*L\\*#@((?:(?!@#\\*L\\*#@).)*)@#\\*L\\*#@(\\[[^\\]]+\\])?$"
 
 is_input_tag <- function(x) {
   grepl(input_pattern(), x, perl = TRUE)
@@ -75,14 +112,17 @@ make_param_from_arg <- function(
   input_list
 ) {
   if (!nzchar(arg_name)) arg_name <- NULL
+  selector <- NULL
 
   if (is_input_tag(arg)) {
     type <- "input"
     label <- extract_tag_varname(arg, input_pattern())
     value <- input_list[[label]] %||% NULL
   } else if (is_result_tag(arg)) {
+    result_ref <- extract_result_ref(arg)
     type <- "result"
-    label <- extract_tag_varname(arg, result_pattern())
+    label <- result_ref$label
+    selector <- result_ref$selector
     value <- NULL
   } else {
     # literal without name (no tag)
@@ -98,7 +138,8 @@ make_param_from_arg <- function(
     value    = value,
     type     = type,
     label    = label,
-    loop     = cmd_loop %||% "no"
+    loop     = cmd_loop %||% "no",
+    selector = selector %||% NULL
   )
 }
 
@@ -216,6 +257,7 @@ extract_input_list_from_files <- function(inputs_path) {
 
 parse_required_fields <- function(args_string) {
   args_values <- parse_args(args_string)$values
+  result_args <- args_values[is_result_tag(args_values)]
 
   list(
     inputs = unique(vapply(
@@ -225,10 +267,9 @@ parse_required_fields <- function(args_string) {
       pattern = input_pattern()
     )),
     steps = unique(vapply(
-      args_values[is_result_tag(args_values)],
-      extract_tag_varname,
-      FUN.VALUE = character(1),
-      pattern = result_pattern()
+      result_args,
+      function(x) extract_result_ref(x)$label,
+      FUN.VALUE = character(1)
     ))
   )
 }
