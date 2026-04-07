@@ -10,8 +10,29 @@ workflow_files_ui <- function(id, title = "") {
   tagList(
     if (nzchar(title)) tags$h4(title) else NULL,
     br(),
-    htmlOutput(ns("wf_dir")),
-    shinyTree::shinyTree(ns("file_tree"), search = FALSE, theme = "proton")
+    fluidRow(
+      column(
+        width = 4,
+        htmlOutput(ns("wf_dir")),
+        shinyTree::shinyTree(ns("file_tree"), search = FALSE, theme = "proton")
+      ),
+      column(
+        width = 8,
+        tags$strong(textOutput(ns("selected_file_label"), inline = TRUE)),
+        br(),
+        textAreaInput(
+          ns("file_editor"),
+          label = NULL,
+          value = "",
+          width = "100%",
+          height = "420px",
+          resize = "vertical"
+        ),
+        actionButton(ns("save_file"), "Save file", icon = icon("save")),
+        br(),
+        textOutput(ns("editor_status"))
+      )
+    )
   )
 }
 
@@ -23,6 +44,8 @@ workflow_files_ui <- function(id, title = "") {
 #' @export
 workflow_files_server <- function(id, active_dir) {
   moduleServer(id, function(input, output, session) {
+    selected_file <- reactiveVal(NULL)
+
     build_file_tree <- function(path) {
       entries <- list.files(path, full.names = TRUE, no.. = TRUE)
       tree <- lapply(entries, function(entry) {
@@ -36,6 +59,59 @@ workflow_files_server <- function(id, active_dir) {
       tree
     }
 
+    resolve_selected_file <- function(root_path, selected_slice) {
+      selected_slice_to_parts <- function(x) {
+        if (is.null(x) || length(x) == 0L) return(character(0))
+
+        if (is.character(x) && is.null(names(x))) {
+          return(x)
+        }
+
+        if (is.list(x)) {
+          node_name <- x[["_names"]]
+          if (is.character(node_name) && length(node_name) == 1L && nzchar(node_name)) {
+            child <- x[[node_name]]
+            return(c(node_name, selected_slice_to_parts(child)))
+          }
+
+          child_names <- setdiff(names(x), "_names")
+          if (length(child_names) == 1L) {
+            node_name <- child_names[[1]]
+            child <- x[[node_name]]
+            return(c(node_name, selected_slice_to_parts(child)))
+          }
+        }
+
+        character(0)
+      }
+
+      selected_parts <- selected_slice_to_parts(selected_slice)
+      if (length(selected_parts) == 0L) return(NULL)
+
+      candidate <- do.call(file.path, as.list(c(root_path, selected_parts)))
+      root_norm <- normalizePath(root_path, winslash = "/", mustWork = TRUE)
+      candidate_norm <- normalizePath(candidate, winslash = "/", mustWork = FALSE)
+
+      in_root <- identical(candidate_norm, root_norm) ||
+        startsWith(candidate_norm, paste0(root_norm, "/"))
+      if (!in_root || !file.exists(candidate_norm) || dir.exists(candidate_norm)) {
+        return(NULL)
+      }
+
+      candidate_norm
+    }
+
+    can_display_file <- function(path) {
+      ext <- tolower(tools::file_ext(path))
+      ext %in% c("r", "txt", "md", "csv", "yaml", "yml", "json")
+    }
+
+    can_edit_file <- function(path) {
+      name <- basename(path)
+      can_display_file(path) &&
+        grepl("inputs|functions|commands", name, ignore.case = TRUE)
+    }
+
     output$wf_dir <- renderText({
       req(active_dir(), dir.exists(active_dir()))
       paste(basename(active_dir()))
@@ -44,6 +120,80 @@ workflow_files_server <- function(id, active_dir) {
     output$file_tree <- shinyTree::renderTree({
       req(active_dir(), dir.exists(active_dir()))
       build_file_tree(active_dir())
+    })
+
+    output$selected_file_label <- renderText({
+      path <- selected_file()
+      if (is.null(path)) {
+        "No file selected"
+      } else {
+        paste("Selected:", basename(path))
+      }
+    })
+
+    output$editor_status <- renderText("")
+
+    observeEvent(input$file_tree, {
+      req(active_dir(), dir.exists(active_dir()))
+
+      selected_slices <- shinyTree::get_selected(input$file_tree, format = "slices")
+      req(length(selected_slices) == 1L)
+
+      path <- resolve_selected_file(active_dir(), selected_slices[[1]])
+      req(!is.null(path))
+
+      if (!can_display_file(path)) {
+        selected_file(NULL)
+        updateTextAreaInput(session, "file_editor", value = "")
+        output$editor_status <- renderText("Selected file type is not supported in this view.")
+        return()
+      }
+
+      content <- tryCatch(
+        paste(readLines(path, warn = FALSE, encoding = "UTF-8"), collapse = "\n"),
+        error = function(e) {
+          output$editor_status <- renderText(
+            paste("Could not read file:", conditionMessage(e))
+          )
+          NULL
+        }
+      )
+      req(!is.null(content))
+
+      updateTextAreaInput(session, "file_editor", value = content)
+      if (can_edit_file(path)) {
+        selected_file(path)
+        output$editor_status <- renderText("")
+      } else {
+        selected_file(NULL)
+        output$editor_status <- renderText("Read-only file: display only.")
+      }
+    })
+
+    observeEvent(input$save_file, {
+      path <- selected_file()
+      if (is.null(path)) {
+        output$editor_status <- renderText(
+          "This file is read-only. Only inputs/functions/commands files can be edited."
+        )
+        return()
+      }
+      req(file.exists(path), !dir.exists(path))
+
+      value <- input$file_editor
+      if (is.null(value)) value <- ""
+      lines <- strsplit(value, "\n", fixed = TRUE)[[1]]
+
+      tryCatch({
+        writeLines(lines, con = path, useBytes = TRUE)
+        output$editor_status <- renderText(
+          sprintf("Saved %s", basename(path))
+        )
+      }, error = function(e) {
+        output$editor_status <- renderText(
+          paste("Could not save file:", conditionMessage(e))
+        )
+      })
     })
   })
 }
