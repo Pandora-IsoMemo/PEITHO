@@ -9,10 +9,16 @@ workflow_files_ui <- function(id, title = "") {
 
   tagList(
     if (nzchar(title)) tags$h4(title) else NULL,
+    tags$p(
+      "Browse and edit workflow files, or view built-in package functions available for use in commands.",
+      class = "text-muted"
+    ),
     br(),
     fluidRow(
       column(
         width = 4,
+        actionButton(ns("show_defaults"), "Show package default functions", icon = icon("book")),
+        br(), br(),
         htmlOutput(ns("wf_dir")),
         shinyTree::shinyTree(ns("file_tree"), search = FALSE, theme = "proton")
       ),
@@ -30,7 +36,6 @@ workflow_files_ui <- function(id, title = "") {
         ),
         br(),
         actionButton(ns("save_file"), "Save file", icon = icon("save")),
-        actionButton(ns("show_defaults"), "Show package defaults", icon = icon("book")),
         br(),
         htmlOutput(ns("editor_status"))
       )
