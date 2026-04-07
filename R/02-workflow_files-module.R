@@ -28,9 +28,11 @@ workflow_files_ui <- function(id, title = "") {
           height = "420px",
           resize = "vertical"
         ),
-        actionButton(ns("save_file"), "Save file", icon = icon("save")),
         br(),
-        textOutput(ns("editor_status"))
+        actionButton(ns("save_file"), "Save file", icon = icon("save")),
+        actionButton(ns("show_defaults"), "Show package defaults", icon = icon("book")),
+        br(),
+        htmlOutput(ns("editor_status"))
       )
     )
   )
@@ -45,6 +47,7 @@ workflow_files_ui <- function(id, title = "") {
 workflow_files_server <- function(id, active_dir) {
   moduleServer(id, function(input, output, session) {
     selected_file <- reactiveVal(NULL)
+    selected_label <- reactiveVal(NULL)
 
     build_file_tree <- function(path) {
       entries <- list.files(path, full.names = TRUE, no.. = TRUE)
@@ -123,11 +126,16 @@ workflow_files_server <- function(id, active_dir) {
     })
 
     output$selected_file_label <- renderText({
+      label_override <- selected_label()
+      if (!is.null(label_override) && nzchar(label_override)) {
+        return(paste("Selected file:", label_override))
+      }
+
       path <- selected_file()
       if (is.null(path)) {
         "No file selected"
       } else {
-        paste("Selected:", basename(path))
+        paste("Selected file:", basename(path))
       }
     })
 
@@ -144,6 +152,7 @@ workflow_files_server <- function(id, active_dir) {
 
       if (!can_display_file(path)) {
         selected_file(NULL)
+        selected_label(NULL)
         updateTextAreaInput(session, "file_editor", value = "")
         output$editor_status <- renderText("Selected file type is not supported in this view.")
         return()
@@ -163,11 +172,38 @@ workflow_files_server <- function(id, active_dir) {
       updateTextAreaInput(session, "file_editor", value = content)
       if (can_edit_file(path)) {
         selected_file(path)
+        selected_label(NULL)
         output$editor_status <- renderText("")
       } else {
         selected_file(NULL)
+        selected_label(basename(path))
         output$editor_status <- renderText("Read-only file: display only.")
       }
+    })
+
+    observeEvent(input$show_defaults, {
+      defaults_text <- tryCatch(
+        PEITHO:::default_workflow_functions_text(),
+        error = function(e) {
+          output$editor_status <- renderText(
+            paste("Could not load package defaults:", conditionMessage(e))
+          )
+          NULL
+        }
+      )
+      req(!is.null(defaults_text))
+
+      selected_file(NULL)
+      selected_label("PEITHO package defaults")
+      updateTextAreaInput(session, "file_editor", value = defaults_text)
+      gh_url <- "https://github.com/Pandora-IsoMemo/PEITHO/blob/main/R/01-default-functions.R"
+      output$editor_status <- renderText(
+        HTML(paste(
+          "Read-only view of the currently loaded default function definitions.",
+          sprintf("<a href='%s' target='_blank'>View original source on GitHub</a>", gh_url),
+          sep = " | "
+        ))
+      )
     })
 
     observeEvent(input$save_file, {

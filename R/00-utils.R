@@ -14,6 +14,14 @@ is_running_online <- function() {
   base::as.logical(base::Sys.getenv("IS_SHINYPROXY") != "", unset = "FALSE")
 }
 
+peitho_user_agent <- function() {
+  ver <- utils::packageVersion("PEITHO")
+  sprintf(
+    "PEITHO-WebTextFetcher/%s (source: https://github.com/Pandora-IsoMemo/PEITHO)",
+    ver
+  )
+}
+
 # Build labeled row selector choices while keeping values as row indices.
 build_row_selector_choices <- function(df, preferred_name_cols = c("Name", "name")) {
   n <- nrow(df)
@@ -60,4 +68,37 @@ next_unique_input_name <- function(existing_names, base_name = "new_input") {
     candidate <- paste0(base_name, "_", i)
   }
   candidate
+}
+
+# -----------------------------------------------------------------------------
+# Display/meta helpers for default workflow functions (used by the app UI)
+#
+# These helpers define WHICH package default functions are shown in the workflow
+# files module and HOW they are rendered as source text in the read-only editor.
+#
+# Single source of truth note:
+# - `default_workflow_function_names()` controls the visible default functions.
+# - `default_workflow_functions_text()` renders function bodies from the package
+#   namespace, so no duplicate source file is required for display.
+# -----------------------------------------------------------------------------
+
+default_workflow_function_names <- function() {
+  c("fetch_WebText", "simple_split")
+}
+
+default_workflow_functions_text <- function() {
+  ns <- asNamespace("PEITHO")
+  fn_names <- default_workflow_function_names()
+
+  chunks <- vapply(fn_names, function(fn_name) {
+    if (!exists(fn_name, mode = "function", envir = ns, inherits = FALSE)) {
+      return(sprintf("# Missing default workflow function in namespace: %s", fn_name))
+    }
+
+    fn <- get(fn_name, mode = "function", envir = ns, inherits = FALSE)
+    fn_text <- paste(deparse(fn), collapse = "\n")
+    sprintf("%s <- %s", fn_name, fn_text)
+  }, character(1))
+
+  paste(chunks, collapse = "\n\n")
 }
