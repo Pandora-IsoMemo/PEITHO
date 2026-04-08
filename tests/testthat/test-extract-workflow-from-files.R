@@ -139,6 +139,7 @@ test_that("is_input_tag identifies valid and invalid input tags", {
 test_that("is_result_tag identifies valid and invalid result tags", {
   expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@"))
   expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@[2]")) # new format
+  expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@[[2]]"))
   expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@[c(1, 2)]"))
   expect_false(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@[2]@#*L*#@"))
   expect_true(PEITHO:::is_result_tag("@#*L*#@@#*L*#@"))
@@ -167,6 +168,10 @@ test_that("extract_tag_varname extracts and normalizes tag variable names", {
     PEITHO:::extract_tag_varname("@#*L*#@my step label@#*L*#@[2]", result_pattern()),
     "my_step_label[2]"
   )
+  expect_equal(
+    PEITHO:::extract_tag_varname("@#*L*#@my step label@#*L*#@[[2]]", result_pattern()),
+    "my_step_label[[2]]"
+  )
 
   expect_equal(
     PEITHO:::extract_tag_varname("@#*L*#@my step label@#*L*#@[c(1, 2)]", result_pattern()),
@@ -191,6 +196,10 @@ test_that("extract_result_ref splits label and selector", {
   expect_equal(out$label, "my_step_label")
   expect_equal(out$selector, "c(1,2)")
 
+  out_double <- PEITHO:::extract_result_ref("@#*L*#@my step label@#*L*#@[[2]]")
+  expect_equal(out_double$label, "my_step_label")
+  expect_equal(out_double$selector, "2")
+
   out_no_selector <- PEITHO:::extract_result_ref("@#*L*#@step_1@#*L*#@")
   expect_equal(out_no_selector$label, "step_1")
   expect_null(out_no_selector$selector)
@@ -198,8 +207,17 @@ test_that("extract_result_ref splits label and selector", {
 
 test_that("parse_required_fields tracks result dependencies by base label", {
   required <- PEITHO:::parse_required_fields(
-    "x = @#*L*#@step 1@#*L*#@[2], y = @#*L*#@step 2@#*L*#@[1]"
+    "x = @#*L*#@step 1@#*L*#@[c(1, 2)], y = @#*L*#@step 2@#*L*#@[1]"
   )
 
   expect_equal(required$steps, c("step_1", "step_2"))
+})
+
+test_that("parse_args keeps selectors with commas intact", {
+  parsed <- PEITHO:::parse_args(
+    "url=@#*L*#@Split@#*L*#@[c(1, 3)], timeout = 30"
+  )
+
+  expect_equal(parsed$names, c("url", "timeout"))
+  expect_equal(parsed$values, c("@#*L*#@Split@#*L*#@[c(1, 3)]", "30"))
 })

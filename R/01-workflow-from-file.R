@@ -36,7 +36,11 @@ extract_result_ref <- function(x) {
 
   if (length(captures) >= 3L && nzchar(captures[[3]])) {
     selector <- gsub("\\s+", "", captures[[3]], perl = TRUE)
-    selector <- substr(selector, 2L, nchar(selector) - 1L)
+    if (grepl("^\\[\\[.*\\]\\]$", selector)) {
+      selector <- substr(selector, 3L, nchar(selector) - 2L)
+    } else {
+      selector <- substr(selector, 2L, nchar(selector) - 1L)
+    }
   }
 
   list(label = label, selector = selector)
@@ -93,7 +97,7 @@ load_inputs_to_list <- function(
 }
 
 input_pattern <- function() "^@#\\*I\\*#@((?:(?!@#\\*I\\*#@).)*)@#\\*I\\*#@$"
-result_pattern <- function() "^@#\\*L\\*#@((?:(?!@#\\*L\\*#@).)*)@#\\*L\\*#@(\\[[^\\]]+\\])?$"
+result_pattern <- function() "^@#\\*L\\*#@((?:(?!@#\\*L\\*#@).)*)@#\\*L\\*#@((?:\\[\\[[^\\]]+\\]\\])|(?:\\[[^\\]]+\\]))?$"
 
 is_input_tag <- function(x) {
   grepl(input_pattern(), x, perl = TRUE)
@@ -147,12 +151,68 @@ parse_args <- function(arg_string) {
   if (is.null(arg_string) || !nzchar(arg_string)) {
     return(list(values = character(0), names = character(0)))
   }
-  # split on commas, but not inside single or double quotes
-  args_vec <- strsplit(
-    arg_string,
-    ",(?=(?:[^']*'[^']*')*[^']*$)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",
-    perl = TRUE
-  )[[1]] |> trimws()
+
+  split_top_level_args <- function(x) {
+    chars <- strsplit(x, "", fixed = TRUE)[[1]]
+    if (!length(chars)) return(character(0))
+
+    parts <- character(0)
+    current <- ""
+    in_single <- FALSE
+    in_double <- FALSE
+    bracket_depth <- 0L
+    paren_depth <- 0L
+
+    for (ch in chars) {
+      if (ch == "'" && !in_double) {
+        in_single <- !in_single
+        current <- paste0(current, ch)
+        next
+      }
+
+      if (ch == "\"" && !in_single) {
+        in_double <- !in_double
+        current <- paste0(current, ch)
+        next
+      }
+
+      if (!in_single && !in_double) {
+        if (ch == "[") {
+          bracket_depth <- bracket_depth + 1L
+          current <- paste0(current, ch)
+          next
+        }
+        if (ch == "]") {
+          bracket_depth <- max(0L, bracket_depth - 1L)
+          current <- paste0(current, ch)
+          next
+        }
+        if (ch == "(") {
+          paren_depth <- paren_depth + 1L
+          current <- paste0(current, ch)
+          next
+        }
+        if (ch == ")") {
+          paren_depth <- max(0L, paren_depth - 1L)
+          current <- paste0(current, ch)
+          next
+        }
+
+        if (ch == "," && bracket_depth == 0L && paren_depth == 0L) {
+          parts <- c(parts, trimws(current))
+          current <- ""
+          next
+        }
+      }
+
+      current <- paste0(current, ch)
+    }
+
+    c(parts, trimws(current))
+  }
+
+  args_vec <- split_top_level_args(arg_string)
+  args_vec <- args_vec[nzchar(args_vec)]
 
   arg_names <- character(length(args_vec))
   arg_values <- character(length(args_vec))
