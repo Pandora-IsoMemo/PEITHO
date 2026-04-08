@@ -55,7 +55,7 @@
     "label": "Split addresses",
     "comments": "",
     "command": "simple_split",
-    "args": "x=@#*I*#@web_addresses_wf_2@#*I*#@, split=\\n",
+    "args": "x=@#*I*#@web_addresses_2@#*I*#@, split=\\n",
     "loop": "no",
     "prompt": ""
   },
