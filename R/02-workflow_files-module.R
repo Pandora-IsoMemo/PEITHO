@@ -17,7 +17,7 @@ workflow_files_ui <- function(id, title = "") {
           "Inspect package defaults and available namespace functions.",
           class = "text-muted"
         ),
-        actionButton(ns("show_defaults"), "Show package default functions", icon = icon("book")),
+        actionButton(ns("show_defaults"), "Show package functions", icon = icon("book")),
         actionButton(ns("browse_functions"), "Browse available functions", icon = icon("list")),
         br(), br(),
         tags$p(
@@ -137,7 +137,7 @@ workflow_files_server <- function(id, active_dir) {
       if (is.null(dir_path) || !dir.exists(dir_path)) {
         return(tags$span(
           class = "text-muted",
-          "No workflow loaded. Import a workflow or load the example."
+          "Import a workflow or load the example."
         ))
       }
 

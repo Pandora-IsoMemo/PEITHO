@@ -1,5 +1,5 @@
 
-# FUNCTION: split strings
+# CUSTOM FUNCTION: split strings
 
 split_strings <- function(strings, separator) {
   # Initialize results list
