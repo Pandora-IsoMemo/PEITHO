@@ -41,6 +41,5 @@ tagList(
   shinyTools::headerButtonsUI(
     id = "header",
     help_link = "https://pandora-isomemo.github.io/PEITHO/"
-  ),
-  shinyjs::useShinyjs()
+  )
 )
