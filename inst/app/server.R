@@ -74,6 +74,20 @@ shinyServer(function(input, output, session) {
     cleanup_active_dir(session$ns("example"))
 
     example_dir <- system.file(cfg$pathToFolder, package = "PEITHO")
+    if (!nzchar(example_dir) || !dir.exists(example_dir)) {
+      shiny::showNotification(
+        paste0(
+          "Example workflow folder not found in package 'PEITHO': ",
+          cfg$pathToFolder
+        ),
+        type = "error"
+      )
+      PEITHO:::logDebug(
+        "%s: Example workflow folder not found in package 'PEITHO': %s",
+        session$ns("example"), cfg$pathToFolder
+      )
+      return()
+    }
     active_temp_dir(example_dir)
     active_temp_dir_is_managed(FALSE)
 
