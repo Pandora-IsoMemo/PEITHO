@@ -102,3 +102,46 @@ default_workflow_functions_text <- function() {
 
   paste(chunks, collapse = "\n\n")
 }
+
+# Build a data frame of all functions available on the current search path,
+# grouped by source package, for display in the function browser DT.
+available_functions_df <- function(extra_env = NULL) {
+  # Packages to include explicitly (curated subset to avoid noise)
+  pkgs <- c("PEITHO", "base", "stats", "utils", "methods")
+
+  rows <- lapply(pkgs, function(pkg) {
+    env <- tryCatch(
+      if (pkg == "PEITHO") asNamespace("PEITHO") else as.environment(paste0("package:", pkg)),
+      error = function(e) NULL
+    )
+    if (is.null(env)) return(NULL)
+
+    fns <- ls(envir = env)
+    fns <- fns[vapply(fns, function(f) {
+      tryCatch(is.function(get(f, envir = env, inherits = FALSE)), error = function(e) FALSE)
+    }, logical(1))]
+
+    if (length(fns) == 0L) return(NULL)
+    data.frame(Function = fns, Source = pkg, stringsAsFactors = FALSE)
+  })
+
+  # Add functions from a custom environment (e.g. loaded functions.R)
+  if (!is.null(extra_env) && is.environment(extra_env)) {
+    fns <- ls(envir = extra_env)
+    fns <- fns[vapply(fns, function(f) {
+      tryCatch(is.function(get(f, envir = extra_env, inherits = FALSE)), error = function(e) FALSE)
+    }, logical(1))]
+    if (length(fns) > 0L) {
+      rows <- c(
+        rows,
+        list(data.frame(Function = fns, Source = "custom (functions.R)", stringsAsFactors = FALSE))
+      )
+    }
+  }
+
+  rows <- Filter(Negate(is.null), rows)
+  if (length(rows) == 0L) return(data.frame(Function = character(0), Source = character(0)))
+
+  result <- do.call(rbind, rows)
+  result[order(result$Source, result$Function), ]
+}

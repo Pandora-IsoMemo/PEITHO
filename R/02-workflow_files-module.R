@@ -9,21 +9,30 @@ workflow_files_ui <- function(id, title = "") {
 
   tagList(
     if (nzchar(title)) tags$h4(title) else NULL,
-    tags$p(
-      "Browse and edit workflow files, or view built-in package functions available for use in commands.",
-      class = "text-muted"
-    ),
     br(),
     fluidRow(
       column(
         width = 4,
+        tags$p(
+          "Inspect package defaults and available namespace functions.",
+          class = "text-muted"
+        ),
         actionButton(ns("show_defaults"), "Show package default functions", icon = icon("book")),
+        actionButton(ns("browse_functions"), "Browse available functions", icon = icon("list")),
         br(), br(),
+        tags$p(
+          "Browse workflow files.",
+          class = "text-muted"
+        ),
         htmlOutput(ns("wf_dir")),
         shinyTree::shinyTree(ns("file_tree"), search = FALSE, theme = "proton")
       ),
       column(
         width = 8,
+        tags$p(
+          "View selected content and edit supported workflow files.",
+          class = "text-muted"
+        ),
         tags$strong(textOutput(ns("selected_file_label"), inline = TRUE)),
         br(),
         textAreaInput(
@@ -120,14 +129,25 @@ workflow_files_server <- function(id, active_dir) {
         grepl("inputs|functions|commands", name, ignore.case = TRUE)
     }
 
-    output$wf_dir <- renderText({
-      req(active_dir(), dir.exists(active_dir()))
-      paste(basename(active_dir()))
+    output$wf_dir <- renderUI({
+      dir_path <- active_dir()
+      if (is.null(dir_path) || !dir.exists(dir_path)) {
+        return(tags$span(
+          class = "text-muted",
+          "No workflow loaded. Import a workflow or load the example."
+        ))
+      }
+
+      tags$strong(sprintf("Workflow folder: %s", basename(dir_path)))
     })
 
     output$file_tree <- shinyTree::renderTree({
-      req(active_dir(), dir.exists(active_dir()))
-      build_file_tree(active_dir())
+      dir_path <- active_dir()
+      if (is.null(dir_path) || !dir.exists(dir_path)) {
+        return(list())
+      }
+
+      build_file_tree(dir_path)
     })
 
     output$selected_file_label <- renderText({
@@ -183,6 +203,41 @@ workflow_files_server <- function(id, active_dir) {
         selected_file(NULL)
         selected_label(basename(path))
         output$editor_status <- renderText("Read-only file: display only.")
+      }
+    })
+
+    observeEvent(input$browse_functions, {
+      fn_df <- tryCatch(
+        PEITHO:::available_functions_df(),
+        error = function(e) NULL
+      )
+
+      showModal(modalDialog(
+        title = "Available functions from loaded namespace",
+        size = "l",
+        easyClose = TRUE,
+        footer = modalButton("Close"),
+        if (is.null(fn_df) || nrow(fn_df) == 0L) {
+          tags$p("No functions found.")
+        } else {
+          DT::DTOutput(session$ns("fn_browser_tbl"))
+        }
+      ))
+
+      if (!is.null(fn_df) && nrow(fn_df) > 0L) {
+        output$fn_browser_tbl <- DT::renderDT({
+          DT::datatable(
+            fn_df,
+            rownames = FALSE,
+            filter = "top",
+            options = list(
+              pageLength = 20,
+              scrollY = "420px",
+              scrollCollapse = TRUE,
+              dom = "ftipr"
+            )
+          )
+        })
       }
     })
 
