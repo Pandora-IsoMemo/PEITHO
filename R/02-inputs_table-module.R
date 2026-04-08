@@ -8,6 +8,10 @@ inputs_table_ui <- function(id, title = "") {
   ns <- NS(id)
   tagList(
     tags$h4(title),
+    tags$p(
+      "Manage workflow inputs. Double-click a cell to edit names or values, then add or remove rows as needed.",
+      class = "text-muted"
+    ),
     fluidRow(
       column(
         width = 4,

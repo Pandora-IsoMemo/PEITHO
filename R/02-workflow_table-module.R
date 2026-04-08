@@ -9,6 +9,10 @@ workflow_table_ui <- function(id, title = "") {
 
   tagList(
     tags$h4(title),
+    tags$p(
+      "Define workflow steps. Double-click a cell to edit, then select a row to add or remove steps.",
+      class = "text-muted"
+    ),
     fluidRow(
       column(
         width = 4,
