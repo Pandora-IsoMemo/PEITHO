@@ -126,7 +126,10 @@ workflow_files_server <- function(id, active_dir) {
     can_edit_file <- function(path) {
       name <- basename(path)
       can_display_file(path) &&
-        grepl("inputs|functions|commands", name, ignore.case = TRUE)
+        file.exists(path) &&
+        !dir.exists(path) &&
+        grepl("inputs|functions|commands", name, ignore.case = TRUE) &&
+        file.access(path, 2) == 0
     }
 
     output$wf_dir <- renderUI({
