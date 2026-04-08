@@ -284,7 +284,9 @@ workflow_files_server <- function(id, active_dir) {
       lines <- strsplit(value, "\n", fixed = TRUE)[[1]]
 
       tryCatch({
-        writeLines(lines, con = path, useBytes = TRUE)
+        con <- file(path, open = "w", encoding = "UTF-8")
+        on.exit(close(con), add = TRUE)
+        writeLines(lines, con = con)
         output$editor_status <- renderText(
           sprintf("Saved %s", basename(path))
         )
