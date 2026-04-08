@@ -109,7 +109,7 @@ inputs_table_server <- function(id, wf) {
       selected <- resolve_selected_row(isolate(input$selected_row), n_rows = nrow(df))
       choices <- build_row_selector_choices(df)
 
-      shinyWidgets::updateSelectizeInput(
+      updateSelectizeInput(
         session,
         "selected_row",
         choices = choices,
