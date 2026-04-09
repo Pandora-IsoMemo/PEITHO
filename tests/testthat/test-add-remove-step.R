@@ -120,3 +120,26 @@ test_that("update writes command changes to commands.json", {
   cmds <- jsonlite::fromJSON(file.path(td, "commands.json"), simplifyVector = FALSE)
   expect_equal(cmds[[1]]$command, "toupper")
 })
+
+test_that("update does not warn on validation issues by default", {
+  td <- tempfile("wf_update_nowarn_")
+  dir.create(td, recursive = TRUE)
+  on.exit(unlink(td, recursive = TRUE, force = TRUE), add = TRUE)
+
+  jsonlite::write_json(list(existing_input = "x"), file.path(td, "inputs.json"), auto_unbox = TRUE, pretty = TRUE)
+  jsonlite::write_json(
+    list(list(name = "Step 1", command = "identity", args = "x = @#*I*#@existing_input@#*I*#@", loop = "no")),
+    file.path(td, "commands.json"),
+    auto_unbox = TRUE,
+    pretty = TRUE
+  )
+
+  wf <- suppressWarnings(new_workflow(
+    name = "Update No Warn Test",
+    workflow_file_paths = workflow_file_paths(path = td)
+  ))
+
+  expect_no_warning(
+    update(wf, step = 1, field = "Parameters", value = "x = @#*I*#@missing_input@#*I*#@")
+  )
+})
