@@ -9,7 +9,6 @@ workflow_files_ui <- function(id, title = "") {
 
   tagList(
     if (nzchar(title)) tags$h4(title) else NULL,
-    br(),
     fluidRow(
       column(
         width = 4,
@@ -19,7 +18,7 @@ workflow_files_ui <- function(id, title = "") {
         ),
         actionButton(ns("show_defaults"), "Show package functions", icon = icon("book")),
         actionButton(ns("browse_functions"), "Browse available functions", icon = icon("list")),
-        br(), br(),
+        tags$hr(),
         tags$p(
           "Browse workflow files.",
           class = "text-muted"

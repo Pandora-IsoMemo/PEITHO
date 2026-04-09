@@ -120,11 +120,8 @@ new_workflow <- function(
   }
 
   # 2) Validations, if not valid stopping with error
-  validate_workflow_steps(steps, error_on_warn = TRUE)
-  validate_unique_steps(steps, error_on_warn = error_on_warn)
-  validate_numeric_entries(steps, error_on_warn = error_on_warn)
-  validate_required_inputs(steps, input_list, error_on_warn = error_on_warn)
-  validate_required_steps(steps, error_on_warn = error_on_warn)
+  validate_steps_class(steps, error_on_warn = TRUE)
+  validate_workflow(list(steps = steps, input_list = input_list), error_on_warn = error_on_warn)
 
   # 3) Determine current step
   current <- validate_current_index(current, length(steps))
@@ -265,7 +262,7 @@ validate_workflow_file_paths <- function(workflow_file_paths) {
   invisible(TRUE)
 }
 
-validate_workflow_steps <- function(steps, error_on_warn = TRUE) {
+validate_steps_class <- function(steps, error_on_warn = TRUE) {
   if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
     stop("'error_on_warn' must be a single logical value.", call. = FALSE)
   }
@@ -405,6 +402,40 @@ validate_current_index <- function(current, n_steps) {
   max(1L, min(current, n_steps))
 }
 
+validate_workflow <- function(x, error_on_warn = TRUE) {
+  validate_unique_steps(x$steps, error_on_warn = error_on_warn)
+  validate_numeric_entries(x$steps, error_on_warn = error_on_warn)
+  validate_required_inputs(x$steps, x$input_list, error_on_warn = error_on_warn)
+  validate_required_steps(x$steps, error_on_warn = error_on_warn)
+}
+
+get_warn_on_validation <- function(dots, default = FALSE) {
+  if (!is.list(dots)) {
+    stop("'dots' must be a list.", call. = FALSE)
+  }
+  if (!is.logical(default) || length(default) != 1L) {
+    stop("'default' must be a single logical value.", call. = FALSE)
+  }
+
+  if ("warn_on_validation" %in% names(dots)) {
+    return(isTRUE(dots$warn_on_validation))
+  }
+  default
+}
+
+validate_workflow_with_policy <- function(x, warn_on_validation = FALSE) {
+  if (!is.logical(warn_on_validation) || length(warn_on_validation) != 1L) {
+    stop("'warn_on_validation' must be a single logical value.", call. = FALSE)
+  }
+
+  if (warn_on_validation) {
+    validate_workflow(x, error_on_warn = FALSE)
+  } else {
+    suppressWarnings(validate_workflow(x, error_on_warn = FALSE))
+  }
+  invisible(TRUE)
+}
+
 # -------------------------------------------------------------------------
 # Save/load workflow as ZIP file
 # -------------------------------------------------------------------------
@@ -470,6 +501,9 @@ import_workflow <- function(
 #' @return The updated `workflow` object.
 #' @export
 update.workflow <- function(x, step, field, value, ...) {
+  dots <- list(...)
+  warn_on_validation <- get_warn_on_validation(dots, default = FALSE)
+
   # pass field & value NOT a whole step -> we need to update the wf object AND the commands json
   # get commands file path
   wf_file_paths <- x$workflow_file_paths
@@ -477,10 +511,7 @@ update.workflow <- function(x, step, field, value, ...) {
   updated_step <- update(x$steps[[step]], wf_file_paths, field = field, value = value,  ...)
   x$steps[[step]] <- updated_step
   # validate updated workflow
-  validate_unique_steps(x$steps, error_on_warn = FALSE)
-  validate_numeric_entries(x$steps, error_on_warn = FALSE)
-  validate_required_inputs(x$steps, x$input_list, error_on_warn = FALSE)
-  validate_required_steps(x$steps, error_on_warn = FALSE)
+  validate_workflow_with_policy(x, warn_on_validation = warn_on_validation)
   # return updated workflow
   x
 }
@@ -542,16 +573,16 @@ add_step.workflow <- function(x, new_step, position = length(x$steps) + 1L, ...)
   if (position < 1L || position > length(x$steps) + 1L) {
     stop("Position must be between 1 and ", length(x$steps) + 1L, ".", call. = FALSE)
   }
+  dots <- list(...)
+  warn_on_validation <- get_warn_on_validation(dots, default = FALSE)
+
   x$steps <- append(x$steps, list(new_step), after = position - 1L)
   # update entries of all steps to maintain numeric order
   for (i in seq_along(x$steps)) {
     x$steps[[i]]$entry <- i
   }
   # validate workflow after adding step
-  validate_unique_steps(x$steps, error_on_warn = FALSE)
-  validate_numeric_entries(x$steps, error_on_warn = FALSE)
-  validate_required_inputs(x$steps, x$input_list, error_on_warn = FALSE)
-  validate_required_steps(x$steps, error_on_warn = FALSE)
+  validate_workflow_with_policy(x, warn_on_validation = warn_on_validation)
 
   # update current index if needed
   if (is.na(x$current)) {
@@ -592,12 +623,12 @@ remove_step.workflow <- function(x, position, ...) {
   if (position < 1L || position > length(x$steps)) {
     stop("Step index must be between 1 and ", length(x$steps), ".", call. = FALSE)
   }
+  dots <- list(...)
+  warn_on_validation <- get_warn_on_validation(dots, default = FALSE)
+
   x$steps <- x$steps[-position]
   # validate workflow after removing step
-  validate_unique_steps(x$steps, error_on_warn = FALSE)
-  validate_numeric_entries(x$steps, error_on_warn = FALSE)
-  validate_required_inputs(x$steps, x$input_list, error_on_warn = FALSE)
-  validate_required_steps(x$steps, error_on_warn = FALSE)
+  validate_workflow_with_policy(x, warn_on_validation = warn_on_validation)
   # update current index if needed
   if (!is.na(x$current)) {
     if (x$current == position) {
@@ -714,9 +745,6 @@ run.workflow <- function(
   env = NULL,
   ...
 ) {
-  # unpack additional args
-  additional_args <- list(...)
-
   # for now we always stop on error!!!
   stop_on_error <- TRUE
 
@@ -740,10 +768,7 @@ run.workflow <- function(
     state <- new_workflowstate(initial_input = state)
   }
 
-  validate_unique_steps(x$steps, error_on_warn = TRUE)
-  validate_numeric_entries(x$steps, error_on_warn = TRUE)
-  validate_required_inputs(x$steps, x$input_list, error_on_warn = TRUE)
-  validate_required_steps(x$steps, error_on_warn = TRUE)
+  validate_workflow(x, error_on_warn = TRUE)
 
   # RUN workflow steps
   from <- max(1L, as.integer(from))
