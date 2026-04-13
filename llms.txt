@@ -18,6 +18,8 @@ the [Documentation](#documenation) above.
 
 ## Notes for developers
 
+### Documentation Updates
+
 When adding information to the *help* sites, *docstrings* or the
 *vignette* of this package, please update documentation locally as
 follows. The documentation of the main branch is build automatically via
@@ -28,24 +30,63 @@ devtools::document() # or CTRL + SHIFT + D in RStudio
 devtools::build_site()
 ```
 
+### Local Docker Container
+
+When testing with a local docker container, please make sure to rebuild
+the docker image after changes in the R code or dependencies. You can do
+this from the root of the repository via:
+
+``` bash
+docker build -t peitho-app:latest .
+```
+
+After that, start the container as usual via:
+
+``` bash
+docker run -p 3838:3838 peitho-app:latest
+```
+
+and access the app in your browser at `http://localhost:3838/`. Stop the
+container with `CTRL + C` in the terminal.
+
 # Package index
 
 ## All functions
 
+- [`add_step()`](https://pandora-isomemo.github.io/PEITHO/reference/add_step.md)
+  : Add a step to a workflow
+- [`add_step(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/add_step.workflow.md)
+  : Add a new step to the workflow
+- [`as.commands_record()`](https://pandora-isomemo.github.io/PEITHO/reference/as.commands_record.md)
+  : Convert an object to commands.json record format
+- [`as.commands_record(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/as.commands_record.workflow.md)
+  : Convert a workflow object to commands.json record format
+- [`as.commands_record(`*`<workflowstep>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/as.commands_record.workflowstep.md)
+  : Convert a workflowstep to commands.json record format
 - [`as.data.frame(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/as.data.frame.workflow.md)
   : Convert a workflow object to a data frame
 - [`as.data.frame(`*`<workflowrun>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/as.data.frame.workflowrun.md)
   : Convert a workflowrun object to a data frame
 - [`as.data.frame(`*`<workflowstate>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/as.data.frame.workflowstate.md)
   : Convert a workflowstate to a data frame
-- [`extract_inputs()`](https://pandora-isomemo.github.io/PEITHO/reference/extract_inputs.md)
-  : Extract input values from a workflow run
-- [`extract_workflow_from_files()`](https://pandora-isomemo.github.io/PEITHO/reference/extract_workflow_from_files.md)
-  : Extract workflow steps from files in a folder
+- [`as.data.frame(`*`<workflowstep>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/as.data.frame.workflowstep.md)
+  : Convert a workflowstep to a data frame
+- [`config()`](https://pandora-isomemo.github.io/PEITHO/reference/config.md)
+  : Load PEITHO configuration
 - [`fetch_WebText()`](https://pandora-isomemo.github.io/PEITHO/reference/fetch_WebText.md)
   : Fetch and parse web text from a URL
+- [`get_field()`](https://pandora-isomemo.github.io/PEITHO/reference/get_field.md)
+  : Get a specific field
+- [`get_field(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/get_field.workflow.md)
+  : Get a specific field from a workflow
+- [`get_field(`*`<workflowstep>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/get_field.workflowstep.md)
+  : Get a specific field from a workflowstep
 - [`import_workflow()`](https://pandora-isomemo.github.io/PEITHO/reference/import_workflow.md)
   : Import workflow from a ZIP file
+- [`inputs_table_server()`](https://pandora-isomemo.github.io/PEITHO/reference/inputs_table_server.md)
+  : Inputs Table Server
+- [`inputs_table_ui()`](https://pandora-isomemo.github.io/PEITHO/reference/inputs_table_ui.md)
+  : Inputs Table UI
 - [`new_WebText()`](https://pandora-isomemo.github.io/PEITHO/reference/new_WebText.md)
   : WebText Class Represents text content fetched from a web page.
 - [`new_operationparam()`](https://pandora-isomemo.github.io/PEITHO/reference/new_operationparam.md)
@@ -75,9 +116,16 @@ devtools::build_site()
   : Print method for workflowstep objects
 - [`print(`*`<workflowsteprun>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/print.workflowsteprun.md)
   : Print method for workflowsteprun objects
+- [`remove_step()`](https://pandora-isomemo.github.io/PEITHO/reference/remove_step.md)
+  : Remove a step from a workflow
+- [`remove_step(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/remove_step.workflow.md)
+  : Remove a step from the workflow
+- [`results_table_server()`](https://pandora-isomemo.github.io/PEITHO/reference/results_table_server.md)
+  : Results Table Server Module
+- [`results_table_ui()`](https://pandora-isomemo.github.io/PEITHO/reference/results_table_ui.md)
+  : Results Table UI Module
 - [`run()`](https://pandora-isomemo.github.io/PEITHO/reference/run.md) :
-  Run a workflow step This is a generic function to run a workflow step
-  or an entire workflow.
+  Run a workflow step
 - [`run(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/run.workflow.md)
   : Run the entire workflow
 - [`run(`*`<workflowstep>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/run.workflowstep.md)
@@ -91,11 +139,25 @@ devtools::build_site()
 - [`summary(`*`<workflowsteprun>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/summary.workflowsteprun.md)
   : Summary method for workflowsteprun objects
 - [`update()`](https://pandora-isomemo.github.io/PEITHO/reference/update.md)
-  : Update a workflow state after running a step
+  : Update an object
+- [`update(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/update.workflow.md)
+  : Update a workflow step with a new value
 - [`update(`*`<workflowstate>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/update.workflowstate.md)
   : Add a workflow step run to the workflow state
+- [`update(`*`<workflowstep>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/update.workflowstep.md)
+  : Update a workflow step
+- [`update_input_list()`](https://pandora-isomemo.github.io/PEITHO/reference/update_input_list.md)
+  : Update the input list of a workflow
+- [`update_input_list(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/update_input_list.workflow.md)
+  : Update the input list of a workflow
 - [`workflow_file_paths()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_file_paths.md)
   : Helper to get file paths for PEITHO workflow files
+- [`workflow_steps_from_files()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_steps_from_files.md)
+  : Extract workflow steps from files in a folder
+- [`workflow_table_server()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_table_server.md)
+  : Workflow Table Server
+- [`workflow_table_ui()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_table_ui.md)
+  : Workflow Table UI
 
 # Articles
 

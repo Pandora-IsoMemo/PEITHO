@@ -18,7 +18,7 @@ new_workflowsteprun(step, args, output = NULL, error = NULL, ...)
 
 - args:
 
-  A list of arguments that were passed to the step's operation. Contains
+  A list of arguments that were passed to the step's command. Contains
   actual values used during execution (e.g. results of previous steps).
 
 - output:

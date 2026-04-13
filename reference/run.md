@@ -1,17 +1,16 @@
-# Run a workflow step This is a generic function to run a workflow step or an entire workflow.
+# Run a workflow step
 
-Run a workflow step This is a generic function to run a workflow step or
-an entire workflow.
+This is a generic function to run a workflow step or an entire workflow.
 
 ## Usage
 
 ``` r
-run(object, state, ...)
+run(x, state, ...)
 ```
 
 ## Arguments
 
-- object:
+- x:
 
   A \`workflowstep\` object or a \`workflow\` object.
 

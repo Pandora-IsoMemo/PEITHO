@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PEITHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.02.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.03.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,41 @@
 
       <dl><dt>
 
+          <code><a href="add_step.html">add_step()</a></code>
+
+        </dt>
+        <dd>Add a step to a workflow</dd>
+
+        <dt>
+
+          <code><a href="add_step.workflow.html">add_step(<i>&lt;workflow&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Add a new step to the workflow</dd>
+
+        <dt>
+
+          <code><a href="as.commands_record.html">as.commands_record()</a></code>
+
+        </dt>
+        <dd>Convert an object to commands.json record format</dd>
+
+        <dt>
+
+          <code><a href="as.commands_record.workflow.html">as.commands_record(<i>&lt;workflow&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Convert a workflow object to commands.json record format</dd>
+
+        <dt>
+
+          <code><a href="as.commands_record.workflowstep.html">as.commands_record(<i>&lt;workflowstep&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Convert a workflowstep to commands.json record format</dd>
+
+        <dt>
+
           <code><a href="as.data.frame.workflow.html">as.data.frame(<i>&lt;workflow&gt;</i>)</a></code>
 
         </dt>
@@ -67,17 +102,17 @@
 
         <dt>
 
-          <code><a href="extract_inputs.html">extract_inputs()</a></code>
+          <code><a href="as.data.frame.workflowstep.html">as.data.frame(<i>&lt;workflowstep&gt;</i>)</a></code>
 
         </dt>
-        <dd>Extract input values from a workflow run</dd>
+        <dd>Convert a workflowstep to a data frame</dd>
 
         <dt>
 
-          <code><a href="extract_workflow_from_files.html">extract_workflow_from_files()</a></code>
+          <code><a href="config.html">config()</a></code>
 
         </dt>
-        <dd>Extract workflow steps from files in a folder</dd>
+        <dd>Load PEITHO configuration</dd>
 
         <dt>
 
@@ -88,10 +123,45 @@
 
         <dt>
 
+          <code><a href="get_field.html">get_field()</a></code>
+
+        </dt>
+        <dd>Get a specific field</dd>
+
+        <dt>
+
+          <code><a href="get_field.workflow.html">get_field(<i>&lt;workflow&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Get a specific field from a workflow</dd>
+
+        <dt>
+
+          <code><a href="get_field.workflowstep.html">get_field(<i>&lt;workflowstep&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Get a specific field from a workflowstep</dd>
+
+        <dt>
+
           <code><a href="import_workflow.html">import_workflow()</a></code>
 
         </dt>
         <dd>Import workflow from a ZIP file</dd>
+
+        <dt>
+
+          <code><a href="inputs_table_server.html">inputs_table_server()</a></code>
+
+        </dt>
+        <dd>Inputs Table Server</dd>
+
+        <dt>
+
+          <code><a href="inputs_table_ui.html">inputs_table_ui()</a></code>
+
+        </dt>
+        <dd>Inputs Table UI</dd>
 
         <dt>
 
@@ -193,10 +263,38 @@
 
         <dt>
 
+          <code><a href="remove_step.html">remove_step()</a></code>
+
+        </dt>
+        <dd>Remove a step from a workflow</dd>
+
+        <dt>
+
+          <code><a href="remove_step.workflow.html">remove_step(<i>&lt;workflow&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Remove a step from the workflow</dd>
+
+        <dt>
+
+          <code><a href="results_table_server.html">results_table_server()</a></code>
+
+        </dt>
+        <dd>Results Table Server Module</dd>
+
+        <dt>
+
+          <code><a href="results_table_ui.html">results_table_ui()</a></code>
+
+        </dt>
+        <dd>Results Table UI Module</dd>
+
+        <dt>
+
           <code><a href="run.html">run()</a></code>
 
         </dt>
-        <dd>Run a workflow step This is a generic function to run a workflow step or an entire workflow.</dd>
+        <dd>Run a workflow step</dd>
 
         <dt>
 
@@ -245,7 +343,14 @@
           <code><a href="update.html">update()</a></code>
 
         </dt>
-        <dd>Update a workflow state after running a step</dd>
+        <dd>Update an object</dd>
+
+        <dt>
+
+          <code><a href="update.workflow.html">update(<i>&lt;workflow&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Update a workflow step with a new value</dd>
 
         <dt>
 
@@ -256,10 +361,52 @@
 
         <dt>
 
+          <code><a href="update.workflowstep.html">update(<i>&lt;workflowstep&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Update a workflow step</dd>
+
+        <dt>
+
+          <code><a href="update_input_list.html">update_input_list()</a></code>
+
+        </dt>
+        <dd>Update the input list of a workflow</dd>
+
+        <dt>
+
+          <code><a href="update_input_list.workflow.html">update_input_list(<i>&lt;workflow&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Update the input list of a workflow</dd>
+
+        <dt>
+
           <code><a href="workflow_file_paths.html">workflow_file_paths()</a></code>
 
         </dt>
         <dd>Helper to get file paths for PEITHO workflow files</dd>
+
+        <dt>
+
+          <code><a href="workflow_steps_from_files.html">workflow_steps_from_files()</a></code>
+
+        </dt>
+        <dd>Extract workflow steps from files in a folder</dd>
+
+        <dt>
+
+          <code><a href="workflow_table_server.html">workflow_table_server()</a></code>
+
+        </dt>
+        <dd>Workflow Table Server</dd>
+
+        <dt>
+
+          <code><a href="workflow_table_ui.html">workflow_table_ui()</a></code>
+
+        </dt>
+        <dd>Workflow Table UI</dd>
       </dl></div>
   </main></div>
 

@@ -6,19 +6,12 @@ Run the entire workflow
 
 ``` r
 # S3 method for class 'workflow'
-run(
-  object,
-  state = list(),
-  from = 1L,
-  to = length(object$steps),
-  env = NULL,
-  ...
-)
+run(x, state = list(), from = 1L, to = length(x$steps), env = NULL, ...)
 ```
 
 ## Arguments
 
-- object:
+- x:
 
   A \`workflow\` object.
 
@@ -36,7 +29,7 @@ run(
 
 - env:
 
-  An environment to look up operation functions. Defaults to \`NULL\`,
+  An environment to look up command functions. Defaults to \`NULL\`,
   which uses each step's own env or the caller's env.
 
 - ...:

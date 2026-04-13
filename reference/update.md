@@ -1,33 +1,19 @@
-# Update a workflow state after running a step
+# Update an object
 
-This is a generic function to update a workflow state after executing a
-step.
+Generic update method for workflow-related objects.
 
 ## Usage
 
 ``` r
-update(object, steprun, idx, ...)
+update(x, ...)
 ```
 
 ## Arguments
 
-- object:
+- x:
 
-  A \`workflowstate\` object.
-
-- steprun:
-
-  A \`workflowsteprun\` object representing the result of the executed
-  step.
-
-- idx:
-
-  The index of the step run to update.
+  The object to update.
 
 - ...:
 
-  Additional arguments (not used).
-
-## Value
-
-The updated \`workflowstate\` object.
+  Additional arguments passed to methods.

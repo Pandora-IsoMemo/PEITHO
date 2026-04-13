@@ -7,12 +7,12 @@ executed step runs
 
 ``` r
 # S3 method for class 'workflowstate'
-update(object, steprun, idx, ...)
+update(x, steprun, idx, ...)
 ```
 
 ## Arguments
 
-- object:
+- x:
 
   A \`workflowstate\` object.
 

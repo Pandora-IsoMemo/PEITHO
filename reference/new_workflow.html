@@ -9,7 +9,7 @@ the current step index, and additional metadata."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PEITHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.02.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.03.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,10 +47,12 @@ the current step index, and additional metadata.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">new_workflow</span><span class="op">(</span></span>
 <span>  name <span class="op">=</span> <span class="st">"Untitled workflow"</span>,</span>
+<span>  workflow_file_paths <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  use_peitho_folder <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  input_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  steps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  current <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">steps</span><span class="op">)</span><span class="op">)</span> <span class="fl">1L</span> <span class="kw">else</span> <span class="cn">NA_integer_</span>,</span>
-<span>  use_peitho_folder <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  workflow_file_paths <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  error_on_warn <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -63,6 +65,19 @@ the current step index, and additional metadata.</p>
 <dd><p>A name for the workflow.</p></dd>
 
 
+<dt id="arg-workflow-file-paths">workflow_file_paths<a class="anchor" aria-label="anchor" href="#arg-workflow-file-paths"></a></dt>
+<dd><p>A list of file paths for workflow files (see `workflow_file_paths()`).</p></dd>
+
+
+<dt id="arg-use-peitho-folder">use_peitho_folder<a class="anchor" aria-label="anchor" href="#arg-use-peitho-folder"></a></dt>
+<dd><p>Logical; if `TRUE`, load steps from PEITHO example folder. If `FALSE`,
+use provided `steps` and ignore `workflow_file_paths`, useful for testing.</p></dd>
+
+
+<dt id="arg-input-list">input_list<a class="anchor" aria-label="anchor" href="#arg-input-list"></a></dt>
+<dd><p>A list of inputs for the workflow steps.</p></dd>
+
+
 <dt id="arg-steps">steps<a class="anchor" aria-label="anchor" href="#arg-steps"></a></dt>
 <dd><p>A list of `workflowstep` objects defining the steps of the workflow.</p></dd>
 
@@ -71,12 +86,9 @@ the current step index, and additional metadata.</p>
 <dd><p>The index of the current step in the workflow.</p></dd>
 
 
-<dt id="arg-use-peitho-folder">use_peitho_folder<a class="anchor" aria-label="anchor" href="#arg-use-peitho-folder"></a></dt>
-<dd><p>Logical; if `TRUE`, load steps from PEITHO example folder.</p></dd>
-
-
-<dt id="arg-workflow-file-paths">workflow_file_paths<a class="anchor" aria-label="anchor" href="#arg-workflow-file-paths"></a></dt>
-<dd><p>A list of file paths for workflow files (see `workflow_file_paths()`).</p></dd>
+<dt id="arg-error-on-warn">error_on_warn<a class="anchor" aria-label="anchor" href="#arg-error-on-warn"></a></dt>
+<dd><p>Logical; if `TRUE`, validation issues will raise errors.
+If `FALSE`, they will raise warnings instead.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

@@ -7,12 +7,12 @@ state with the result or error from the step execution.
 
 ``` r
 # S3 method for class 'workflowstep'
-run(object, state, env = NULL, ...)
+run(x, state, env = NULL, step_i = NULL, input_list = NULL, ...)
 ```
 
 ## Arguments
 
-- object:
+- x:
 
   A \`workflowstep\` object representing the step to execute.
 
@@ -23,8 +23,17 @@ run(object, state, env = NULL, ...)
 
 - env:
 
-  An environment to look up the operation function. Defaults to the
-  step's own env or the caller's env.
+  An environment to look up the command function. Defaults to the step's
+  own env or the caller's env.
+
+- step_i:
+
+  The number of the step in the workflow, used for logging purposes.
+
+- input_list:
+
+  A list of inputs for argument parsing, loaded from the workflow's
+  inputs file.
 
 - ...:
 

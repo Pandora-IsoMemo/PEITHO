@@ -1,19 +1,19 @@
 # Create a new workflow step object
 
 This object defines a single step within a workflow, including its
-unique identifier, name, operation, parameters, and other metadata.
+unique identifier, name, command, parameters, and other metadata.
 
 ## Usage
 
 ``` r
 new_workflowstep(
-  id,
-  operation,
+  entry,
+  command,
   name = NULL,
   label = NULL,
   comments = "",
-  params = list(),
-  loop = "",
+  args = "",
+  loop = "auto",
   env = parent.frame(),
   ...
 )
@@ -21,11 +21,12 @@ new_workflowstep(
 
 ## Arguments
 
-- id:
+- entry:
 
-  An integer identifier for the step.
+  An integer representing the step's position in the workflow. This
+  should be unique for each step.
 
-- operation:
+- command:
 
   A character string specifying the name of the function to execute for
   this step, e.g. "strsplit". This function must exist in the loaded
@@ -33,7 +34,7 @@ new_workflowstep(
 
 - name:
 
-  A human-readable name for the step. Defaults to "Step \<id\>".
+  A human-readable name for the step. Defaults to "Step \<entry\>".
 
 - label:
 
@@ -43,9 +44,9 @@ new_workflowstep(
 
   A character string with comments or description for the step.
 
-- params:
+- args:
 
-  A list of parameters to pass to the operation function.
+  The original argument string from the workflow file, for reference.
 
 - loop:
 
@@ -54,8 +55,8 @@ new_workflowstep(
 
 - env:
 
-  An environment to look up the operation function. Default is the
-  parent frame.
+  An environment to look up the command function. Default is the parent
+  frame.
 
 - ...:
 

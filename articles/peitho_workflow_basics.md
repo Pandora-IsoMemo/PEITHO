@@ -21,7 +21,9 @@ with basic R knowledge, but no advanced R expertise is required.
 library(PEITHO)
 ```
 
-- For development only, you may use `devtools::load_all()` instead of
+- For development only, you may use
+  [`devtools::load_all()`](https://devtools.r-lib.org/reference/load_all.html)
+  instead of
   [`library(PEITHO)`](https://pandora-isomemo.github.io/PEITHO/).
 
 ## Loading the Example Workflow
@@ -34,33 +36,7 @@ empty string as the path:
 my_wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 ```
 
-    ## INFO [2026-02-12 08:01:26] Creating empty results.json file.
-
-    ## INFO [2026-02-12 08:01:26] Parsing command simple_split for step 1
-
-    ## INFO [2026-02-12 08:01:26] Parsing command fetch_WebText for step 2
-
-    ## INFO [2026-02-12 08:01:26] Parsing command unlist for step 3
-
-    ## INFO [2026-02-12 08:01:26] Parsing command paste for step 4
-
-    ## INFO [2026-02-12 08:01:26] Parsing command paste for step 5
-
-    ## INFO [2026-02-12 08:01:26] Parsing command gsub for step 6
-
-    ## INFO [2026-02-12 08:01:26] Parsing command simple_split for step 7
-
-    ## INFO [2026-02-12 08:01:26] Parsing command simple_split for step 8
-
-    ## INFO [2026-02-12 08:01:26] Parsing command fetch_WebText for step 9
-
-    ## INFO [2026-02-12 08:01:26] Parsing command unlist for step 10
-
-    ## INFO [2026-02-12 08:01:26] Parsing command paste for step 11
-
-    ## INFO [2026-02-12 08:01:26] Parsing command paste for step 12
-
-    ## INFO [2026-02-12 08:01:26] Parsing command paste for step 13
+    ## INFO [2026-04-13 08:55:04] Creating empty results.json file.
 
 ## Exporting a Workflow as a Zip File
 
@@ -72,7 +48,7 @@ zipfile_path <- "./examples/my_workflow.peitho"
 save_as_zip(my_wf, file = zipfile_path)
 ```
 
-    ## INFO [2026-02-12 08:01:26] Creating directory './examples' for saving zip file.
+    ## INFO [2026-04-13 08:55:05] Creating directory './examples' for saving zip file.
 
 ## Running a Workflow
 
@@ -84,33 +60,39 @@ function. You can specify which steps to run (e.g., from step 1 to 5):
 my_run_1 <- run(my_wf, from = 1, to = 5)
 ```
 
-    ## INFO [2026-02-12 08:01:26] Running step 1 of 5
+    ## INFO [2026-04-13 08:55:05] Running step 1 of 5
 
-    ## INFO [2026-02-12 08:01:26]   Operation 'simple_split': 3 results
+    ## INFO [2026-04-13 08:55:05] Parsing arguments for command simple_split
 
-    ## INFO [2026-02-12 08:01:26] Running step 2 of 5
+    ## INFO [2026-04-13 08:55:05]   Command 'simple_split': 3 results
 
-    ## INFO [2026-02-12 08:01:29]   3 loop iterations for operation 'fetch_WebText':
+    ## INFO [2026-04-13 08:55:05] Running step 2 of 5
 
-    ## WARN [2026-02-12 08:01:29]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
+    ## INFO [2026-04-13 08:55:05] Parsing arguments for command fetch_WebText
 
-    ## INFO [2026-02-12 08:01:29] Running step 3 of 5
+    ## INFO [2026-04-13 08:55:06]   3 loop iterations for command 'fetch_WebText':
 
-    ## INFO [2026-02-12 08:01:29]   3 loop iterations for operation 'unlist':
+    ## INFO [2026-04-13 08:55:06]      3 single results.
 
-    ## WARN [2026-02-12 08:01:29]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
+    ## INFO [2026-04-13 08:55:06] Running step 3 of 5
 
-    ## INFO [2026-02-12 08:01:29] Running step 4 of 5
+    ## INFO [2026-04-13 08:55:06] Parsing arguments for command paste
 
-    ## INFO [2026-02-12 08:01:29]   3 loop iterations for operation 'paste':
+    ## WARN [2026-04-13 08:55:06] WARNING! Detected list argument(s) for command 'paste', but 'loop' is set to 'no'.
 
-    ## INFO [2026-02-12 08:01:29]      3 single results.
+    ## INFO [2026-04-13 08:55:06]   Command 'paste': single result
 
-    ## INFO [2026-02-12 08:01:29] Running step 5 of 5
+    ## INFO [2026-04-13 08:55:06] Running step 4 of 5
 
-    ## WARN [2026-02-12 08:01:29] WARNING! Detected list argument(s) for operation 'paste', but 'loop' is set to 'no'.
+    ## INFO [2026-04-13 08:55:06] Parsing arguments for command gsub
 
-    ## INFO [2026-02-12 08:01:29]   Operation 'paste': single result
+    ## INFO [2026-04-13 08:55:06]   Command 'gsub': single result
+
+    ## INFO [2026-04-13 08:55:06] Running step 5 of 5
+
+    ## INFO [2026-04-13 08:55:06] Parsing arguments for command simple_split
+
+    ## INFO [2026-04-13 08:55:06]   Command 'simple_split': 44271 results
 
 After running, you can inspect the results:
 
@@ -118,13 +100,13 @@ After running, you can inspect the results:
 length(my_run_1$state$last_result)
 ```
 
-    ## [1] 1
+    ## [1] 44271
 
 ``` r
 PEITHO:::trunc(my_run_1$state$last_result, n_char = 100)
 ```
 
-    ## [1] "Main page---Contents---Current events---Random article---About Wikipedia---Contact us---Help---Learn ..."
+    ## [1] "Toggl, \n th, \n tabl, \n of cont, \nnts Roman Empir, \n... (44266 more items)"
 
 ## Importing and Modifying a Workflow from a Zip File
 
@@ -142,32 +124,6 @@ my_wf_imported <- PEITHO::import_workflow(
 )
 ```
 
-    ## INFO [2026-02-12 08:01:30] Parsing command simple_split for step 1
-
-    ## INFO [2026-02-12 08:01:30] Parsing command fetch_WebText for step 2
-
-    ## INFO [2026-02-12 08:01:30] Parsing command unlist for step 3
-
-    ## INFO [2026-02-12 08:01:30] Parsing command paste for step 4
-
-    ## INFO [2026-02-12 08:01:30] Parsing command paste for step 5
-
-    ## INFO [2026-02-12 08:01:30] Parsing command gsub for step 6
-
-    ## INFO [2026-02-12 08:01:30] Parsing command simple_split for step 7
-
-    ## INFO [2026-02-12 08:01:30] Parsing command simple_split for step 8
-
-    ## INFO [2026-02-12 08:01:30] Parsing command fetch_WebText for step 9
-
-    ## INFO [2026-02-12 08:01:30] Parsing command unlist for step 10
-
-    ## INFO [2026-02-12 08:01:30] Parsing command paste for step 11
-
-    ## INFO [2026-02-12 08:01:30] Parsing command paste for step 12
-
-    ## INFO [2026-02-12 08:01:30] Parsing command paste for step 13
-
 You can now run the imported (and possibly modified) workflow and
 inspect the results as before:
 
@@ -175,39 +131,45 @@ inspect the results as before:
 my_run_2 <- run(my_wf_imported, from = 1, to = 4)
 ```
 
-    ## INFO [2026-02-12 08:01:30] Running step 1 of 4
+    ## INFO [2026-04-13 08:55:06] Running step 1 of 4
 
-    ## INFO [2026-02-12 08:01:30]   Operation 'simple_split': 3 results
+    ## INFO [2026-04-13 08:55:06] Parsing arguments for command simple_split
 
-    ## INFO [2026-02-12 08:01:30] Running step 2 of 4
+    ## INFO [2026-04-13 08:55:07]   Command 'simple_split': 3 results
 
-    ## INFO [2026-02-12 08:01:32]   3 loop iterations for operation 'fetch_WebText':
+    ## INFO [2026-04-13 08:55:07] Running step 2 of 4
 
-    ## WARN [2026-02-12 08:01:32]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
+    ## INFO [2026-04-13 08:55:07] Parsing arguments for command fetch_WebText
 
-    ## INFO [2026-02-12 08:01:32] Running step 3 of 4
+    ## INFO [2026-04-13 08:55:08]   3 loop iterations for command 'fetch_WebText':
 
-    ## INFO [2026-02-12 08:01:32]   3 loop iterations for operation 'unlist':
+    ## INFO [2026-04-13 08:55:08]      3 single results.
 
-    ## WARN [2026-02-12 08:01:32]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
+    ## INFO [2026-04-13 08:55:08] Running step 3 of 4
 
-    ## INFO [2026-02-12 08:01:32] Running step 4 of 4
+    ## INFO [2026-04-13 08:55:08] Parsing arguments for command paste
 
-    ## INFO [2026-02-12 08:01:32]   3 loop iterations for operation 'paste':
+    ## WARN [2026-04-13 08:55:08] WARNING! Detected list argument(s) for command 'paste', but 'loop' is set to 'no'.
 
-    ## INFO [2026-02-12 08:01:32]      3 single results.
+    ## INFO [2026-04-13 08:55:08]   Command 'paste': single result
+
+    ## INFO [2026-04-13 08:55:08] Running step 4 of 4
+
+    ## INFO [2026-04-13 08:55:08] Parsing arguments for command gsub
+
+    ## INFO [2026-04-13 08:55:08]   Command 'gsub': single result
 
 ``` r
 length(my_run_2$state$last_result)
 ```
 
-    ## [1] 3
+    ## [1] 1
 
 ``` r
 PEITHO:::trunc(my_run_2$state$last_result, n_char = 100)
 ```
 
-    ## [1] "Main page---Contents---Current events---Random article---About Wikipedia---Contact us---Help---Learn ..., \\nMain page---Contents---Current events---Random article---About Wikipedia---Contact us---Help---Learn ..., \\nMain page---Contents---Current events---Random article---About Wikipedia---Contact us---Help---Learn ..."
+    ## [1] "TogglHALLO thHALLO tablHALLO of contHALLOnts Roman EmpirHALLO 189 languagHALLOs abstract:Q2277 Acèh  ..."
 
 ## Summary
 

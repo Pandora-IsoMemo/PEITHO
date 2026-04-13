@@ -1,15 +1,18 @@
 # Fetch and parse web text from a URL
 
-This function retrieves the HTML content from the specified URL,
-extracts text based on the provided CSS selector, and returns a
-\`WebText\` object containing the extracted text and metadata.
+This function retrieves the HTML content from the specified URL, parses
+it to extract the main text content, and returns it as a character
+vector. It also handles errors and warnings gracefully, providing
+informative messages if the request fails or if the HTML structure is
+not as expected. By default, it returns only the extracted text blocks,
+but it can also return a full \`WebText\` object containing metadata if
+\`return_text_blocks_only\` is set to \`FALSE\`.
 
 ## Usage
 
 ``` r
 fetch_WebText(
   url,
-  css_selector = "h1, h2, h3, p, li",
   timeout_sec = 10,
   user_agent = NULL,
   return_text_blocks_only = TRUE
@@ -21,11 +24,6 @@ fetch_WebText(
 - url:
 
   A character string specifying the URL to fetch.
-
-- css_selector:
-
-  A character string specifying the CSS selector to identify
-  text-containing HTML elements. Default is \`"h1, h2, h3, p, li"\`.
 
 - timeout_sec:
 

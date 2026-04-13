@@ -9,7 +9,7 @@ with the result or error from the step execution."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PEITHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.02.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.03.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,14 +46,14 @@ with the result or error from the step execution.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'workflowstep'</span></span>
-<span><span class="fu"><a href="run.html">run</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">state</span>, env <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="run.html">run</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">state</span>, env <span class="op">=</span> <span class="cn">NULL</span>, step_i <span class="op">=</span> <span class="cn">NULL</span>, input_list <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
+<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>A `workflowstep` object representing the step to execute.</p></dd>
 
 
@@ -62,8 +62,16 @@ with the result or error from the step execution.</p>
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
-<dd><p>An environment to look up the operation function. Defaults to the step's
+<dd><p>An environment to look up the command function. Defaults to the step's
 own env or the caller's env.</p></dd>
+
+
+<dt id="arg-step-i">step_i<a class="anchor" aria-label="anchor" href="#arg-step-i"></a></dt>
+<dd><p>The number of the step in the workflow, used for logging purposes.</p></dd>
+
+
+<dt id="arg-input-list">input_list<a class="anchor" aria-label="anchor" href="#arg-input-list"></a></dt>
+<dd><p>A list of inputs for argument parsing, loaded from the workflow's inputs file.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
