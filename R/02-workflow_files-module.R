@@ -61,6 +61,7 @@ workflow_files_server <- function(id, active_dir) {
   moduleServer(id, function(input, output, session) {
     selected_file <- reactiveVal(NULL)
     selected_label <- reactiveVal(NULL)
+    status_msg <- reactiveVal("")
 
     build_file_tree <- function(path) {
       entries <- list.files(path, full.names = TRUE, no.. = TRUE)
@@ -166,7 +167,7 @@ workflow_files_server <- function(id, active_dir) {
       }
     })
 
-    output$editor_status <- renderText("")
+    output$editor_status <- renderUI(status_msg())
 
     observeEvent(input$file_tree, {
       req(active_dir(), dir.exists(active_dir()))
@@ -181,16 +182,14 @@ workflow_files_server <- function(id, active_dir) {
         selected_file(NULL)
         selected_label(NULL)
         updateTextAreaInput(session, "file_editor", value = "")
-        output$editor_status <- renderText("Selected file type is not supported in this view.")
+        status_msg("Selected file type is not supported in this view.")
         return()
       }
 
       content <- tryCatch(
         paste(readLines(path, warn = FALSE, encoding = "UTF-8"), collapse = "\n"),
         error = function(e) {
-          output$editor_status <- renderText(
-            paste("Could not read file:", conditionMessage(e))
-          )
+          status_msg(paste("Could not read file:", conditionMessage(e)))
           NULL
         }
       )
@@ -200,11 +199,11 @@ workflow_files_server <- function(id, active_dir) {
       if (can_edit_file(path)) {
         selected_file(path)
         selected_label(NULL)
-        output$editor_status <- renderText("")
+        status_msg("")
       } else {
         selected_file(NULL)
         selected_label(basename(path))
-        output$editor_status <- renderText("Read-only file: display only.")
+        status_msg("Read-only file: display only.")
       }
     })
 
@@ -247,9 +246,7 @@ workflow_files_server <- function(id, active_dir) {
       defaults_text <- tryCatch(
         PEITHO:::default_workflow_functions_text(),
         error = function(e) {
-          output$editor_status <- renderText(
-            paste("Could not load package defaults:", conditionMessage(e))
-          )
+          status_msg(paste("Could not load package defaults:", conditionMessage(e)))
           NULL
         }
       )
@@ -259,21 +256,17 @@ workflow_files_server <- function(id, active_dir) {
       selected_label("PEITHO package defaults")
       updateTextAreaInput(session, "file_editor", value = defaults_text)
       gh_url <- "https://github.com/Pandora-IsoMemo/PEITHO/blob/main/R/01-default-functions.R"
-      output$editor_status <- renderText(
-        HTML(paste(
-          "Read-only view of the currently loaded default function definitions.",
-          sprintf("<a href='%s' target='_blank'>View original source on GitHub</a>", gh_url),
-          sep = " | "
-        ))
-      )
+      status_msg(HTML(paste(
+        "Read-only view of the currently loaded default function definitions.",
+        sprintf("<a href='%s' target='_blank'>View original source on GitHub</a>", gh_url),
+        sep = " | "
+      )))
     })
 
     observeEvent(input$save_file, {
       path <- selected_file()
       if (is.null(path)) {
-        output$editor_status <- renderText(
-          "This file is read-only. Only inputs/functions/commands files can be edited."
-        )
+        status_msg("This file is read-only. Only inputs/functions/commands files can be edited.")
         return()
       }
       req(file.exists(path), !dir.exists(path))
@@ -286,13 +279,9 @@ workflow_files_server <- function(id, active_dir) {
         con <- file(path, open = "w", encoding = "UTF-8")
         on.exit(close(con), add = TRUE)
         writeLines(lines, con = con)
-        output$editor_status <- renderText(
-          sprintf("Saved %s", basename(path))
-        )
+        status_msg(sprintf("Saved %s", basename(path)))
       }, error = function(e) {
-        output$editor_status <- renderText(
-          paste("Could not save file:", conditionMessage(e))
-        )
+        status_msg(paste("Could not save file:", conditionMessage(e)))
       })
     })
   })
