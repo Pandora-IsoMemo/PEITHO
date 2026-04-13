@@ -1,25 +1,79 @@
-#' Update a workflow state after running a step
+#' Get a specific field
 #'
-#' This is a generic function to update a workflow state after executing a step.
-#' @param object A `workflowstate` object.
-#' @param steprun A `workflowsteprun` object representing the result of the executed step.
-#' @param idx The index of the step run to update.
-#' @param ... Additional arguments (not used).
-#' @return The updated `workflowstate` object.
+#' Generic get method for workflow-related objects.
+#' @param x The object to extract the field from.
+#' @param field The name of the field to retrieve.
+#' @param ... Additional arguments passed to methods.
 #' @export
-update <- function(object, steprun, idx, ...) {
+get_field <- function(x, field, ...) {
+  UseMethod("get_field")
+}
+
+#' Update an object
+#'
+#' Generic update method for workflow-related objects.
+#' @param x The object to update.
+#' @param ... Additional arguments passed to methods.
+#' @export
+update <- function(x, ...) {
   UseMethod("update")
 }
 
+#' Update the input list of a workflow
+#'
+#' Generic method to update the input list of a workflow object.
+#' @param x The object to update.
+#' @param ... Additional arguments passed to methods.
+#' @export
+update_input_list <- function(x, ...) {
+  UseMethod("update_input_list")
+}
+
+#' Convert an object to commands.json record format
+#'
+#' Generic method to create records matching the commands.json schema.
+#' @param x The object to convert.
+#' @param ... Additional arguments passed to methods.
+#' @export
+as.commands_record <- function(x, ...) {
+  UseMethod("as.commands_record")
+}
+
+#' Add a step to a workflow
+#'
+#' Generic method to add a step to a workflow object.
+#' @param x The workflow object to which the step will be added.
+#' @param new_step The step to add to the workflow.
+#' @param position The position in the workflow where the new step should be added.
+#' @param ... Additional arguments passed to methods.
+#' @return The updated workflow object with the new step added.
+#' @export
+add_step <- function(x, new_step, position, ...) {
+  UseMethod("add_step")
+}
+
+#' Remove a step from a workflow
+#'
+#' Generic method to remove a step from a workflow object.
+#' @param x The workflow object from which the step will be removed.
+#' @param position The position of the step to remove from the workflow.
+#' @param ... Additional arguments passed to methods.
+#' @return The updated workflow object with the specified step removed.
+#' @export
+remove_step <- function(x, position, ...) {
+  UseMethod("remove_step")
+}
+
 #' Run a workflow step
+#'
 #' This is a generic function to run a workflow step or an entire workflow.
-#' @param object A `workflowstep` object or a `workflow` object.
+#' @param x A `workflowstep` object or a `workflow` object.
 #' @param state A `workflowstate` object.
 #' @param ... Additional arguments (not used).
 #' @return A `workflowsteprun` object representing the result of executing the step or
 #'  a list containing the updated `workflow` and `workflowstate` objects.
 #' @export
-run <- function(object, state, ...) {
+run <- function(x, state, ...) {
   UseMethod("run")
 }
 

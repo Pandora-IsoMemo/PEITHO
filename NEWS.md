@@ -1,3 +1,30 @@
+# PEITHO 26.03.1
+
+## New Features
+- Added `add_step()` / `remove_step()` S3 generics + workflow methods and wire them into the Shiny workflow table UI (#28)
+- Add configurable workflow validation (`error_on_warn`) and additional validation checks (unique steps, numeric entries, required inputs/steps).
+- Introduced `as.commands_record()` generic + methods and update `commands.json` writing behavior; update docs and example `commands.json`.
+
+# PEITHO 26.03.0
+
+## New Features
+- Refactored workflowstep from operation/params to command/args and added required-field tracking for input/result tags.
+- Updated workflow file-loading helpers and associated tests/docs; adjusted WebText fetching to a structural extraction approach.
+- Added Shiny table modules (workflow/inputs/results) including option for editing step fields and input values, and the option to display full result content when clicked (#21).
+
+# PEITHO 26.02.3
+
+## New Features
+
+- Integrated workflow import and export functionality into the PEITHO Shiny application, enabling users to upload workflows from zip files and download them for sharing or backup. (#21)
+- Added a centralized YAML configuration file (inst/config.yaml) to manage app settings such as allowed file types and default import sources.
+
+# PEITHO 26.02.2
+
+## Updates
+
+- Removed 'host' argument from `startApplication()` function, as it is no longer needed.
+
 # PEITHO 26.02.1
 
 ## Bug Fixes

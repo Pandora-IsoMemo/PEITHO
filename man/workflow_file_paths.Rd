@@ -9,8 +9,7 @@ workflow_file_paths(
   inputs = "",
   commands = "",
   results = "",
-  functions = "",
-  config_path = system.file("config", "config.json", package = "PEITHO")
+  functions = ""
 )
 }
 \arguments{
@@ -22,14 +21,13 @@ workflow_file_paths(
 
 \item{results}{Name of the results summary file (default: "results.json").}
 
-\item{functions}{Name of the R script file containing custom functions (default: "functions.R").}
-
-\item{config_path}{Path to configuration JSON file (default: package's config.json).}
+\item{functions}{Name of the R script file containing custom functions (default: "functions.R").
+Use `NULL` to skip loading a custom functions file.}
 }
 \value{
 A list with full paths to the specified files.
 }
 \description{
 This function constructs full file paths for the workflow files located in a specified folder.
-Validation of file existence is performed in `extract_workflow_from_files()`.
+Validation of file existence is performed in `workflow_steps_from_files()`.
 }

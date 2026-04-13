@@ -6,23 +6,31 @@
 \usage{
 new_workflow(
   name = "Untitled workflow",
+  workflow_file_paths = list(),
+  use_peitho_folder = TRUE,
+  input_list = list(),
   steps = list(),
   current = if (length(steps)) 1L else NA_integer_,
-  use_peitho_folder = TRUE,
-  workflow_file_paths = list(),
+  error_on_warn = FALSE,
   ...
 )
 }
 \arguments{
 \item{name}{A name for the workflow.}
 
+\item{workflow_file_paths}{A list of file paths for workflow files (see `workflow_file_paths()`).}
+
+\item{use_peitho_folder}{Logical; if `TRUE`, load steps from PEITHO example folder. If `FALSE`,
+use provided `steps` and ignore `workflow_file_paths`, useful for testing.}
+
+\item{input_list}{A list of inputs for the workflow steps.}
+
 \item{steps}{A list of `workflowstep` objects defining the steps of the workflow.}
 
 \item{current}{The index of the current step in the workflow.}
 
-\item{use_peitho_folder}{Logical; if `TRUE`, load steps from PEITHO example folder.}
-
-\item{workflow_file_paths}{A list of file paths for workflow files (see `workflow_file_paths()`).}
+\item{error_on_warn}{Logical; if `TRUE`, validation issues will raise errors.
+If `FALSE`, they will raise warnings instead.}
 
 \item{...}{Additional metadata to store with the workflow.}
 }

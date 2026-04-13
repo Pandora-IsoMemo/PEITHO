@@ -4,17 +4,10 @@
 \alias{run.workflow}
 \title{Run the entire workflow}
 \usage{
-\method{run}{workflow}(
-  object,
-  state = list(),
-  from = 1L,
-  to = length(object$steps),
-  env = NULL,
-  ...
-)
+\method{run}{workflow}(x, state = list(), from = 1L, to = length(x$steps), env = NULL, ...)
 }
 \arguments{
-\item{object}{A `workflow` object.}
+\item{x}{A `workflow` object.}
 
 \item{state}{A `workflowstate` object representing the initial state.}
 
@@ -22,7 +15,7 @@
 
 \item{to}{An integer index of the step to end at.}
 
-\item{env}{An environment to look up operation functions. Defaults to `NULL`, which uses
+\item{env}{An environment to look up command functions. Defaults to `NULL`, which uses
 each step's own env or the caller's env.}
 
 \item{...}{Additional arguments passed to `run.workflowstep()`.}
