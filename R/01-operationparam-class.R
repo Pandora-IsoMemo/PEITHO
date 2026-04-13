@@ -96,7 +96,7 @@ parse_selector_index <- function(selector) {
 }
 
 apply_result_selector <- function(arg_value, selector) {
-  if (is.null(selector) || !nzchar(selector)) {
+  if (is.null(selector) || !is.character(selector) || !nzchar(selector)) {
     return(arg_value)
   }
 
