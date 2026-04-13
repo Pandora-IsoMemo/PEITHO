@@ -232,7 +232,9 @@ update.workflowstep <- function(
   }
 
   # update the commands.json (only if the workflow is file-backed)
-  if (length(x$workflow_file_paths) && !is.null(x$workflow_file_paths$commands_path)) {
+  if (!is.null(workflow_file_paths) &&
+        length(workflow_file_paths) > 0L &&
+        !is.null(workflow_file_paths$commands_path)) {
     # get i-th entry from commands file, update it and write back to file
     commands_list <- read_json_if_exists(path = workflow_file_paths$commands_path)
 
@@ -333,7 +335,6 @@ run.workflowstep <- function(
   }
 
   if (length(args) == 0L) {
-    #browser()
     stop("No parameters found for workflow step.", call. = FALSE)
   }
 

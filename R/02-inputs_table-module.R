@@ -8,10 +8,23 @@ inputs_table_ui <- function(id, title = "") {
   ns <- NS(id)
   tagList(
     tags$h4(title),
+    tags$p(
+      "Manage workflow inputs. Double-click a cell to edit names or values, then add or remove rows as needed.",
+      class = "text-muted"
+    ),
     fluidRow(
       column(
         width = 4,
-        selectInput(ns("selected_row"), "Select row", choices = NULL, width = "100%")
+        selectizeInput(
+          ns("selected_row"),
+          "Select row",
+          choices = NULL,
+          width = "100%",
+          options = list(
+            placeholder = "Import a workflow or load the example.",
+            allowEmptyOption = TRUE
+          )
+        )
       ),
       column(
         width = 4,
@@ -67,13 +80,23 @@ inputs_table_server <- function(id, wf) {
     observe({
       wf_val <- wf()
       if (is.null(wf_val)) {
-        updateSelectInput(session, "selected_row", choices = character(0), selected = character(0))
+        updateSelectizeInput(
+          session,
+          "selected_row",
+          choices = character(0),
+          selected = character(0)
+        )
         return()
       }
 
       input_list_val <- wf_val$input_list
       if (is.null(input_list_val) || length(input_list_val) == 0L) {
-        updateSelectInput(session, "selected_row", choices = character(0), selected = character(0))
+        updateSelectizeInput(
+          session,
+          "selected_row",
+          choices = character(0),
+          selected = character(0)
+        )
         return()
       }
 
@@ -86,7 +109,7 @@ inputs_table_server <- function(id, wf) {
       selected <- resolve_selected_row(isolate(input$selected_row), n_rows = nrow(df))
       choices <- build_row_selector_choices(df)
 
-      updateSelectInput(
+      updateSelectizeInput(
         session,
         "selected_row",
         choices = choices,

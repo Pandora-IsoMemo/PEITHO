@@ -65,3 +65,36 @@ test_that("run.workflowstep handles command error", {
   expect_true(inherits(steprun$error, "error"))
   rm(error_fn, envir = .GlobalEnv)
 })
+
+test_that("make_param_from_arg stores result selector separately", {
+  param <- PEITHO:::make_param_from_arg(
+    arg = "@#*L*#@step 1@#*L*#@[c(1, 3)]",
+    arg_name = "x",
+    step_i = 2,
+    arg_i = 1,
+    cmd_loop = "no",
+    input_list = list()
+  )
+
+  expect_equal(param$type, "result")
+  expect_equal(param$label, "step_1")
+  expect_equal(param$selector, "c(1,3)")
+})
+
+test_that("extract_arg_list applies selector to previous result", {
+  state <- new_workflowstate()
+  state$results_by_name[["step_1"]] <- c("a", "b", "c")
+
+  param <- new_operationparam(
+    step_id = 2,
+    position = 1,
+    name = "x",
+    value = NULL,
+    type = "result",
+    label = "step_1",
+    selector = "c(1,3)"
+  )
+
+  out <- PEITHO:::extract_arg_list(param, state)
+  expect_equal(out$x, list("a", "c"))
+})

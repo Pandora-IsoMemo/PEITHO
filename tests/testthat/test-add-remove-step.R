@@ -95,3 +95,51 @@ test_that("remove_step validates removal position", {
   expect_error(remove_step(wf, position = 0L), "Step index must be between")
   expect_error(remove_step(wf, position = 2L), "Step index must be between")
 })
+
+test_that("update writes command changes to commands.json", {
+  td <- tempfile("wf_update_")
+  dir.create(td, recursive = TRUE)
+  on.exit(unlink(td, recursive = TRUE, force = TRUE), add = TRUE)
+
+  jsonlite::write_json(list(alpha = "x"), file.path(td, "inputs.json"), auto_unbox = TRUE, pretty = TRUE)
+  jsonlite::write_json(
+    list(list(name = "Step 1", command = "identity", args = "x = @#*I*#@alpha@#*I*#@", loop = "no")),
+    file.path(td, "commands.json"),
+    auto_unbox = TRUE,
+    pretty = TRUE
+  )
+
+  wf <- suppressWarnings(new_workflow(
+    name = "Update Write Test",
+    workflow_file_paths = workflow_file_paths(path = td)
+  ))
+
+  wf2 <- update(wf, step = 1, field = "Function", value = "toupper")
+  expect_equal(wf2$steps[[1]]$command, "toupper")
+
+  cmds <- jsonlite::fromJSON(file.path(td, "commands.json"), simplifyVector = FALSE)
+  expect_equal(cmds[[1]]$command, "toupper")
+})
+
+test_that("update does not warn on validation issues by default", {
+  td <- tempfile("wf_update_nowarn_")
+  dir.create(td, recursive = TRUE)
+  on.exit(unlink(td, recursive = TRUE, force = TRUE), add = TRUE)
+
+  jsonlite::write_json(list(existing_input = "x"), file.path(td, "inputs.json"), auto_unbox = TRUE, pretty = TRUE)
+  jsonlite::write_json(
+    list(list(name = "Step 1", command = "identity", args = "x = @#*I*#@existing_input@#*I*#@", loop = "no")),
+    file.path(td, "commands.json"),
+    auto_unbox = TRUE,
+    pretty = TRUE
+  )
+
+  wf <- suppressWarnings(new_workflow(
+    name = "Update No Warn Test",
+    workflow_file_paths = workflow_file_paths(path = td)
+  ))
+
+  expect_no_warning(
+    update(wf, step = 1, field = "Parameters", value = "x = @#*I*#@missing_input@#*I*#@")
+  )
+})

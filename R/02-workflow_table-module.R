@@ -9,10 +9,23 @@ workflow_table_ui <- function(id, title = "") {
 
   tagList(
     tags$h4(title),
+    tags$p(
+      "Define workflow steps. Double-click a cell to edit, then select a row to add or remove steps.",
+      class = "text-muted"
+    ),
     fluidRow(
       column(
         width = 4,
-        selectInput(ns("selected_row"), "Select row", choices = NULL, width = "100%")
+        selectizeInput(
+          ns("selected_row"),
+          "Select row",
+          choices = NULL,
+          width = "100%",
+          options = list(
+            placeholder = "Import a workflow or load the example.",
+            allowEmptyOption = TRUE
+          )
+        )
       ),
       column(
         width = 4,
@@ -59,21 +72,31 @@ workflow_table_server <- function(id, wf) {
     observe({
       wf_val <- wf()
       if (is.null(wf_val)) {
-        updateSelectInput(session, "selected_row", choices = character(0), selected = character(0))
+        updateSelectizeInput(
+          session,
+          "selected_row",
+          choices = character(0),
+          selected = character(0)
+        )
         return()
       }
 
       wf_df <- as.data.frame(wf_val)
       n <- nrow(wf_df)
       if (n == 0L) {
-        updateSelectInput(session, "selected_row", choices = character(0), selected = character(0))
+        updateSelectizeInput(
+          session,
+          "selected_row",
+          choices = character(0),
+          selected = character(0)
+        )
         return()
       }
 
       selected <- resolve_selected_row(isolate(input$selected_row), n_rows = n)
       choices <- build_row_selector_choices(wf_df)
 
-      updateSelectInput(
+      updateSelectizeInput(
         session,
         "selected_row",
         choices = choices,

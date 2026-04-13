@@ -28,7 +28,11 @@ tagList(
           tabsetPanel(id = "main_tabs",
             tabPanel("Workflow", workflow_table_ui("wf_table", title = "Workflow commands")),
             tabPanel("Inputs", inputs_table_ui("inputs_table", title = "Workflow inputs")),
-            tabPanel("Results", results_table_ui("results_table", title = "Workflow results"))
+            tabPanel("Results", results_table_ui("results_table", title = "Workflow results")),
+            tabPanel(
+              "Folders & Files",
+              workflow_files_ui("workflow_files", title = "Workflow files")
+            )
           )
         ),
       )
@@ -37,4 +41,8 @@ tagList(
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
   ),
+  shinyTools::headerButtonsUI(
+    id = "header",
+    help_link = "https://pandora-isomemo.github.io/PEITHO/"
+  )
 )

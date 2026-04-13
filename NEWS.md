@@ -1,3 +1,11 @@
+# PEITHO 26.04.0
+
+## New Features
+- Added a “Folders & Files” tab to the Shiny app, enabling users to browse workflow directories, view and edit supported workflow files, and inspect package defaults and available functions. (#29)
+
+## Updates
+- Result selector support: extended workflow tag parsing to support optional selectors (e.g., [n], [a:b], [c(...)]), including `extract_result_ref`, new selector tag regex handling, and selector application during execution when resolving results from previous steps.
+
 # PEITHO 26.03.1
 
 ## New Features

@@ -8,6 +8,10 @@ results_table_ui <- function(id, title = "") {
   ns <- NS(id)
   tagList(
     tags$h4(title),
+    tags$p(
+      "Review run results. Click a cell to inspect full content below.",
+      class = "text-muted"
+    ),
     fluidRow(
       column(
         4,

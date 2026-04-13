@@ -16,6 +16,7 @@
 #'   - "no"   : do not loop
 #'   - "yes"  : always loop
 #'   - "auto" : automatically determine looping, loop if input is a list else not
+#' @param selector Optional selector for result references (for example `2`, `1:3`, `c(1,3)`).
 #' @param ...      Additional metadata (optional).
 #'
 #' @return A `operationparam` object.
@@ -28,6 +29,7 @@ new_operationparam <- function(
   label = "",
   type = c("literal", "input", "result"),
   loop = c("no", "yes", "auto"),
+  selector = NULL,
   ...
 ) {
   type <- match.arg(type)
@@ -46,6 +48,7 @@ new_operationparam <- function(
       tag      = tag,
       label    = label,
       loop     = loop,
+      selector = selector,
       dots     = list(...)
     ),
     class = c("operationparam", "list")
@@ -64,9 +67,41 @@ print.operationparam <- function(x, ...) {
   cat("  name:     ", x$name, "\n", sep = "")
   cat("  value:    ", if (is.null(x$value)) "NULL" else "...", "\n", sep = "")
   cat("  label:    ", x$label, "\n", sep = "")
+  cat("  selector: ", x$selector %||% "", "\n", sep = "")
   cat("  type:     ", x$type, "\n", sep = "")
   cat("  loop:     ", x$loop, "\n", sep = "")
   invisible(x)
+}
+
+parse_selector_index <- function(selector) {
+  if (grepl("^\\d+$", selector)) {
+    return(as.integer(selector))
+  }
+
+  if (grepl("^\\d+:\\d+$", selector)) {
+    bounds <- as.integer(strsplit(selector, ":", fixed = TRUE)[[1]])
+    return(seq.int(bounds[[1]], bounds[[2]]))
+  }
+
+  if (grepl("^c\\(\\d+(,\\d+)*\\)$", selector)) {
+    inner <- sub("^c\\((.*)\\)$", "\\1", selector)
+    return(as.integer(strsplit(inner, ",", fixed = TRUE)[[1]]))
+  }
+
+  stop(
+    "Unsupported selector '[", selector,
+    "]'. Supported forms are [n], [a:b], and [c(n,m,...)].",
+    call. = FALSE
+  )
+}
+
+apply_result_selector <- function(arg_value, selector) {
+  if (is.null(selector) || !is.character(selector) || !nzchar(selector)) {
+    return(arg_value)
+  }
+
+  idx <- parse_selector_index(selector)
+  arg_value[idx]
 }
 
 extract_arg_list <- function(
@@ -109,6 +144,9 @@ extract_arg_list <- function(
         call. = FALSE
       )
     }
+
+    selector <- operationparam$selector %||% NULL
+    arg_value <- apply_result_selector(arg_value, selector)
 
     # converting arg_value (previous result) into a list (to convert character vectors)
     arg_value <- as.list(arg_value)

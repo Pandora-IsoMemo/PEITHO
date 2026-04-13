@@ -119,3 +119,105 @@ test_that("workflow_steps_from_files supports custom file names", {
   expect_equal(steps[[1]]$name, "Step 1")
   unlink(tmpdir, recursive = TRUE)
 })
+
+test_that("is_input_tag identifies valid and invalid input tags", {
+  expect_true(PEITHO:::is_input_tag("@#*I*#@myinput@#*I*#@"))
+  expect_false(PEITHO:::is_input_tag("@#*I*#@myinput@#*I*#@@#*I*#@"))
+  expect_true(PEITHO:::is_input_tag("@#*I*#@@#*I*#@"))
+  expect_false(PEITHO:::is_input_tag("@#*L*#@myinput@#*L*#@"))
+  expect_false(PEITHO:::is_input_tag("myinput"))
+
+  tags <- c(
+    "@#*I*#@a@#*I*#@",
+    "@#*L*#@a@#*L*#@",
+    "@#*I*#@a",
+    "a@#*I*#@"
+  )
+  expect_equal(PEITHO:::is_input_tag(tags), c(TRUE, FALSE, FALSE, FALSE))
+})
+
+test_that("is_result_tag identifies valid and invalid result tags", {
+  expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@"))
+  expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@[2]")) # new format
+  expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@[[2]]"))
+  expect_true(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@[c(1, 2)]"))
+  expect_false(PEITHO:::is_result_tag("@#*L*#@step_1@#*L*#@[2]@#*L*#@"))
+  expect_true(PEITHO:::is_result_tag("@#*L*#@@#*L*#@"))
+  expect_false(PEITHO:::is_result_tag("@#*I*#@step_1@#*I*#@"))
+  expect_false(PEITHO:::is_result_tag("step_1"))
+
+  tags <- c(
+    "@#*L*#@x@#*L*#@",
+    "@#*I*#@x@#*I*#@",
+    "@#*L*#@x",
+    "x@#*L*#@"
+  )
+  expect_equal(PEITHO:::is_result_tag(tags), c(TRUE, FALSE, FALSE, FALSE))
+})
+
+test_that("extract_tag_varname extracts and normalizes tag variable names", {
+  expect_equal(
+    PEITHO:::extract_tag_varname("@#*I*#@my input@#*I*#@", input_pattern()),
+    "my_input"
+  )
+  expect_equal(
+    PEITHO:::extract_tag_varname("@#*L*#@  step label  @#*L*#@", result_pattern()),
+    "step_label"
+  )
+  expect_equal(
+    PEITHO:::extract_tag_varname("@#*L*#@my step label@#*L*#@[2]", result_pattern()),
+    "my_step_label[2]"
+  )
+  expect_equal(
+    PEITHO:::extract_tag_varname("@#*L*#@my step label@#*L*#@[[2]]", result_pattern()),
+    "my_step_label[[2]]"
+  )
+
+  expect_equal(
+    PEITHO:::extract_tag_varname("@#*L*#@my step label@#*L*#@[c(1, 2)]", result_pattern()),
+    "my_step_label[c(1,2)]"
+  )
+
+  tags <- c("@#*I*#@a b@#*I*#@", "@#*I*#@ c d @#*I*#@")
+  expect_equal(
+    PEITHO:::extract_tag_varname(tags, input_pattern()),
+    c("a_b", "c_d")
+  )
+
+  # Current behavior: if the pattern does not match, the original value is normalized.
+  expect_equal(
+    PEITHO:::extract_tag_varname("plain value", input_pattern()),
+    "plain_value"
+  )
+})
+
+test_that("extract_result_ref splits label and selector", {
+  out <- PEITHO:::extract_result_ref("@#*L*#@my step label@#*L*#@[c(1, 2)]")
+  expect_equal(out$label, "my_step_label")
+  expect_equal(out$selector, "c(1,2)")
+
+  out_double <- PEITHO:::extract_result_ref("@#*L*#@my step label@#*L*#@[[2]]")
+  expect_equal(out_double$label, "my_step_label")
+  expect_equal(out_double$selector, "2")
+
+  out_no_selector <- PEITHO:::extract_result_ref("@#*L*#@step_1@#*L*#@")
+  expect_equal(out_no_selector$label, "step_1")
+  expect_null(out_no_selector$selector)
+})
+
+test_that("parse_required_fields tracks result dependencies by base label", {
+  required <- PEITHO:::parse_required_fields(
+    "x = @#*L*#@step 1@#*L*#@[c(1, 2)], y = @#*L*#@step 2@#*L*#@[1]"
+  )
+
+  expect_equal(required$steps, c("step_1", "step_2"))
+})
+
+test_that("parse_args keeps selectors with commas intact", {
+  parsed <- PEITHO:::parse_args(
+    "url=@#*L*#@Split@#*L*#@[c(1, 3)], timeout = 30"
+  )
+
+  expect_equal(parsed$names, c("url", "timeout"))
+  expect_equal(parsed$values, c("@#*L*#@Split@#*L*#@[c(1, 3)]", "30"))
+})
