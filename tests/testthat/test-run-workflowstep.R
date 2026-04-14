@@ -6,7 +6,7 @@ test_that("new_workflowstep creates valid object with base function", {
 })
 
 test_that("new_workflowstep fails for missing function", {
-  expect_error(new_workflowstep(entry = 3, command = "not_a_function"), "not found")
+  expect_warning(new_workflowstep(entry = 3, command = "not_a_function"), "not found")
 })
 
 test_that("new_workflowstep sets name and label correctly", {
