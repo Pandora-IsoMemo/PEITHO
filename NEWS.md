@@ -1,3 +1,9 @@
+# PEITHO 26.04.1
+
+## Bug Fixes
+- Fixed loading of custom functions (from functions.R) into an environment for the “Browse functions” modal and adjusted save messaging for functions.R.
+- Fixed how custom workflow functions are loaded and surfaced in the Shiny UI and workflow execution, with the goal of picking up updated functions more reliably.
+
 # PEITHO 26.04.0
 
 ## New Features
