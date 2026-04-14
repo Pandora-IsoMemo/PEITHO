@@ -11,7 +11,7 @@
 `%||%` <- function(a, b) if (!is.null(a) && length(a) > 0L) a else b
 
 is_running_online <- function() {
-  base::as.logical(base::Sys.getenv("IS_SHINYPROXY") != "", unset = "FALSE")
+  isTRUE(base::as.logical(base::Sys.getenv("IS_SHINYPROXY", unset = "FALSE")))
 }
 
 peitho_user_agent <- function() {

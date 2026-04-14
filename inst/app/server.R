@@ -94,8 +94,7 @@ shinyServer(function(input, output, session) {
     example_wf <- new_workflow(
       name = "example_workflow",
       workflow_file_paths = PEITHO:::workflow_file_paths(
-        path = example_dir,
-        functions = NULL
+        path = example_dir
       )
     ) |>
       shinyTools::shinyTryCatch(

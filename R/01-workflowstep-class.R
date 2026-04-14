@@ -36,7 +36,7 @@ new_workflowstep <- function(
   if (is.null(name)) name <- paste("Step", entry)
   if (is.null(label)) label <- name
 
-  resolve_operation(command, env = env)
+  resolve_operation(command, env = env, warn_only = TRUE)
 
   required_fields <- parse_required_fields(args)
 
@@ -260,13 +260,20 @@ update.workflowstep <- function(
   x
 }
 
-resolve_operation <- function(op_name, env) {
+resolve_operation <- function(op_name, env, warn_only = FALSE) {
   PEITHO:::logDebug("  Resolving command function: %s", op_name)
   if (!is.character(op_name) || length(op_name) != 1L || !nzchar(op_name)) {
     stop("'command' must be a non-empty character string.", call. = FALSE)
   }
   if (!exists(op_name, mode = "function", envir = env, inherits = TRUE)) {
-    stop("Command '", op_name, "' not found in given environment.", call. = FALSE)
+    msg <- sprintf("Command '%s' not found in given environment.", op_name)
+    if (warn_only) {
+      PEITHO:::logWarn("%s", msg)
+      warning(msg, immediate. = TRUE, call. = FALSE)
+      return(NULL)
+    } else {
+      stop(msg, call. = FALSE)
+    }
   }
   get(op_name, envir = env, mode = "function", inherits = TRUE)
 }
@@ -302,7 +309,7 @@ run.workflowstep <- function(
   if (!inherits(state, "workflowstate")) {
     stop("'state' must be a 'workflowstate' object.", call. = FALSE)
   }
-  # default env: use step-specific env if present, else caller’s env
+  # Resolve environment: use provided env, or fall back to step-specific env, or caller's env
   if (is.null(env)) {
     env <- if (!is.null(x$env)) x$env else parent.frame()
   }
