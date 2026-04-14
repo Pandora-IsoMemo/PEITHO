@@ -769,6 +769,17 @@ run.workflow <- function(
   }
 
   validate_workflow(x, error_on_warn = TRUE)
+  if (
+    is.null(env) &&
+      length(x$workflow_file_paths) > 0L &&
+      !is.null(x$workflow_file_paths$functions_path)
+  ) {
+    env <- load_workflow_script_env(
+      script_path = x$workflow_file_paths$functions_path,
+      parent_env = globalenv(),
+      show_functions_path = FALSE
+    )
+  }
 
   # RUN workflow steps
   from <- max(1L, as.integer(from))

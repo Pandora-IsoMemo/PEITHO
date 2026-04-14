@@ -269,7 +269,20 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
     PEITHO:::logInfo("Loading custom script for workflow: %s", script_path)
   }
   script_env <- new.env(parent = parent_env)
-  sys.source(script_path, envir = script_env)
+  
+  tryCatch(
+    sys.source(script_path, envir = script_env),
+    error = function(e) {
+      err_msg <- sprintf(
+        "Error loading custom functions from %s: %s",
+        basename(script_path),
+        conditionMessage(e)
+      )
+      PEITHO:::logError("%s", err_msg)
+      stop(err_msg, call. = FALSE)
+    }
+  )
+  
   return(script_env)
 }
 
