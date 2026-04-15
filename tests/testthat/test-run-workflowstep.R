@@ -5,7 +5,7 @@ test_that("new_workflowstep creates valid object with base function", {
   expect_equal(step$command, "strsplit")
 })
 
-test_that("new_workflowstep fails for missing function", {
+test_that("new_workflowstep warns for missing function on construction", {
   expect_warning(new_workflowstep(entry = 3, command = "not_a_function"), "not found")
 })
 
