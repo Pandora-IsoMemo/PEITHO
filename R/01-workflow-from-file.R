@@ -52,7 +52,7 @@ extract_tag_varname <- function(x, pattern) {
 }
 
 read_json_if_exists <- function(path) {
-  if (!file.exists(path)) return(list())
+  if (!file_nonempty(path)) return(list())
   jsonlite::fromJSON(path, simplifyVector = FALSE)
 }
 
@@ -66,7 +66,7 @@ load_inputs_to_list <- function(
     input_list <- read_json_if_exists(input_path)
   } else if (grepl("\\.txt$", input_path)) {
     # load input.txt
-    if (file.exists(input_path)) {
+    if (file_nonempty(input_path)) {
       lines <- readLines(input_path)
       tag_list_indx <- grepl(paste0("^", pattern, ".*", pattern, "$"), lines)
       tag_list <- unique(lines[tag_list_indx])
@@ -248,7 +248,7 @@ strip_outer_quotes <- function(x) {
 
 load_workflow_script_env <- function(script_path, parent_env, show_functions_path = TRUE) {
   if (is.null(script_path)) return(parent_env)
-  if (!file.exists(script_path) || file.info(script_path)$size == 0) {
+  if (!file_nonempty(script_path)) {
     info_msg <- sprintf(
       "Custom script file not found or is empty: %s. Using global environment for operations.",
       basename(script_path)
@@ -311,9 +311,9 @@ make_param_from_arg_loop <- function(args_string, loop, step_i, input_list) {
 
 extract_input_list_from_files <- function(inputs_path) {
   # return empty wf if no inputs
-  if (!file.exists(inputs_path)) {
+  if (!file_nonempty(inputs_path)) {
     warn_msg <- sprintf(
-      "%s not found in folder '%s'. Returning empty workflow.",
+      "%s not found or is empty in folder '%s'. Returning empty input list.",
       basename(inputs_path),
       dirname(inputs_path)
     )
@@ -359,9 +359,9 @@ workflow_steps_from_files <- function(
   show_functions_path = TRUE
 ) {
   # return empty wf if no commands
-  if (!file.exists(workflow_file_paths$commands_path)) {
+  if (!file_nonempty(workflow_file_paths$commands_path)) {
     warn_msg <- sprintf(
-      "%s not found in folder '%s'. Returning empty workflow.",
+      "%s not found or is empty in folder '%s'. Returning empty workflow.",
       basename(workflow_file_paths$commands_path),
       workflow_file_paths$path_to_folder
     )
@@ -371,8 +371,11 @@ workflow_steps_from_files <- function(
   }
 
   # create results file if not exists
-  if (!file.exists(workflow_file_paths$results_path)) {
-    PEITHO:::logInfo("Creating empty %s file.", basename(workflow_file_paths$results_path))
+  if (!file_nonempty(workflow_file_paths$results_path)) {
+    PEITHO:::logInfo(
+      "Creating empty %s file.",
+      basename(workflow_file_paths$results_path)
+    )
     jsonlite::write_json(
       list(),
       workflow_file_paths$results_path,

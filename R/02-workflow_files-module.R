@@ -214,11 +214,7 @@ workflow_files_server <- function(id, active_dir) {
       if (!is.null(dir_path) && dir.exists(dir_path)) {
         functions_path <- PEITHO:::workflow_file_paths(path = dir_path)$functions_path
 
-        has_functions_file <- !is.null(functions_path) &&
-          file.exists(functions_path) &&
-          isTRUE(file.info(functions_path)$size > 0)
-
-        if (has_functions_file) {
+        if (file_nonempty(functions_path)) {
           extra_env <- tryCatch(
             PEITHO:::load_workflow_script_env(
               script_path = functions_path,

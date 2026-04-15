@@ -12,7 +12,7 @@ test_that("save_as_zip exports workflow to zip", {
   wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
   zipfile_path <- tempfile(fileext = ".peitho")
   save_as_zip(wf, file = zipfile_path)
-  expect_true(file.exists(zipfile_path))
+  expect_true(file_nonempty(zipfile_path))
   unlink(zipfile_path) # Clean up
 })
 

@@ -1,6 +1,6 @@
 # ---- workflowstep class ----
 
-# constructor --------------------------------------------------------------
+# constructor -----------------------------------------------------------------
 
 #' Create a new workflow step object
 #'
@@ -17,8 +17,10 @@
 #' @param args           The original argument string from the workflow file, for reference.
 #' @param loop           A character string indicating if the step should be looped over.
 #'                       Can be "yes", "no", or "auto".
-#' @param env            An environment to look up the command function. Default is the parent
-#'                       frame.
+#' @param env            An environment to look up the command function.
+#'                       Defaults to the caller's env. Warns if the command
+#'                       cannot be found, but does not throw an error at this
+#'                       stage.
 #' @param ...            Additional metadata to store with the step.
 #' @return A `workflowstep` object.
 #' @export
@@ -30,7 +32,7 @@ new_workflowstep <- function(
   comments        = "",
   args            = "",          # original argument string from workflow file, for reference
   loop            = "auto",          # loop variable name (if any)
-  env             = parent.frame(),  # where to look up command
+  env             = parent.frame(),
   ...
 ) {
   if (is.null(name)) name <- paste("Step", entry)
@@ -290,8 +292,7 @@ run_with_error <- function(fn, args) {
 #' with the result or error from the step execution.
 #' @param x  A `workflowstep` object representing the step to execute.
 #' @param state A `workflowstate` object representing the current state of the workflow.
-#' @param env   An environment to look up the command function. Defaults to the step's
-#'  own env or the caller's env.
+#' @param env   An environment to look up the command function. Defaults to the caller's env.
 #' @param step_i The number of the step in the workflow, used for logging purposes.
 #' @param input_list A list of inputs for argument parsing, loaded from the workflow's inputs file.
 #' @param ...   Additional arguments (not used).
@@ -308,7 +309,7 @@ run.workflowstep <- function(
   if (!inherits(state, "workflowstate")) {
     stop("'state' must be a 'workflowstate' object.", call. = FALSE)
   }
-  # Resolve environment: use provided env, or fall back to step-specific env, or caller's env
+  # Resolve environment: use provided env, or fall back to caller's env
   if (is.null(env)) {
     env <- parent.frame()
   }

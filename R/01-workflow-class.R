@@ -804,7 +804,7 @@ run.workflow <- function(
     steprun_summary <- summary(steprun)
 
     if (length(x$workflow_file_paths) > 0) {
-      if (!file.exists(x$workflow_file_paths$results_path) || i == 1L) {
+      if (!file_nonempty(x$workflow_file_paths$results_path) || i == 1L) {
         # if missing or first step, create empty results file
         jsonlite::write_json(
           list(),

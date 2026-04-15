@@ -22,6 +22,15 @@ peitho_user_agent <- function() {
   )
 }
 
+file_nonempty <- function(path) {
+  if (missing(path) || is.null(path)) return(FALSE)
+  if (!is.character(path) || length(path) != 1L) return(FALSE)
+  if (!nzchar(path)) return(FALSE)
+  if (!file.exists(path)) return(FALSE)
+  if (file.info(path)$isdir) return(FALSE)
+  file.info(path)$size > 0L
+}
+
 # Build labeled row selector choices while keeping values as row indices.
 build_row_selector_choices <- function(df, preferred_name_cols = c("Name", "name")) {
   n <- nrow(df)
