@@ -35,8 +35,10 @@ name space or in a custom script environment.}
 \item{loop}{A character string indicating if the step should be looped over.
 Can be "yes", "no", or "auto".}
 
-\item{env}{An environment to look up the command function. Default is the parent
-frame.}
+\item{env}{An environment to look up the command function.
+Defaults to the caller's env. Warns if the command
+cannot be found, but does not throw an error at this
+stage.}
 
 \item{...}{Additional metadata to store with the step.}
 }

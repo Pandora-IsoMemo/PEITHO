@@ -11,7 +11,7 @@
 `%||%` <- function(a, b) if (!is.null(a) && length(a) > 0L) a else b
 
 is_running_online <- function() {
-  base::as.logical(base::Sys.getenv("IS_SHINYPROXY") != "", unset = "FALSE")
+  isTRUE(base::as.logical(base::Sys.getenv("IS_SHINYPROXY", unset = "FALSE")))
 }
 
 peitho_user_agent <- function() {
@@ -20,6 +20,15 @@ peitho_user_agent <- function() {
     "PEITHO-WebTextFetcher/%s (source: https://github.com/Pandora-IsoMemo/PEITHO)",
     ver
   )
+}
+
+file_nonempty <- function(path) {
+  if (missing(path) || is.null(path)) return(FALSE)
+  if (!is.character(path) || length(path) != 1L) return(FALSE)
+  if (!nzchar(path)) return(FALSE)
+  if (!file.exists(path)) return(FALSE)
+  if (file.info(path)$isdir) return(FALSE)
+  file.info(path)$size > 0L
 }
 
 # Build labeled row selector choices while keeping values as row indices.

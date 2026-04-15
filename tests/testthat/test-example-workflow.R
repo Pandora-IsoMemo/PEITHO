@@ -16,7 +16,7 @@ test_that("workflow can be exported, imported, and run as in example_wf.R", {
 
   # Export as zip
   PEITHO::save_as_zip(my_wf, file = zipfile_path)
-  expect_true(file.exists(zipfile_path))
+  expect_true(file_nonempty(zipfile_path))
 
   # Run workflow (steps 1 to 4)
   my_run_1 <- PEITHO::run(my_wf, from = 1, to = 4)

@@ -769,6 +769,17 @@ run.workflow <- function(
   }
 
   validate_workflow(x, error_on_warn = TRUE)
+  if (
+    is.null(env) &&
+      length(x$workflow_file_paths) > 0L &&
+      !is.null(x$workflow_file_paths$functions_path)
+  ) {
+    env <- load_workflow_script_env(
+      script_path = x$workflow_file_paths$functions_path,
+      parent_env = asNamespace("PEITHO"),
+      show_functions_path = FALSE
+    )
+  }
 
   # RUN workflow steps
   from <- max(1L, as.integer(from))
@@ -793,7 +804,7 @@ run.workflow <- function(
     steprun_summary <- summary(steprun)
 
     if (length(x$workflow_file_paths) > 0) {
-      if (!file.exists(x$workflow_file_paths$results_path) || i == 1L) {
+      if (!file_nonempty(x$workflow_file_paths$results_path) || i == 1L) {
         # if missing or first step, create empty results file
         jsonlite::write_json(
           list(),
