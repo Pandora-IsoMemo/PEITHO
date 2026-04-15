@@ -54,7 +54,6 @@ new_workflowstep <- function(
       required_steps  = required_steps,
       args            = args,
       loop            = loop,
-      env             = env,
       dots            = list(...)     # extension point
     ),
     class = c("workflowstep", "list")
@@ -311,7 +310,7 @@ run.workflowstep <- function(
   }
   # Resolve environment: use provided env, or fall back to step-specific env, or caller's env
   if (is.null(env)) {
-    env <- if (!is.null(x$env)) x$env else parent.frame()
+    env <- parent.frame()
   }
   # 1) resolve the function
   # for a package you might use: env = asNamespace("PEITHO")

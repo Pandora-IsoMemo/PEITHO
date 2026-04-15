@@ -776,7 +776,7 @@ run.workflow <- function(
   ) {
     env <- load_workflow_script_env(
       script_path = x$workflow_file_paths$functions_path,
-      parent_env = globalenv(),
+      parent_env = asNamespace("PEITHO"),
       show_functions_path = FALSE
     )
   }
