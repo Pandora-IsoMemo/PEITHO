@@ -764,9 +764,15 @@ run.workflow <- function(
     )
   }
 
+  # create run_id
+  ts <- format(Sys.time(), "%Y%m%d%H%M%S", tz = "UTC")
+  rdm_suffix <- sprintf("%08x", sample.int(.Machine$integer.max, 1L))
+  run_id <- paste0(ts, "_", rdm_suffix)
+  PEITHO:::logInfo("Starting workflow run with ID: '%s'", run_id)
+
   # initialize state if not already a workflowstate
   if (!inherits(state, "workflowstate")) {
-    state <- new_workflowstate(initial_input = state)
+    state <- new_workflowstate(initial_input = state, run_id = run_id)
   }
 
   validate_workflow(x, error_on_warn = TRUE)
@@ -782,15 +788,11 @@ run.workflow <- function(
     )
   }
 
-  # create run_id
-  run_id <- format(Sys.time(), "%Y%m%d%H%M%S")
-
   # RUN workflow steps
   from <- max(1L, as.integer(from))
   to   <- min(length(x$steps), as.integer(to))
   idxs <- seq(from, to)
 
-  PEITHO:::logInfo("Starting workflow run with ID: '%s'", run_id)
   PEITHO:::logDebug("Running workflow from step %d to %d", from, to)
 
   for (j in seq_along(idxs)) {

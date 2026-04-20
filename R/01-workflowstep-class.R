@@ -399,7 +399,8 @@ run.workflowstep <- function(
       step   = x,
       args   = args,
       output = results,
-      error  = errors
+      error  = errors,
+      run_id = state$run_id
     )
   } else {
     PEITHO:::logDebug("  Running command: NO LOOPING")
@@ -419,7 +420,8 @@ run.workflowstep <- function(
       step   = x,
       args   = args,
       output = list(run$output),
-      error  = list(run$error)
+      error  = list(run$error),
+      run_id = state$run_id
     )
   }
 

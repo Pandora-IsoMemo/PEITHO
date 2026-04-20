@@ -5,16 +5,17 @@
 #' This object keeps track of the state while executing a workflow,
 #' including the initial input, the last result, and the list of executed step runs.
 #' @param initial_input The initial input provided to the workflow.
+#' @param run_id A unique identifier for the workflow run (optional).
 #' @return A `workflowstate` object.
 #' @export
-new_workflowstate <- function(initial_input = NULL) {
+new_workflowstate <- function(initial_input = NULL, run_id = NULL) {
   structure(
     list(
       initial_input = initial_input,
       errors        = NULL,            # all errors encountered
       last_result   = initial_input,   # last step’s result
       stepruns      = list(),           # list of workflowsteprun objects
-
+      run_id        = run_id,           # unique identifier for the workflow run
       # caches (duplication on purpose, we may later decide if we use 'id' or 'name' at the end)
       results_by_id   = list(),
       results_by_name = list(),

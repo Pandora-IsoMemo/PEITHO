@@ -4,7 +4,14 @@
 \alias{new_workflowsteprun}
 \title{Create a new workflow step run object}
 \usage{
-new_workflowsteprun(step, args, output = NULL, error = NULL, ...)
+new_workflowsteprun(
+  step,
+  args,
+  output = NULL,
+  error = NULL,
+  run_id = NULL,
+  ...
+)
 }
 \arguments{
 \item{step}{A `workflowstep` object representing the step definition.}
@@ -15,6 +22,8 @@ Contains actual values used during execution (e.g. results of previous steps).}
 \item{output}{The output produced by the step, if successful.}
 
 \item{error}{An error object if the step failed, otherwise `NULL`.}
+
+\item{run_id}{A unique identifier for the workflow run this step belongs to.}
 
 \item{...}{Additional metadata to store with the step run.}
 }
