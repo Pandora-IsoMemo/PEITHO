@@ -3,6 +3,7 @@
 ## Updates
 - Updated run.workflowstep() to always store output/error as lists
 - Extended test coverage to assert list-shaped output/error and list-shaped last_result
+- Added run_id to workflow run and state objects
 
 # PEITHO 26.04.1
 

@@ -416,6 +416,7 @@ run.workflowstep <- function(
       if (is_single_result) "" else "s"
     )
 
+    # return list of results/errors (to keep structure consistent)
     steprun <- new_workflowsteprun(
       step   = x,
       args   = args,

@@ -19,9 +19,11 @@ new_workflowsteprun(
 \item{args}{A list of arguments that were passed to the step's command.
 Contains actual values used during execution (e.g. results of previous steps).}
 
-\item{output}{The output produced by the step, if successful.}
+\item{output}{List of outputs produced by the step if it executed
+successfully, otherwise list(NULL).}
 
-\item{error}{An error object if the step failed, otherwise `NULL`.}
+\item{error}{List of error conditions if the step encountered errors,
+otherwise list(NULL).}
 
 \item{run_id}{A unique identifier for the workflow run this step belongs to.}
 
