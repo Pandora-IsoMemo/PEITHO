@@ -75,7 +75,12 @@ print.workflowstate <- function(x, ...) {
   if (any(is_error)) {
     cat("  error in steps:", paste(which(is_error), collapse = ", "), "\n", sep = " ")
     cat("                 (use summary() to see error details)\n")
-    cat("  first error:   ", trunc(x$stepruns[[which(is_error)[1]]]$error), "\n", sep = "")
+    first_error <- x$stepruns[[which(is_error)[1]]]$error
+    if (is.list(first_error)) {
+      non_null <- Filter(function(e) !is.null(e), first_error)
+      first_error <- if (length(non_null) > 0L) non_null[[1L]] else NULL
+    }
+    cat("  first error:   ", trunc(first_error), "\n", sep = "")
   }
   cat("  initial_input: ", trunc(x$initial_input), "\n", sep = "")
   cat("  last_result:   ", trunc(x$last_result), "\n", sep = "")

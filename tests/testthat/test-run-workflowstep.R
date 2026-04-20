@@ -81,7 +81,7 @@ test_that("make_param_from_arg stores result selector separately", {
   expect_equal(param$selector, "c(1,3)")
 })
 
-test_that("run.workflowstep without looping returns single output and NULL error", {
+test_that("run.workflowstep without looping returns lists with single output and NULL error", {
   step <- new_workflowstep(
     entry   = 1,
     command = "toupper",
@@ -92,8 +92,9 @@ test_that("run.workflowstep without looping returns single output and NULL error
   steprun <- run.workflowstep(step, state, env = globalenv())
 
   expect_s3_class(steprun, "workflowsteprun")
-  expect_equal(steprun$output, "HELLO")
-  expect_null(steprun$error)
+  expect_equal(steprun$output, list("HELLO"))
+  expect_equal(length(steprun$error), 1L)
+  expect_true(all(sapply(steprun$error, is.null)))
   expect_false(steprun$has_error)
 })
 

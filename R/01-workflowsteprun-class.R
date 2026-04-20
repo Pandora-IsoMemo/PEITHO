@@ -27,11 +27,7 @@ new_workflowsteprun <- function(step, args, output = NULL, error = NULL, ...) {
       args   = args,   # actual arguments passed to the function
       output = output, # result (if no error)
       error  = error,  # condition object (if any)
-      has_error = if (is.list(error)) {
-        any(!sapply(error, is.null))
-      } else {
-        !is.null(error)
-      },
+      has_error = any(!sapply(error, is.null)), # logical flag for convenience
       meta   = list(...)
     ),
     class = c("workflowsteprun", "list")
