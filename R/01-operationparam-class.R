@@ -122,6 +122,7 @@ extract_arg_list <- function(
   }
 
   if (operationparam$type == "result") {
+    # check that ref is present and non-empty
     ref <- operationparam$label
 
     if (is.null(ref) || !nzchar(ref)) {
@@ -145,6 +146,11 @@ extract_arg_list <- function(
       )
     }
 
+    # unwrap single-element lists to allow selecting from character vectors
+    if (is.list(arg_value) && length(arg_value) == 1L) {
+      arg_value <- arg_value[[1L]]
+    }
+
     selector <- operationparam$selector %||% NULL
     arg_value <- apply_result_selector(arg_value, selector)
 
@@ -162,7 +168,7 @@ extract_arg_list <- function(
       )
     }
 
-    # unwrap single-element lists
+    # unwrap single-element lists since we just converted to list above
     if (is.list(arg_value) && length(arg_value) == 1L) {
       arg_value <- arg_value[[1L]]
     }

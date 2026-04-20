@@ -45,7 +45,7 @@ test_that("run.workflowstep executes command and returns correct output", {
   state <- new_workflowstate()
   steprun <- run.workflowstep(step, state, path_to_folder = tempdir())
   expect_s3_class(steprun, "workflowsteprun")
-  expect_equal(steprun$output, list(c("hallo", "test")))
+  expect_equal(steprun$output, list(list(c("hallo", "test"))))
   expect_equal(steprun$error, list(NULL))
 })
 
