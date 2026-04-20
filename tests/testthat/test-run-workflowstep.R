@@ -46,7 +46,7 @@ test_that("run.workflowstep executes command and returns correct output", {
   steprun <- run.workflowstep(step, state, path_to_folder = tempdir())
   expect_s3_class(steprun, "workflowsteprun")
   expect_equal(steprun$output, list(c("hallo", "test")))
-  expect_null(steprun$error)
+  expect_equal(steprun$error, list(NULL))
 })
 
 test_that("run.workflowstep handles command error", {
@@ -61,8 +61,8 @@ test_that("run.workflowstep handles command error", {
   state <- new_workflowstate()
   steprun <- run.workflowstep(step, state, path_to_folder = tempdir())
   expect_s3_class(steprun, "workflowsteprun")
-  expect_null(steprun$output)
-  expect_true(inherits(steprun$error, "error"))
+  expect_equal(steprun$output, list(NULL))
+  expect_true(inherits(steprun$error[[1]], "error"))
   rm(error_fn, envir = .GlobalEnv)
 })
 

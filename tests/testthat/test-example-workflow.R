@@ -20,7 +20,8 @@ test_that("workflow can be exported, imported, and run as in example_wf.R", {
 
   # Run workflow (steps 1 to 4)
   my_run_1 <- PEITHO::run(my_wf, from = 1, to = 4)
-  expect_type(my_run_1$state$last_result, "character")
+  expect_type(my_run_1$state$last_result, "list")
+  expect_type(my_run_1$state$last_result[[1]], "character")
   expect_length(my_run_1$state$last_result, 1)
 
   # Truncate output

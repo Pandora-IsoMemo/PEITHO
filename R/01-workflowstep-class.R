@@ -418,8 +418,8 @@ run.workflowstep <- function(
     steprun <- new_workflowsteprun(
       step   = x,
       args   = args,
-      output = list(run$output),   # always a list
-      error  = list(run$error)     # always a list
+      output = if (length(run$output) > 0L) as.list(run$output) else list(run$output),
+      error  = list(run$error)
     )
   }
 
