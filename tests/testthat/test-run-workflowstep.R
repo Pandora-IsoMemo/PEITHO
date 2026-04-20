@@ -45,8 +45,8 @@ test_that("run.workflowstep executes command and returns correct output", {
   state <- new_workflowstate()
   steprun <- run.workflowstep(step, state, path_to_folder = tempdir())
   expect_s3_class(steprun, "workflowsteprun")
-  expect_equal(steprun$output, list(c("hallo", "test")))
-  expect_null(steprun$error)
+  expect_equal(steprun$output, list(list(c("hallo", "test"))))
+  expect_equal(steprun$error, list(NULL))
 })
 
 test_that("run.workflowstep handles command error", {
@@ -61,8 +61,8 @@ test_that("run.workflowstep handles command error", {
   state <- new_workflowstate()
   steprun <- run.workflowstep(step, state, path_to_folder = tempdir())
   expect_s3_class(steprun, "workflowsteprun")
-  expect_null(steprun$output)
-  expect_true(inherits(steprun$error, "error"))
+  expect_equal(steprun$output, list(NULL))
+  expect_true(inherits(steprun$error[[1]], "error"))
   rm(error_fn, envir = .GlobalEnv)
 })
 
@@ -79,6 +79,42 @@ test_that("make_param_from_arg stores result selector separately", {
   expect_equal(param$type, "result")
   expect_equal(param$label, "step_1")
   expect_equal(param$selector, "c(1,3)")
+})
+
+test_that("run.workflowstep without looping returns lists with single output and NULL error", {
+  step <- new_workflowstep(
+    entry   = 1,
+    command = "toupper",
+    args    = "x = \"hello\"",
+    loop    = "no"
+  )
+  state <- new_workflowstate()
+  steprun <- run.workflowstep(step, state, env = globalenv())
+
+  expect_s3_class(steprun, "workflowsteprun")
+  expect_equal(steprun$output, list("HELLO"))
+  expect_equal(length(steprun$error), 1L)
+  expect_true(all(sapply(steprun$error, is.null)))
+  expect_false(steprun$has_error)
+})
+
+test_that("run.workflowstep with looping iterates over list arg and returns list of outputs", {
+  step <- new_workflowstep(
+    entry   = 2,
+    command = "toupper",
+    args    = "x = @#*L*#@step 1@#*L*#@",
+    loop    = "auto"
+  )
+  state <- new_workflowstate()
+  state$results_by_name[["step_1"]] <- c("hello", "world", "foo")
+
+  steprun <- run.workflowstep(step, state, step_i = 2, env = globalenv())
+
+  expect_s3_class(steprun, "workflowsteprun")
+  expect_equal(steprun$output, list("HELLO", "WORLD", "FOO"))
+  expect_equal(length(steprun$error), 3L)
+  expect_true(all(sapply(steprun$error, is.null)))
+  expect_false(steprun$has_error)
 })
 
 test_that("extract_arg_list applies selector to previous result", {

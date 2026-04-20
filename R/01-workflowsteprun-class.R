@@ -8,12 +8,15 @@
 #' @param step   A `workflowstep` object representing the step definition.
 #' @param args   A list of arguments that were passed to the step's command.
 #'  Contains actual values used during execution (e.g. results of previous steps).
-#' @param output The output produced by the step, if successful.
-#' @param error  An error object if the step failed, otherwise `NULL`.
+#' @param output List of outputs produced by the step if it executed
+#'               successfully, otherwise list(NULL).
+#' @param error  List of error conditions if the step encountered errors,
+#'               otherwise list(NULL).
+#' @param run_id A unique identifier for the workflow run this step belongs to.
 #' @param ...    Additional metadata to store with the step run.
 #' @return A `workflowsteprun` object.
 #' @export
-new_workflowsteprun <- function(step, args, output = NULL, error = NULL, ...) {
+new_workflowsteprun <- function(step, args, output = NULL, error = NULL, run_id = NULL, ...) {
   # validate that step is a workflowstep
   if (!inherits(step, "workflowstep")) {
     stop("Argument 'step' must be of class 'workflowstep'.")
@@ -27,11 +30,8 @@ new_workflowsteprun <- function(step, args, output = NULL, error = NULL, ...) {
       args   = args,   # actual arguments passed to the function
       output = output, # result (if no error)
       error  = error,  # condition object (if any)
-      has_error = if (is.list(error)) {
-        any(!sapply(error, is.null))
-      } else {
-        !is.null(error)
-      },
+      run_id = run_id, # workflow run identifier
+      has_error = any(!sapply(error, is.null)), # logical flag for convenience
       meta   = list(...)
     ),
     class = c("workflowsteprun", "list")
@@ -45,6 +45,9 @@ new_workflowsteprun <- function(step, args, output = NULL, error = NULL, ...) {
 #' @export
 print.workflowsteprun <- function(x, ...) {
   cat("<workflowsteprun>\n")
+  if (!is.null(x$run_id) && nzchar(x$run_id)) {
+    cat("  run id:    ", x$run_id, "\n", sep = "")
+  }
   cat("  step id:   ", x$step$entry, "  (", x$step$name, ")\n", sep = "")
   cat("  command: ", x$step$command, "\n", sep = "")
   cat("  args:      ", paste(names(x$args), collapse = ", "), "\n", sep = "")
@@ -112,6 +115,7 @@ summary.workflowsteprun <- function(object, ...) {
   }
 
   list(
+    run_id = object$run_id,
     entry  = object$step$entry,
     name   = object$step$name,
     label  = object$step$label,

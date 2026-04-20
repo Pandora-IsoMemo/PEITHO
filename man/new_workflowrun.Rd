@@ -4,12 +4,14 @@
 \alias{new_workflowrun}
 \title{Workflow run object}
 \usage{
-new_workflowrun(workflow, state)
+new_workflowrun(workflow, state, run_id = NULL)
 }
 \arguments{
 \item{workflow}{A `workflow` object.}
 
 \item{state}{A `workflowstate` object.}
+
+\item{run_id}{A unique identifier for the workflow run (optional).}
 }
 \value{
 A `workflowrun` object.

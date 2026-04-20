@@ -19,7 +19,7 @@ test_that("save_as_zip exports workflow to zip", {
 # Test: Running a Workflow
 test_that("run executes workflow steps", {
   wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
-  run_result <- run(wf, from = 1, to = 5)
+  run_result <- run(wf, from = 1, to = length(wf$steps))
   expect_true(!is.null(run_result$state$last_result))
   expect_true(length(run_result$state$last_result) >= 0)
 })

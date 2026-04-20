@@ -1,12 +1,13 @@
 #' Workflow run object
-#' 
+#'
 #' This object represents a completed run of a workflow, containing the workflow definition
 #' and the final state after execution.
 #' @param workflow A `workflow` object.
 #' @param state A `workflowstate` object.
+#' @param run_id A unique identifier for the workflow run (optional).
 #' @return A `workflowrun` object.
 #' @export
-new_workflowrun <- function(workflow, state) {
+new_workflowrun <- function(workflow, state, run_id = NULL) {
   if (!inherits(workflow, "workflow")) {
     stop("Argument 'workflow' must be of class 'workflow'.")
   }
@@ -19,7 +20,8 @@ new_workflowrun <- function(workflow, state) {
       workflow = workflow,
       state    = state,
       errors   = state$errors,
-      last_result   = state$last_result
+      last_result   = state$last_result,
+      run_id   = run_id
     ),
     class = "workflowrun"
   )
@@ -37,6 +39,7 @@ print.workflowrun <- function(x, ...) {
   cat("Finished with state:\n")
   print(x$state)
   cat("  available fields: $", paste(names(x), collapse = ", $"), "\n", sep = "")
+  cat("  run ID:    ", x$run_id, "\n", sep = "")
   invisible(x)
 }
 
