@@ -76,7 +76,7 @@ print.workflowstate <- function(x, ...) {
     cat("  error in steps:", paste(which(is_error), collapse = ", "), "\n", sep = " ")
     cat("                 (use summary() to see error details)\n")
     first_error <- x$stepruns[[which(is_error)[1]]]$error
-    if (is.list(first_error)) {
+    if (is.list(first_error) && !inherits(first_error, "condition")) {
       non_null <- Filter(function(e) !is.null(e), first_error)
       first_error <- if (length(non_null) > 0L) non_null[[1L]] else NULL
     }
