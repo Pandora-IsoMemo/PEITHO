@@ -46,6 +46,12 @@ truncate_many <- function(vals, n_char, n_items, collapse = ", \n") {
 trunc <- function(val, n_char = 40, n_items = 5) {
   if (is.null(val)) return("NULL")
 
+  # unwrap single-element lists
+  # (we often have lists of length 1 due to how we store outputs and errors)
+  if (is.list(val) && length(val) == 1L) {
+    val <- val[[1L]]
+  }
+
   # lists of characters
   if (is.list(val) && all(vapply(val, is.character, logical(1)))) {
     return(truncate_many(unlist(val), n_char = n_char, n_items = n_items))
