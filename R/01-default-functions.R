@@ -3,7 +3,7 @@
 # @param split A character string containing a regular expression to use
 #              as the split point.
 # @param ... Additional arguments passed to `strsplit()`.
-# @return A character vector with the split elements.
+# @return A list of character strings resulting from splitting `x` by `split`.
 simple_split <- function(x, split, ...) {
   as.list(strsplit(x, split, ...)[[1]])
 }
