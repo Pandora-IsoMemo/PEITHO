@@ -1,9 +1,10 @@
 #' Workflow run object
-#' 
+#'
 #' This object represents a completed run of a workflow, containing the workflow definition
 #' and the final state after execution.
 #' @param workflow A `workflow` object.
 #' @param state A `workflowstate` object.
+#' @param run_id A unique identifier for the workflow run (optional).
 #' @return A `workflowrun` object.
 #' @export
 new_workflowrun <- function(workflow, state, run_id = NULL) {
