@@ -764,6 +764,7 @@ run.workflow <- function(
     )
   }
 
+  # initialize state if not already a workflowstate
   if (!inherits(state, "workflowstate")) {
     state <- new_workflowstate(initial_input = state)
   }
@@ -781,10 +782,15 @@ run.workflow <- function(
     )
   }
 
+  # create run_id
+  run_id <- format(Sys.time(), "%Y%m%d%H%M%S")
+
   # RUN workflow steps
   from <- max(1L, as.integer(from))
   to   <- min(length(x$steps), as.integer(to))
   idxs <- seq(from, to)
+
+  PEITHO:::logInfo("Starting workflow run with ID: '%s'", run_id)
   PEITHO:::logDebug("Running workflow from step %d to %d", from, to)
 
   for (j in seq_along(idxs)) {
@@ -830,7 +836,7 @@ run.workflow <- function(
     }
   }
 
-  new_workflowrun(x, state)
+  new_workflowrun(x, state, run_id = run_id)
 }
 
 
