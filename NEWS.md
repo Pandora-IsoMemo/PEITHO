@@ -1,3 +1,9 @@
+# PEITHO 26.04.2
+
+## Updates
+- Updated run.workflowstep() to always store output/error as lists
+- Extended test coverage to assert list-shaped output/error and list-shaped last_result
+
 # PEITHO 26.04.1
 
 ## Bug Fixes
