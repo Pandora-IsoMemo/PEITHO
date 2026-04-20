@@ -773,6 +773,8 @@ run.workflow <- function(
   # initialize state if not already a workflowstate
   if (!inherits(state, "workflowstate")) {
     state <- new_workflowstate(initial_input = state, run_id = run_id)
+  } else {
+    state$run_id <- run_id
   }
 
   validate_workflow(x, error_on_warn = TRUE)
