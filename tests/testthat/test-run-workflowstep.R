@@ -81,6 +81,41 @@ test_that("make_param_from_arg stores result selector separately", {
   expect_equal(param$selector, "c(1,3)")
 })
 
+test_that("run.workflowstep without looping returns single output and NULL error", {
+  step <- new_workflowstep(
+    entry   = 1,
+    command = "toupper",
+    args    = "x = \"hello\"",
+    loop    = "no"
+  )
+  state <- new_workflowstate()
+  steprun <- run.workflowstep(step, state, env = globalenv())
+
+  expect_s3_class(steprun, "workflowsteprun")
+  expect_equal(steprun$output, "HELLO")
+  expect_null(steprun$error)
+  expect_false(steprun$has_error)
+})
+
+test_that("run.workflowstep with looping iterates over list arg and returns list of outputs", {
+  step <- new_workflowstep(
+    entry   = 2,
+    command = "toupper",
+    args    = "x = @#*L*#@step 1@#*L*#@",
+    loop    = "auto"
+  )
+  state <- new_workflowstate()
+  state$results_by_name[["step_1"]] <- c("hello", "world", "foo")
+
+  steprun <- run.workflowstep(step, state, step_i = 2, env = globalenv())
+
+  expect_s3_class(steprun, "workflowsteprun")
+  expect_equal(steprun$output, list("HELLO", "WORLD", "FOO"))
+  expect_equal(length(steprun$error), 3L)
+  expect_true(all(sapply(steprun$error, is.null)))
+  expect_false(steprun$has_error)
+})
+
 test_that("extract_arg_list applies selector to previous result", {
   state <- new_workflowstate()
   state$results_by_name[["step_1"]] <- c("a", "b", "c")
