@@ -4,6 +4,14 @@
 # These methods modify workflow objects in memory and optionally persist
 # selected updates to the corresponding workflow files on disk.
 
+renumber_workflow_steps <- function(x) {
+  for (i in seq_along(x$steps)) {
+    x$steps[[i]]$entry <- i
+  }
+
+  x
+}
+
 #' Update a workflow step with a new value
 #'
 #' This function updates a specific field of a `workflowstep` object with a new value. It is used
@@ -59,11 +67,8 @@ update_input_list.workflow <- function(
   x$input_list <- new_list
 
   # 2) persist to inputs file (if file-backed)
-  if (write_file && length(x$workflow_file_paths)) {
-    in_path <- x$workflow_file_paths$inputs_path
-    if (!is.null(in_path) && nzchar(in_path)) {
-      jsonlite::write_json(new_list, in_path, auto_unbox = TRUE, pretty = TRUE)
-    }
+  if (write_file) {
+    write_inputs_json(x)
   }
 
   x
@@ -94,10 +99,10 @@ add_step.workflow <- function(x, new_step, position = length(x$steps) + 1L, ...)
   warn_on_validation <- get_warn_on_validation(dots, default = FALSE)
 
   x$steps <- append(x$steps, list(new_step), after = position - 1L)
+  
   # update entries of all steps to maintain numeric order
-  for (i in seq_along(x$steps)) {
-    x$steps[[i]]$entry <- i
-  }
+  x <- renumber_workflow_steps(x)
+
   # validate workflow after adding step
   validate_workflow_with_policy(x, warn_on_validation = warn_on_validation)
 
@@ -109,16 +114,7 @@ add_step.workflow <- function(x, new_step, position = length(x$steps) + 1L, ...)
   }
 
   # update the commands.json (only if the workflow is file-backed)
-  if (length(x$workflow_file_paths) && !is.null(x$workflow_file_paths$commands_path)) {
-    updated_commands <- as.commands_record(x)
-
-    write_json(
-      updated_commands,
-      path = x$workflow_file_paths$commands_path,
-      auto_unbox = TRUE,
-      pretty = TRUE
-    )
-  }
+  write_commands_json(x)
 
   # return updated workflow
   x
@@ -144,8 +140,10 @@ remove_step.workflow <- function(x, position, ...) {
   warn_on_validation <- get_warn_on_validation(dots, default = FALSE)
 
   x$steps <- x$steps[-position]
+
   # validate workflow after removing step
   validate_workflow_with_policy(x, warn_on_validation = warn_on_validation)
+
   # update current index if needed
   if (!is.na(x$current)) {
     if (x$current == position) {
@@ -154,25 +152,12 @@ remove_step.workflow <- function(x, position, ...) {
       x$current <- x$current - 1L
     }
   }
-  # update entries of all steps to maintain numeric order
-  for (i in seq_along(x$steps)) {
-    x$steps[[i]]$entry <- i
-  }
 
-  # update the commands.json
-  updated_commands <- as.commands_record(x)
+  # update entries of all steps to maintain numeric order
+  x <- renumber_workflow_steps(x)
 
   # Only write to disk for file-backed workflows with a valid commands_path
-  if (!is.null(x$workflow_file_paths) &&
-      length(x$workflow_file_paths) > 0L &&
-      !is.null(x$workflow_file_paths$commands_path)) {
-    write_json(
-      updated_commands,
-      path = x$workflow_file_paths$commands_path,
-      auto_unbox = TRUE,
-      pretty = TRUE
-    )
-  }
+  write_commands_json(x)
 
   # return updated workflow
   x

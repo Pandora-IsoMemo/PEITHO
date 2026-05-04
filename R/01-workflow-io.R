@@ -4,6 +4,10 @@
 # This file provides JSON and ZIP I/O utilities used to read, update,
 # and persist workflow data and run summaries.
 
+# -------------------------------------------------------------------------
+# Read/write workflow results summary JSON
+# -------------------------------------------------------------------------
+
 read_json_if_exists <- function(path) {
   if (!file_nonempty(path)) return(list())
   jsonlite::fromJSON(path, simplifyVector = FALSE)
@@ -84,4 +88,42 @@ import_workflow <- function(
   PEITHO::new_workflow(
     workflow_file_paths = workflow_file_paths(path = extract_dir)
   )
+}
+
+
+is_file_backed_workflow <- function(x) {
+  !is.null(x$workflow_file_paths) && length(x$workflow_file_paths) > 0L
+}
+
+
+write_commands_json <- function(x) {
+  if (!is_file_backed_workflow(x)) return(invisible(FALSE))
+
+  path <- x$workflow_file_paths$commands_path
+  if (is.null(path) || !nzchar(path)) return(invisible(FALSE))
+
+  jsonlite::write_json(
+    as.commands_record(x),
+    path = path,
+    auto_unbox = TRUE,
+    pretty = TRUE
+  )
+
+  invisible(TRUE)
+}
+
+write_inputs_json <- function(x) {
+  if (!is_file_backed_workflow(x)) return(invisible(FALSE))
+
+  path <- x$workflow_file_paths$inputs_path
+  if (is.null(path) || !nzchar(path)) return(invisible(FALSE))
+
+  jsonlite::write_json(
+    x$input_list,
+    path = path,
+    auto_unbox = TRUE,
+    pretty = TRUE
+  )
+
+  invisible(TRUE)
 }
