@@ -211,6 +211,48 @@ as.commands_record.workflow <- function(x, ...) {
   lapply(x$steps, as.commands_record.workflowstep)
 }
 
+#' Convert a workflow to graph tables
+#'
+#' This method converts a `workflow` object into graph tables (nodes and edges)
+#' for visualization or analysis. It extracts relevant information from each
+#' workflow step to create a structured representation of the workflow's
+#' structure and dependencies.
+#' Nodes represent individual steps with their attributes, while edges
+#' represent the dependencies between steps based on the `required_steps` field.
+#'
+#' @param x The workflow object to convert.
+#' @param ... Additional arguments passed to methods.
+#' @return A list containing graph tables representing the workflow structure.
+#' @export
+as.graph_tables.workflow <- function(x, ...) {
+  steps <- x$steps
+
+  step_names <- vapply(steps, function(s) as.character(s$name), character(1))
+  step_entries <- vapply(steps, function(s) as.integer(s$entry), integer(1))
+  names(step_entries) <- step_names
+
+  nodes <- tibble::tibble(
+    id = as.character(step_entries),
+    name = step_names,
+    label = vapply(steps, function(s) as.character(s$label), character(1)),
+    command = vapply(steps, function(s) as.character(s$command), character(1)),
+    entry = step_entries,
+    order = seq_along(steps)
+  )
+
+  edges <- purrr::map_dfr(steps, function(step) {
+    deps <- step$required_steps %||% character(0)
+
+    tibble::tibble(
+      from = as.character(unname(step_entries[deps])),
+      to = as.character(step$entry),
+      rel = "required_steps"
+    )
+  })
+
+  list(nodes = nodes, edges = edges)
+}
+
 step_name_to_position <- function(x, step_name) {
   step_names <- vapply(x$steps, function(s) s$name, character(1))
   match(step_name, step_names)
