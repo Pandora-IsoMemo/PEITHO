@@ -1,4 +1,8 @@
-# Helper functions for workflow extraction from files
+# -------------------------------------------------------------------------
+# Workflow extraction and parsing from files
+# -------------------------------------------------------------------------
+# These helpers parse tagged workflow definitions from inputs/command files
+# and normalize references used when constructing workflow steps.
 
 normalize_varname <- function(x) {
   x <- trimws(x)
@@ -49,11 +53,6 @@ extract_result_ref <- function(x) {
 extract_tag_varname <- function(x, pattern) {
   varname <- sub(pattern, "\\1\\2", x, perl = TRUE)
   normalize_varname(varname)
-}
-
-read_json_if_exists <- function(path) {
-  if (!file_nonempty(path)) return(list())
-  jsonlite::fromJSON(path, simplifyVector = FALSE)
 }
 
 load_inputs_to_list <- function(
