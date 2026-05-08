@@ -29,6 +29,10 @@ workflow_graph_server <- function(id, wf) {
 
       graph_tables <- as.graph_tables(wf_val)
 
+      step_ids <- graph_tables$nodes$id[graph_tables$nodes$type == "step"]
+      input_ids <- graph_tables$nodes$id[graph_tables$nodes$type == "input"]
+
+
       DiagrammeR::create_graph(directed = TRUE) |>
         DiagrammeR::add_nodes_from_table(
           graph_tables$nodes,
@@ -42,17 +46,24 @@ workflow_graph_server <- function(id, wf) {
           from_to_map = "id_external"
         ) |>
         DiagrammeR::set_node_attrs("fontcolor", "black") |>
-        DiagrammeR::select_nodes(conditions = type == "step") |>
-        DiagrammeR::set_node_attrs_ws("fillcolor", "#AED6F1") |>
-        DiagrammeR::set_node_attrs_ws("style", "filled") |>
-        DiagrammeR::set_node_attrs_ws("shape", "rectangle") |>
-        DiagrammeR::clear_selection() |>
-        DiagrammeR::select_nodes(conditions = type == "input") |>
-        DiagrammeR::set_node_attrs_ws("fillcolor", "#A9DFBF") |>
-        DiagrammeR::set_node_attrs_ws("style", "filled") |>
-        DiagrammeR::set_node_attrs_ws("shape", "ellipse") |>
-        DiagrammeR::clear_selection() |>
+        set_node_style(step_ids, "#AED6F1", "rectangle") |>
+        set_node_style(input_ids, "#A9DFBF", "ellipse") |>
         DiagrammeR::render_graph(layout = "tree")
     })
   })
+}
+
+set_node_style <- function(
+  graph, node_ids, fillcolor, shape, style = "filled"
+) {
+  graph |>
+    DiagrammeR::set_node_attrs(
+      node_attr = "fillcolor", values = fillcolor, nodes = node_ids
+    ) |>
+    DiagrammeR::set_node_attrs(
+      node_attr = "style", values = style, nodes = node_ids
+    ) |>
+    DiagrammeR::set_node_attrs(
+      node_attr = "shape", values = shape, nodes = node_ids
+    )
 }
