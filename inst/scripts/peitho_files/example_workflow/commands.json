@@ -2,10 +2,10 @@
   {
     "entry": 1,
     "name": "Split",
-    "label": "Split empire \n addresses",
+    "label": "Split addresses",
     "comments": "",
     "command": "simple_split",
-    "args": "x=@#*I*#@web_addresses_1@#*I*#@, split=\\n",
+    "args": "x=@#*I*#@empire_inputs@#*I*#@, split=\\n",
     "loop": "no",
     "prompt": ""
   },
@@ -52,10 +52,10 @@
   {
     "entry": 6,
     "name": "Split_2",
-    "label": "Split stat \n addresses",
+    "label": "Split addresses",
     "comments": "",
     "command": "simple_split",
-    "args": "x=@#*I*#@web_addresses_2@#*I*#@, split=\\n",
+    "args": "x=@#*I*#@statistics_inputs@#*I*#@, split=\\n",
     "loop": "no",
     "prompt": ""
   },

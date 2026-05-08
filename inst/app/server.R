@@ -144,5 +144,6 @@ shinyServer(function(input, output, session) {
 
   workflow_table_server("wf_table", wf)
   inputs_table_server("inputs_table", wf)
+  workflow_graph_server("graph", wf)
   results_table_server("results_table", wf_run)
 })

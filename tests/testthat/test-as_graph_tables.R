@@ -54,7 +54,7 @@ test_that("as.graph_tables creates correct nodes for steps", {
 
   # Check nodes dataframe structure and content
   expect_equal(nrow(nodes), 2)
-  expect_named(nodes, c("id", "name", "label", "command", "entry", "order"))
+  expect_named(nodes, c("id", "name", "label", "command", "entry", "order", "type"))
 
   # Check node data
   expect_equal(nodes$id, c("1", "2"))
@@ -63,6 +63,7 @@ test_that("as.graph_tables creates correct nodes for steps", {
   expect_equal(nodes$command, c("identity", "identity"))
   expect_equal(unname(nodes$entry), c(1L, 2L))
   expect_equal(nodes$order, c(1L, 2L))
+  expect_equal(nodes$type, c("step", "step"))
 })
 
 test_that("as.graph_tables creates empty edges for independent steps", {
@@ -270,7 +271,7 @@ test_that("as.graph_tables returns tibbles with expected classes", {
   expect_equal(typeof(result$edges$rel), "character")
 })
 
-test_that("as.graph_tables edge rel values are always 'required_steps'", {
+test_that("as.graph_tables edge rel values are 'required_steps' for step dependencies", {
   s1 <- mk_step_with_deps(1L, "Alpha")
   s2 <- mk_step_with_deps(2L, "Beta", required_steps = c("Alpha"))
   s3 <- mk_step_with_deps(3L, "Gamma", required_steps = c("Alpha", "Beta"))
@@ -284,6 +285,66 @@ test_that("as.graph_tables edge rel values are always 'required_steps'", {
 
   result <- as.graph_tables(wf)
 
-  # All rel values should be "required_steps"
+  # All rel values should be "required_steps" (since no inputs)
   expect_true(all(result$edges$rel == "required_steps"))
+})
+
+test_that("as.graph_tables includes input nodes and required_inputs edges", {
+  # Create a helper to set required_inputs
+  mk_step_with_inputs <- function(entry, name, required_inputs = character(0), required_steps = character(0)) {
+    step <- new_workflowstep(
+      entry = entry,
+      command = "identity",
+      name = name,
+      label = name,
+      comments = paste("Step", name),
+      args = "",
+      loop = "no"
+    )
+    step$required_inputs <- required_inputs
+    step$required_steps <- required_steps
+    step
+  }
+
+  s1 <- mk_step_with_inputs(1L, "Init", required_inputs = c("input1"))
+  s2 <- mk_step_with_inputs(2L, "Process", required_inputs = c("input1", "input2"), required_steps = "Init")
+
+  wf <- suppressWarnings(new_workflow(
+    name = "With Inputs",
+    steps = list(s1, s2),
+    input_list = list(input1 = "value1", input2 = "value2"),
+    use_peitho_folder = FALSE
+  ))
+
+  result <- as.graph_tables(wf)
+  nodes <- result$nodes
+  edges <- result$edges
+
+  # Should have 4 nodes: 2 steps + 2 inputs
+  expect_equal(nrow(nodes), 4)
+
+  # Check for step nodes
+  step_nodes <- nodes[nodes$type == "step", ]
+  expect_equal(nrow(step_nodes), 2)
+  expect_equal(step_nodes$name, c("Init", "Process"))
+
+  # Check for input nodes
+  input_nodes <- nodes[nodes$type == "input", ]
+  expect_equal(nrow(input_nodes), 2)
+  expect_setequal(input_nodes$name, c("input1", "input2"))
+  expect_equal(input_nodes$id, c("input_input1", "input_input2"))
+  expect_true(all(is.na(input_nodes$command)))
+
+  # Should have 4 edges: 1 required_inputs (Init) + 2 required_inputs (Process) + 1 required_steps
+  expect_equal(nrow(edges), 4)
+
+  # Check edge types
+  required_input_edges <- edges[edges$rel == "required_inputs", ]
+  required_step_edges <- edges[edges$rel == "required_steps", ]
+  expect_equal(nrow(required_input_edges), 3)
+  expect_equal(nrow(required_step_edges), 1)
+
+  # Verify input edges are from input nodes to step nodes
+  expect_true(all(required_input_edges$from %in% input_nodes$id))
+  expect_true(all(required_input_edges$to %in% step_nodes$id))
 })
