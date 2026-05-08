@@ -414,3 +414,29 @@ workflow_steps_from_files <- function(
   # return all steps as list
   steps
 }
+
+#' Workflow example from package files
+#'
+#' @param name Name for the workflow.
+#' @return A `workflow` object.
+#' @export
+workflow_example <- function(name = "example_workflow") {
+  cfg <- config()
+  example_dir <- system.file(cfg$pathToFolder, package = "PEITHO")
+
+  if (!nzchar(example_dir) || !dir.exists(example_dir)) {
+    stop(paste0(
+      "Example workflow folder not found in package 'PEITHO': ",
+      cfg$pathToFolder
+    ))
+
+    return()
+  }
+
+  new_workflow(
+    name = name,
+    workflow_file_paths = PEITHO:::workflow_file_paths(
+      path = example_dir
+    )
+  )
+}
