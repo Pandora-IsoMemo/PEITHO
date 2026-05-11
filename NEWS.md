@@ -1,3 +1,8 @@
+# PEITHO 26.05.1
+
+## Updates
+- Updated the “Folders & Files” module to make it easier to manage custom workflow functions by adding one-click actions to copy defaults into the workflow or reset the workflow functions back to defaults.
+
 # PEITHO 26.05.0
 
 ## New Features
