@@ -425,12 +425,13 @@ workflow_example <- function(name = "example_workflow") {
   example_dir <- system.file(cfg$pathToFolder, package = "PEITHO")
 
   if (!nzchar(example_dir) || !dir.exists(example_dir)) {
-    stop(paste0(
-      "Example workflow folder not found in package 'PEITHO': ",
-      cfg$pathToFolder
-    ))
-
-    return()
+    stop(
+      paste0(
+        "Example workflow folder not found in package 'PEITHO': ",
+        cfg$pathToFolder
+      ),
+      call. = FALSE
+    )
   }
 
   new_workflow(
