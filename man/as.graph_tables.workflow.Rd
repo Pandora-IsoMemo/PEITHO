@@ -13,9 +13,9 @@
 }
 \value{
 A list containing graph tables representing the workflow structure.
-  `nodes` is a tibble with columns: `id`, `name`, `label`, `command`, `entry`, 
+  `nodes` is a data.frame with columns: `id`, `name`, `label`, `command`, `entry`, 
   `order`, `type` (either "step" or "input").
-  `edges` is a tibble with columns: `from`, `to`, `rel` (either 
+  `edges` is a data.frame with columns: `from`, `to`, `rel` (either 
   "required_steps" or "required_inputs").
 }
 \description{

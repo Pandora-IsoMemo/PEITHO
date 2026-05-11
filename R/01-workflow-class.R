@@ -211,36 +211,10 @@ as.commands_record.workflow <- function(x, ...) {
   lapply(x$steps, as.commands_record.workflowstep)
 }
 
-#' Convert a workflow to graph tables
-#'
-#' This method converts a `workflow` object into graph tables (nodes and edges)
-#' for visualization or analysis. It extracts relevant information from each
-#' workflow step to create a structured representation of the workflow's
-#' structure and dependencies.
-#' Nodes represent individual steps with their attributes, while edges
-#' represent the dependencies between steps based on the `required_steps` field.
-#' Additionally, input nodes are created from the workflow's `input_list`, 
-#' and edges representing `required_inputs` relationships are added.
-#'
-#' @param x The workflow object to convert.
-#' @param ... Additional arguments passed to methods.
-#' @return A list containing graph tables representing the workflow structure.
-#'   `nodes` is a tibble with columns: `id`, `name`, `label`, `command`, `entry`, 
-#'   `order`, `type` (either "step" or "input").
-#'   `edges` is a tibble with columns: `from`, `to`, `rel` (either 
-#'   "required_steps" or "required_inputs").
-#' @export
-as.graph_tables.workflow <- function(x, ...) {
-  steps <- x$steps
-
-  step_names <- vapply(steps, function(s) as.character(s$name), character(1))
-  step_entries <- vapply(steps, function(s) as.integer(s$entry), integer(1))
-  names(step_entries) <- step_names
-
-  # Build step nodes with type = "step"
-  nodes <- data.frame(
+build_step_nodes <- function(steps, step_entries) {
+  data.frame(
     id = as.character(step_entries),
-    name = step_names,
+    name = names(step_entries),
     label = vapply(steps, function(s) as.character(s$label), character(1)),
     command = vapply(steps, function(s) as.character(s$command), character(1)),
     entry = step_entries,
@@ -248,8 +222,9 @@ as.graph_tables.workflow <- function(x, ...) {
     type = "step",
     stringsAsFactors = FALSE
   )
+}
 
-  # Build step → step edges (required_steps)
+build_step_dependencies <- function(steps, step_entries) {
   edge_list <- lapply(steps, function(step) {
     deps <- step$required_steps %||% character(0)
 
@@ -270,25 +245,28 @@ as.graph_tables.workflow <- function(x, ...) {
     )
   })
 
-  edges <- do.call(rbind, edge_list)
+  do.call(rbind, edge_list)
+}
 
-  # Build input nodes from input_list
-  input_names <- names(x$input_list)
-  if (length(input_names) > 0) {
-    input_nodes <- data.frame(
-      id = paste0("input_", input_names),
-      name = input_names,
-      label = input_names,
-      command = NA_character_,
-      entry = NA_integer_,
-      order = NA_integer_,
-      type = "input",
-      stringsAsFactors = FALSE
-    )
-    nodes <- rbind(nodes, input_nodes)
+build_input_nodes <- function(input_list) {
+  input_names <- names(input_list)
+  if (length(input_names) == 0) {
+    return(NULL)
   }
 
-  # Build input → step edges (required_inputs)
+  data.frame(
+    id = paste0("input_", input_names),
+    name = input_names,
+    label = input_names,
+    command = NA_character_,
+    entry = NA_integer_,
+    order = NA_integer_,
+    type = "input",
+    stringsAsFactors = FALSE
+  )
+}
+
+build_input_dependencies <- function(steps) {
   input_edge_list <- lapply(steps, function(step) {
     req_inputs <- step$required_inputs %||% character(0)
 
@@ -305,8 +283,44 @@ as.graph_tables.workflow <- function(x, ...) {
   })
 
   input_edge_list <- Filter(Negate(is.null), input_edge_list)
+  do.call(rbind, input_edge_list)
+}
 
-  input_edges <- do.call(rbind, input_edge_list)
+#' Convert a workflow to graph tables
+#'
+#' This method converts a `workflow` object into graph tables (nodes and edges)
+#' for visualization or analysis. It extracts relevant information from each
+#' workflow step to create a structured representation of the workflow's
+#' structure and dependencies.
+#' Nodes represent individual steps with their attributes, while edges
+#' represent the dependencies between steps based on the `required_steps` field.
+#' Additionally, input nodes are created from the workflow's `input_list`, 
+#' and edges representing `required_inputs` relationships are added.
+#'
+#' @param x The workflow object to convert.
+#' @param ... Additional arguments passed to methods.
+#' @return A list containing graph tables representing the workflow structure.
+#'   `nodes` is a data.frame with columns: `id`, `name`, `label`, `command`, `entry`, 
+#'   `order`, `type` (either "step" or "input").
+#'   `edges` is a data.frame with columns: `from`, `to`, `rel` (either 
+#'   "required_steps" or "required_inputs").
+#' @export
+as.graph_tables.workflow <- function(x, ...) {
+  steps <- x$steps
+
+  step_names <- vapply(steps, function(s) as.character(s$name), character(1))
+  step_entries <- vapply(steps, function(s) as.integer(s$entry), integer(1))
+  names(step_entries) <- step_names
+
+  nodes <- build_step_nodes(steps, step_entries)
+  edges <- build_step_dependencies(steps, step_entries)
+
+  input_nodes <- build_input_nodes(x$input_list)
+  if (!is.null(input_nodes)) {
+    nodes <- rbind(nodes, input_nodes)
+  }
+
+  input_edges <- build_input_dependencies(steps)
 
   if (!is.null(input_edges) && nrow(input_edges) > 0) {
     edges <- rbind(edges, input_edges)
