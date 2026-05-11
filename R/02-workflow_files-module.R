@@ -12,19 +12,61 @@ workflow_files_ui <- function(id, title = "") {
     fluidRow(
       column(
         width = 4,
-        tags$p(
-          "Inspect package defaults and available namespace functions.",
-          class = "text-muted"
+        div(
+          class = "well well-sm",
+          tags$h4(icon("book"), "PEITHO defaults"),
+          tags$p(
+            "Inspect package defaults and copy them into workflow for customization.",
+            class = "text-muted"
+          ),
+          actionButton(
+            ns("show_defaults"),
+            "Show",
+            icon = icon("book"),
+            width = "100%"
+          ),
+          tags$hr(),
+          actionButton(
+            ns("copy_defaults"),
+            "Copy",
+            icon = icon("copy"),
+            class = "btn-danger btn-block"
+          ),
+          tags$p(
+            "Overwrites custom functions in the workflow.",
+            class = "text-danger small"
+          ),
+          actionButton(
+            ns("reset_defaults"),
+            "Reset workflow functions",
+            icon = icon("undo"),
+            class = "btn-danger btn-block"
+          ),
+          tags$p(
+            "Removes custom functions from the workflow and reverts to package defaults.",
+            class = "text-danger small"
+          )
         ),
-        actionButton(ns("show_defaults"), "Show package functions", icon = icon("book")),
-        actionButton(ns("browse_functions"), "Browse available functions", icon = icon("list")),
-        tags$hr(),
-        tags$p(
-          "Browse workflow files.",
-          class = "text-muted"
+
+        div(
+          class = "well well-sm",
+          tags$h4(icon("list"), "All available functions"),
+          tags$p(
+            "Browse all functions available in the current session, including custom workflow functions.",
+            class = "text-muted"
+          ),
+          actionButton(ns("browse_functions"), "Browse functions",
+                       icon = icon("list"),
+                       class = "btn-default btn-block")
         ),
-        htmlOutput(ns("wf_dir")),
-        shinyTree::shinyTree(ns("file_tree"), search = FALSE, theme = "proton")
+
+        div(
+          class = "well well-sm",
+          tags$h4(icon("folder-open"), "Workflow files"),
+          tags$p("Browse files in the current workflow.", class = "text-muted"),
+          htmlOutput(ns("wf_dir")),
+          shinyTree::shinyTree(ns("file_tree"), search = FALSE, theme = "proton")
+        )
       ),
       column(
         width = 8,
@@ -132,6 +174,45 @@ workflow_files_server <- function(id, active_dir) {
         file.access(path, 2) == 0
     }
 
+    get_functions_path <- function(dir_path = active_dir()) {
+      if (is.null(dir_path) || !dir.exists(dir_path)) return(NULL)
+      PEITHO:::workflow_file_paths(path = dir_path)$functions_path
+    }
+
+    write_text_file_utf8 <- function(path, value) {
+      if (is.null(value)) value <- ""
+      lines <- if (identical(value, "")) character(0) else strsplit(value, "\n", fixed = TRUE)[[1]]
+
+      con <- file(path, open = "w", encoding = "UTF-8")
+      on.exit(close(con), add = TRUE)
+      writeLines(lines, con = con)
+    }
+
+    is_functions_file <- function(path) {
+      functions_path <- get_functions_path(dirname(path))
+      if (is.null(functions_path)) return(FALSE)
+
+      identical(
+        normalizePath(path, winslash = "/", mustWork = TRUE),
+        normalizePath(functions_path, winslash = "/", mustWork = FALSE)
+      )
+    }
+
+    set_functions_saved_status <- function(path) {
+      if (is_running_online()) {
+        status_msg(sprintf(
+          "Saved %s. Warning: Running online; skipping loading %s into the environment!",
+          basename(path),
+          basename(path)
+        ))
+      } else {
+        status_msg(sprintf(
+          "Saved %s. Updated custom functions will be reloaded on the next workflow run.",
+          basename(path)
+        ))
+      }
+    }
+
     output$wf_dir <- renderUI({
       dir_path <- active_dir()
       if (is.null(dir_path) || !dir.exists(dir_path)) {
@@ -212,7 +293,7 @@ workflow_files_server <- function(id, active_dir) {
       dir_path <- active_dir()
 
       if (!is.null(dir_path) && dir.exists(dir_path)) {
-        functions_path <- PEITHO:::workflow_file_paths(path = dir_path)$functions_path
+        functions_path <- get_functions_path(dir_path)
 
         if (file_nonempty(functions_path)) {
           extra_env <- tryCatch(
@@ -293,38 +374,62 @@ workflow_files_server <- function(id, active_dir) {
       req(file.exists(path), !dir.exists(path))
 
       value <- input$file_editor
-      if (is.null(value)) value <- ""
-      lines <- strsplit(value, "\n", fixed = TRUE)[[1]]
 
       tryCatch({
-        con <- file(path, open = "w", encoding = "UTF-8")
-        on.exit(close(con), add = TRUE)
-        writeLines(lines, con = con)
+        write_text_file_utf8(path, value)
 
-        functions_path <- PEITHO:::workflow_file_paths(path = dirname(path))$functions_path
-        is_functions_file <- identical(
-          normalizePath(path, winslash = "/", mustWork = TRUE),
-          normalizePath(functions_path, winslash = "/", mustWork = FALSE)
-        )
-
-        if (is_functions_file) {
-          if (is_running_online()) {
-            status_msg(sprintf(
-              "Saved %s. Warning: Running online; skipping loading %s into the environment!",
-              basename(path),
-              basename(path)
-            ))
-          } else {
-            status_msg(sprintf(
-              "Saved %s. Updated custom functions will be reloaded on the next workflow run.",
-              basename(path)
-            ))
-          }
+        if (is_functions_file(path)) {
+          set_functions_saved_status(path)
         } else {
           status_msg(sprintf("Saved %s", basename(path)))
         }
       }, error = function(e) {
         status_msg(paste("Could not save file:", conditionMessage(e)))
+      })
+    })
+
+    observeEvent(input$copy_defaults, {
+      req(active_dir(), dir.exists(active_dir()))
+
+      defaults_text <- tryCatch(
+        PEITHO:::default_workflow_functions_text(),
+        error = function(e) {
+          status_msg(paste("Could not load package defaults:", conditionMessage(e)))
+          NULL
+        }
+      )
+      req(!is.null(defaults_text))
+
+      functions_path <- get_functions_path()
+      req(!is.null(functions_path))
+
+      tryCatch({
+        write_text_file_utf8(functions_path, defaults_text)
+
+        selected_file(functions_path)
+        selected_label(NULL)
+        updateTextAreaInput(session, "file_editor", value = defaults_text)
+        set_functions_saved_status(functions_path)
+      }, error = function(e) {
+        status_msg(paste("Could not copy defaults:", conditionMessage(e)))
+      })
+    })
+
+    observeEvent(input$reset_defaults, {
+      req(active_dir(), dir.exists(active_dir()))
+
+      functions_path <- get_functions_path()
+      req(!is.null(functions_path))
+
+      tryCatch({
+        write_text_file_utf8(functions_path, "")
+
+        selected_file(functions_path)
+        selected_label(NULL)
+        updateTextAreaInput(session, "file_editor", value = "")
+        status_msg("Cleared functions.R. Workflow will use package defaults on next run.")
+      }, error = function(e) {
+        status_msg(paste("Could not clear functions.R:", conditionMessage(e)))
       })
     })
   })
