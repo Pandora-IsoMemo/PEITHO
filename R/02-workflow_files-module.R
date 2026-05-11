@@ -12,19 +12,61 @@ workflow_files_ui <- function(id, title = "") {
     fluidRow(
       column(
         width = 4,
-        tags$p(
-          "Inspect package defaults and available namespace functions.",
-          class = "text-muted"
+        div(
+          class = "well well-sm",
+          tags$h4(icon("book"), "PEITHO defaults"),
+          tags$p(
+            "Inspect package defaults and copy them into workflow for customization.",
+            class = "text-muted"
+          ),
+          actionButton(
+            ns("show_defaults"),
+            "Show",
+            icon = icon("book"),
+            width = "100%"
+          ),
+          tags$hr(),
+          actionButton(
+            ns("copy_defaults"),
+            "Copy",
+            icon = icon("copy"),
+            class = "btn-danger btn-block"
+          ),
+          tags$p(
+            "Overwrites custom functions in the workflow.",
+            class = "text-danger small"
+          ),
+          actionButton(
+            ns("reset_defaults"),
+            "Reset workflow functions",
+            icon = icon("undo"),
+            class = "btn-danger btn-block"
+          ),
+          tags$p(
+            "Deletes custom functions and reverts to package defaults.",
+            class = "text-danger small"
+          )
         ),
-        actionButton(ns("show_defaults"), "Show package functions", icon = icon("book")),
-        actionButton(ns("browse_functions"), "Browse available functions", icon = icon("list")),
-        tags$hr(),
-        tags$p(
-          "Browse workflow files.",
-          class = "text-muted"
+
+        div(
+          class = "well well-sm",
+          tags$h4(icon("list"), "All available functions"),
+          tags$p(
+            "Browse all functions available in the current session, including custom workflow functions.",
+            class = "text-muted"
+          ),
+          actionButton(ns("browse_functions"), "Browse functions",
+                       icon = icon("list"),
+                       class = "btn-default btn-block")
         ),
-        htmlOutput(ns("wf_dir")),
-        shinyTree::shinyTree(ns("file_tree"), search = FALSE, theme = "proton")
+
+        div(
+          class = "well well-sm",
+          tags$h4(icon("folder-open"), "Workflow files"),
+          tags$p("Browse files in the current workflow.", class = "text-muted"),
+          htmlOutput(ns("wf_dir")),
+          shinyTree::shinyTree(ns("file_tree"), search = FALSE, theme = "proton")
+        )
       ),
       column(
         width = 8,
