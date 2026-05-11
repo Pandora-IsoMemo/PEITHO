@@ -9,6 +9,27 @@ get_field <- function(x, field, ...) {
   UseMethod("get_field")
 }
 
+#' Convert an object to commands.json record format
+#'
+#' Generic method to create records matching the commands.json schema.
+#' @param x The object to convert.
+#' @param ... Additional arguments passed to methods.
+#' @export
+as.commands_record <- function(x, ...) {
+  UseMethod("as.commands_record")
+}
+
+#' Convert a workflow to graph tables
+#'
+#' Generic method to convert a workflow object into graph tables for visualization or analysis.
+#' @param x The workflow object to convert.
+#' @param ... Additional arguments passed to methods.
+#' @return A list containing graph tables representing the workflow structure.
+#' @export
+as.graph_tables <- function(x, ...) {
+  UseMethod("as.graph_tables")
+}
+
 #' Update an object
 #'
 #' Generic update method for workflow-related objects.
@@ -27,16 +48,6 @@ update <- function(x, ...) {
 #' @export
 update_input_list <- function(x, ...) {
   UseMethod("update_input_list")
-}
-
-#' Convert an object to commands.json record format
-#'
-#' Generic method to create records matching the commands.json schema.
-#' @param x The object to convert.
-#' @param ... Additional arguments passed to methods.
-#' @export
-as.commands_record <- function(x, ...) {
-  UseMethod("as.commands_record")
 }
 
 #' Add a step to a workflow
@@ -64,6 +75,18 @@ remove_step <- function(x, position, ...) {
   UseMethod("remove_step")
 }
 
+#' Save an object as a ZIP file
+#'
+#' This is a generic function to save various objects as ZIP files.
+#' @param x The object to save.
+#' @param file The path to the output ZIP file.
+#' @param ... Additional arguments (not used).
+#' @return None. The object is saved to the specified ZIP file.
+#' @export
+save_as_zip <- function(x, file, ...) {
+  UseMethod("save_as_zip")
+}
+
 #' Run a workflow step
 #'
 #' This is a generic function to run a workflow step or an entire workflow.
@@ -75,16 +98,4 @@ remove_step <- function(x, position, ...) {
 #' @export
 run <- function(x, state, ...) {
   UseMethod("run")
-}
-
-#' Save an object as a ZIP file
-#'
-#' This is a generic function to save various objects as ZIP files.
-#' @param x The object to save.
-#' @param file The path to the output ZIP file.
-#' @param ... Additional arguments (not used).
-#' @return None. The object is saved to the specified ZIP file.
-#' @export
-save_as_zip <- function(x, file, ...) {
-  UseMethod("save_as_zip")
 }

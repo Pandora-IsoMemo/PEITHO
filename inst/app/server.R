@@ -74,29 +74,10 @@ shinyServer(function(input, output, session) {
     cleanup_active_dir(session$ns("example"))
 
     example_dir <- system.file(cfg$pathToFolder, package = "PEITHO")
-    if (!nzchar(example_dir) || !dir.exists(example_dir)) {
-      shiny::showNotification(
-        paste0(
-          "Example workflow folder not found in package 'PEITHO': ",
-          cfg$pathToFolder
-        ),
-        type = "error"
-      )
-      PEITHO:::logDebug(
-        "%s: Example workflow folder not found in package 'PEITHO': %s",
-        session$ns("example"), cfg$pathToFolder
-      )
-      return()
-    }
     active_temp_dir(example_dir)
     active_temp_dir_is_managed(FALSE)
 
-    example_wf <- new_workflow(
-      name = "example_workflow",
-      workflow_file_paths = PEITHO:::workflow_file_paths(
-        path = example_dir
-      )
-    ) |>
+    example_wf <- workflow_example() |>
       shinyTools::shinyTryCatch(
         errorTitle = "Error creating workflow",
         warningTitle = "Warning creating workflow"
@@ -163,5 +144,6 @@ shinyServer(function(input, output, session) {
 
   workflow_table_server("wf_table", wf)
   inputs_table_server("inputs_table", wf)
+  workflow_graph_server("graph", wf)
   results_table_server("results_table", wf_run)
 })

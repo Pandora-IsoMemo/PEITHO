@@ -1,3 +1,9 @@
+# -------------------------------------------------------------------------
+# Workflow class constructors and core helpers
+# -------------------------------------------------------------------------
+# This file defines workflow object constructors and shared helpers for
+# creating file-backed workflows and managing their core metadata.
+
 # ---- workflow class ----
 
 #' Helper to get file paths for PEITHO workflow files
@@ -205,6 +211,124 @@ as.commands_record.workflow <- function(x, ...) {
   lapply(x$steps, as.commands_record.workflowstep)
 }
 
+build_step_nodes <- function(steps, step_entries) {
+  data.frame(
+    id = as.character(step_entries),
+    name = names(step_entries),
+    label = vapply(steps, function(s) as.character(s$label), character(1)),
+    command = vapply(steps, function(s) as.character(s$command), character(1)),
+    entry = step_entries,
+    order = seq_along(steps),
+    type = "step",
+    stringsAsFactors = FALSE
+  )
+}
+
+build_step_dependencies <- function(steps, step_entries) {
+  edge_list <- lapply(steps, function(step) {
+    deps <- step$required_steps %||% character(0)
+
+    if (length(deps) == 0) {
+      return(data.frame(
+        from = character(0),
+        to = character(0),
+        rel = character(0),
+        stringsAsFactors = FALSE
+      ))
+    }
+
+    data.frame(
+      from = as.character(unname(step_entries[deps])),
+      to = as.character(step$entry),
+      rel = "required_steps",
+      stringsAsFactors = FALSE
+    )
+  })
+
+  do.call(rbind, edge_list)
+}
+
+build_input_nodes <- function(input_list) {
+  input_names <- names(input_list)
+  if (length(input_names) == 0) {
+    return(NULL)
+  }
+
+  data.frame(
+    id = paste0("input_", input_names),
+    name = input_names,
+    label = input_names,
+    command = NA_character_,
+    entry = NA_integer_,
+    order = NA_integer_,
+    type = "input",
+    stringsAsFactors = FALSE
+  )
+}
+
+build_input_dependencies <- function(steps) {
+  input_edge_list <- lapply(steps, function(step) {
+    req_inputs <- step$required_inputs %||% character(0)
+
+    if (length(req_inputs) == 0) {
+      return(NULL)
+    }
+
+    data.frame(
+      from = paste0("input_", req_inputs),
+      to = as.character(step$entry),
+      rel = "required_inputs",
+      stringsAsFactors = FALSE
+    )
+  })
+
+  input_edge_list <- Filter(Negate(is.null), input_edge_list)
+  do.call(rbind, input_edge_list)
+}
+
+#' Convert a workflow to graph tables
+#'
+#' This method converts a `workflow` object into graph tables (nodes and edges)
+#' for visualization or analysis. It extracts relevant information from each
+#' workflow step to create a structured representation of the workflow's
+#' structure and dependencies.
+#' Nodes represent individual steps with their attributes, while edges
+#' represent the dependencies between steps based on the `required_steps` field.
+#' Additionally, input nodes are created from the workflow's `input_list`, 
+#' and edges representing `required_inputs` relationships are added.
+#'
+#' @param x The workflow object to convert.
+#' @param ... Additional arguments passed to methods.
+#' @return A list containing graph tables representing the workflow structure.
+#'   `nodes` is a data.frame with columns: `id`, `name`, `label`, `command`, `entry`, 
+#'   `order`, `type` (either "step" or "input").
+#'   `edges` is a data.frame with columns: `from`, `to`, `rel` (either 
+#'   "required_steps" or "required_inputs").
+#' @export
+as.graph_tables.workflow <- function(x, ...) {
+  steps <- x$steps
+
+  step_names <- vapply(steps, function(s) as.character(s$name), character(1))
+  step_entries <- vapply(steps, function(s) as.integer(s$entry), integer(1))
+  names(step_entries) <- step_names
+
+  nodes <- build_step_nodes(steps, step_entries)
+  edges <- build_step_dependencies(steps, step_entries)
+
+  input_nodes <- build_input_nodes(x$input_list)
+  if (!is.null(input_nodes)) {
+    nodes <- rbind(nodes, input_nodes)
+  }
+
+  input_edges <- build_input_dependencies(steps)
+
+  if (!is.null(input_edges) && nrow(input_edges) > 0) {
+    edges <- rbind(edges, input_edges)
+  }
+
+  list(nodes = nodes, edges = edges)
+}
+
 step_name_to_position <- function(x, step_name) {
   step_names <- vapply(x$steps, function(s) s$name, character(1))
   match(step_name, step_names)
@@ -235,496 +359,6 @@ extract_step_names <- function(x) {
   # return named vector for selectInput
   step_entries
 }
-
-# -------------------------------------------------------------------------
-# Validation helpers for workflow construction
-# -------------------------------------------------------------------------
-# These helpers centralize validations that were previously inline in new_workflow().
-# Keeping them here makes new_workflow() easier to read, and ensures consistent checks
-# for other constructors/helpers that may create/modify workflows later.
-
-validate_workflow_file_paths <- function(workflow_file_paths) {
-  # Minimal structural validation; actual file existence is checked in workflow_steps_from_files()
-  if (!is.list(workflow_file_paths)) {
-    stop("'workflow_file_paths' must be a list.", call. = FALSE)
-  }
-  if (length(workflow_file_paths) == 0L) {
-    return(invisible(TRUE))
-  }
-  if (is.null(workflow_file_paths$path_to_folder) || !nzchar(workflow_file_paths$path_to_folder)) {
-    stop("'workflow_file_paths$path_to_folder' must be a non-empty string.", call. = FALSE)
-  }
-
-  if (!dir.exists(workflow_file_paths$path_to_folder)) {
-    stop("Argument 'path_to_folder' does not exist.", call. = FALSE)
-  }
-  # add check if functions script is not empty here?
-  invisible(TRUE)
-}
-
-validate_steps_class <- function(steps, error_on_warn = TRUE) {
-  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
-    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
-  }
-  if (!is.list(steps)) {
-    msg <- "'steps' must be a list."
-    if (error_on_warn) {
-      stop(msg, call. = FALSE)
-    }
-    warning(msg, immediate. = TRUE, call. = FALSE)
-    return(invisible(TRUE))
-  }
-  if (length(steps) == 0L) return(invisible(TRUE))
-
-  ok <- vapply(steps, inherits, logical(1), what = "workflowstep")
-  if (!all(ok)) {
-    msg <- "All elements of 'steps' must be of class 'workflowstep'."
-    if (error_on_warn) {
-      stop(msg, call. = FALSE)
-    }
-    warning(msg, immediate. = TRUE, call. = FALSE)
-  }
-  invisible(TRUE)
-}
-
-validate_unique_steps <- function(
-  steps,
-  id_fields = c("entry", "name"),
-  error_on_warn = TRUE
-) {
-  if (!length(steps)) return(invisible(TRUE))
-  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
-    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
-  }
-
-  for (field in id_fields) {
-    vals <- vapply(steps, function(s) as.character(s[[field]]), character(1))
-    if (anyDuplicated(vals)) {
-      dup <- unique(vals[duplicated(vals)])
-      msg <- sprintf(
-        "Workflow has duplicate step %s(s): %s",
-        field,
-        paste(dup, collapse = ", ")
-      )
-      if (error_on_warn) {
-        stop(msg, call. = FALSE)
-      }
-      warning(msg, immediate. = TRUE, call. = FALSE)
-    }
-  }
-  invisible(TRUE)
-}
-
-validate_numeric_entries <- function(steps, error_on_warn = TRUE) {
-  if (!length(steps)) return(invisible(TRUE))
-  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
-    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
-  }
-  entries <- vapply(steps, function(s) as.integer(s$entry), integer(1))
-  if (any(is.na(entries))) {
-    msg <- "All steps must have a numeric 'entry' field."
-    if (error_on_warn) {
-      stop(msg, call. = FALSE)
-    }
-    warning(msg, immediate. = TRUE, call. = FALSE)
-  }
-  invisible(TRUE)
-}
-
-validate_required_inputs <- function(steps, input_list, error_on_warn = TRUE) {
-  if (!length(steps)) return(invisible(TRUE))
-  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
-    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
-  }
-  # extract required_fields and check if exist
-  required_inputs <- unique(unlist(lapply(steps, function(s) {
-    x <- s[["required_inputs"]]
-    if (!is.character(x)) {
-      msg <- sprintf("'required_inputs' in step '%s' must be a character vector.", s$name)
-      if (error_on_warn) {
-        stop(msg, call. = FALSE)
-      }
-      warning(msg, immediate. = TRUE, call. = FALSE)
-    }
-    x
-  }), use.names = FALSE))
-
-  # check if required inputs exist in input_list
-  missing_inputs <- setdiff(required_inputs, names(input_list))
-  if (length(missing_inputs)) {
-    msg <- sprintf("Missing required inputs: %s", paste(missing_inputs, collapse = ", "))
-    if (error_on_warn) {
-      stop(msg, call. = FALSE)
-    }
-    warning(msg, immediate. = TRUE, call. = FALSE)
-  }
-}
-
-validate_required_steps <- function(steps, error_on_warn = TRUE) {
-  if (!length(steps)) return(invisible(TRUE))
-  if (!is.logical(error_on_warn) || length(error_on_warn) != 1L) {
-    stop("'error_on_warn' must be a single logical value.", call. = FALSE)
-  }
-  required_steps <- unique(unlist(lapply(steps, function(s) {
-    x <- s[["required_steps"]]
-    if (!is.character(x)) {
-      msg <- sprintf("'required_steps' in step '%s' must be a character vector.", s$name)
-      if (error_on_warn) {
-        stop(msg, call. = FALSE)
-      }
-      warning(msg, immediate. = TRUE, call. = FALSE)
-    }
-    x
-  }), use.names = FALSE))
-
-  # check if required steps exist in steps
-  step_names <- vapply(steps, function(s) s$name, character(1))
-  missing_steps <- setdiff(required_steps, step_names)
-  if (length(missing_steps)) {
-    msg <- sprintf("Missing required steps: %s", paste(missing_steps, collapse = ", "))
-    if (error_on_warn) {
-      stop(msg, call. = FALSE)
-    }
-    warning(msg, immediate. = TRUE, call. = FALSE)
-  }
-}
-
-validate_current_index <- function(current, n_steps) {
-  if (is.null(current)) {
-    return(if (n_steps) 1L else NA_integer_)
-  }
-  if (n_steps == 0L) return(NA_integer_)
-
-  current <- as.integer(current)
-  if (is.na(current)) return(NA_integer_)
-
-  # clamp to [1, n_steps]
-  max(1L, min(current, n_steps))
-}
-
-validate_workflow <- function(x, error_on_warn = TRUE) {
-  validate_unique_steps(x$steps, error_on_warn = error_on_warn)
-  validate_numeric_entries(x$steps, error_on_warn = error_on_warn)
-  validate_required_inputs(x$steps, x$input_list, error_on_warn = error_on_warn)
-  validate_required_steps(x$steps, error_on_warn = error_on_warn)
-}
-
-get_warn_on_validation <- function(dots, default = FALSE) {
-  if (!is.list(dots)) {
-    stop("'dots' must be a list.", call. = FALSE)
-  }
-  if (!is.logical(default) || length(default) != 1L) {
-    stop("'default' must be a single logical value.", call. = FALSE)
-  }
-
-  if ("warn_on_validation" %in% names(dots)) {
-    return(isTRUE(dots$warn_on_validation))
-  }
-  default
-}
-
-validate_workflow_with_policy <- function(x, warn_on_validation = FALSE) {
-  if (!is.logical(warn_on_validation) || length(warn_on_validation) != 1L) {
-    stop("'warn_on_validation' must be a single logical value.", call. = FALSE)
-  }
-
-  if (warn_on_validation) {
-    validate_workflow(x, error_on_warn = FALSE)
-  } else {
-    suppressWarnings(validate_workflow(x, error_on_warn = FALSE))
-  }
-  invisible(TRUE)
-}
-
-# -------------------------------------------------------------------------
-# Save/load workflow as ZIP file
-# -------------------------------------------------------------------------
-
-#' Save workflow as a ZIP file
-#'
-#' @param x A `workflow` object.
-#' @param file Path to the output ZIP file.
-#' @param ... Additional arguments (not used).
-#' @export
-save_as_zip.workflow <- function(
-  x,
-  file,
-  ...
-) {
-  DataTools::build_download_zip(
-    zipfile = file,
-    package_name = "PEITHO",
-    include_paths = c(
-      x$workflow_file_paths$inputs_path,
-      x$workflow_file_paths$commands_path,
-      x$workflow_file_paths$results_path,
-      x$workflow_file_paths$functions_path
-    ),
-    include_root = x$workflow_file_paths$path_to_folder
-  )
-}
-
-#' Import workflow from a ZIP file
-#'
-#' @param zipfile Path to the input ZIP file.
-#' @param extract_dir Directory to extract the workflow files to.
-#' @return A `workflow` object created from the extracted files.
-#' @export
-import_workflow <- function(
-  zipfile,
-  extract_dir
-) {
-  DataTools::import_bundle_zip(
-    zipfile = zipfile,
-    extract_dir = extract_dir,
-    keep_dir = TRUE
-  )
-
-  PEITHO::new_workflow(
-    workflow_file_paths = workflow_file_paths(path = extract_dir)
-  )
-}
-
-# Accessor functions (some will be added later) ------------------------
-
-#' Update a workflow step with a new value
-#'
-#' This function updates a specific field of a `workflowstep` object with a new value. It is used
-#' to modify step details such as name, label, comments, command, parameters, or loop settings.
-#'
-#' @param x A `workflow` object to update.
-#' @param step The index of the step to update.
-#' @param value The new value to assign to the specified field.
-#' @param field The name of the field to update (one of "name", "label", "comments", "command",
-#'  "args", "loop")
-#' @param ... Additional arguments (not used).
-#' @return The updated `workflow` object.
-#' @export
-update.workflow <- function(x, step, field, value, ...) {
-  dots <- list(...)
-  warn_on_validation <- get_warn_on_validation(dots, default = FALSE)
-
-  # pass field & value NOT a whole step -> we need to update the wf object AND the commands json
-  # get commands file path
-  wf_file_paths <- x$workflow_file_paths
-  # update the steps
-  updated_step <- update(x$steps[[step]], wf_file_paths, field = field, value = value,  ...)
-  x$steps[[step]] <- updated_step
-  # validate updated workflow
-  validate_workflow_with_policy(x, warn_on_validation = warn_on_validation)
-  # return updated workflow
-  x
-}
-
-#' Update the input list of a workflow
-#'
-#' This method updates the `input_list` of a `workflow` object and optionally writes the
-#' updated list to the corresponding inputs file if the workflow is file-backed.
-#'
-#' @param x The `workflow` object to update.
-#' @param new_list A named list of input values to update in the workflow.
-#' @param write_file Logical; if `TRUE`, the updated input list will be written to the
-#'  inputs file if the workflow has associated file paths.
-#' @param ... Additional arguments (not used).
-#' @return The updated `workflow` object with the new input list and optionally updated parameters.
-#' @export
-update_input_list.workflow <- function(
-  x,
-  new_list,
-  write_file = TRUE,
-  ...
-) {
-  if (!is.list(new_list)) {
-    stop("'new_list' must be a list.", call. = FALSE)
-  }
-
-  # 1) update in-memory
-  x$input_list <- new_list
-
-  # 2) persist to inputs file (if file-backed)
-  if (write_file && length(x$workflow_file_paths)) {
-    in_path <- x$workflow_file_paths$inputs_path
-    if (!is.null(in_path) && nzchar(in_path)) {
-      jsonlite::write_json(new_list, in_path, auto_unbox = TRUE, pretty = TRUE)
-    }
-  }
-
-  x
-}
-
-#' Add a new step to the workflow
-#'
-#' This method adds a new `workflowstep` to the `steps` list of a `workflow` object at a specified
-#' position. It also performs validation after adding the step and updates the current index and
-#' entries of all steps to maintain consistency.
-#'
-#' @param x The `workflow` object to update.
-#' @param new_step A `workflowstep` object to add to the workflow.
-#' @param position An integer index specifying where to insert the new step (default: at the end
-#'  of the steps list).
-#' @param ... Additional arguments (not used).
-#' @return The updated `workflow` object with the new step added.
-#' @export
-add_step.workflow <- function(x, new_step, position = length(x$steps) + 1L, ...) {
-  if (!inherits(new_step, "workflowstep")) {
-    stop("'new_step' must be of class 'workflowstep'.", call. = FALSE)
-  }
-  position <- as.integer(position)
-  if (position < 1L || position > length(x$steps) + 1L) {
-    stop("Position must be between 1 and ", length(x$steps) + 1L, ".", call. = FALSE)
-  }
-  dots <- list(...)
-  warn_on_validation <- get_warn_on_validation(dots, default = FALSE)
-
-  x$steps <- append(x$steps, list(new_step), after = position - 1L)
-  # update entries of all steps to maintain numeric order
-  for (i in seq_along(x$steps)) {
-    x$steps[[i]]$entry <- i
-  }
-  # validate workflow after adding step
-  validate_workflow_with_policy(x, warn_on_validation = warn_on_validation)
-
-  # update current index if needed
-  if (is.na(x$current)) {
-    x$current <- position
-  } else if (position <= x$current) {
-    x$current <- x$current + 1L
-  }
-
-  # update the commands.json (only if the workflow is file-backed)
-  if (length(x$workflow_file_paths) && !is.null(x$workflow_file_paths$commands_path)) {
-    updated_commands <- as.commands_record(x)
-
-    write_json(
-      updated_commands,
-      path = x$workflow_file_paths$commands_path,
-      auto_unbox = TRUE,
-      pretty = TRUE
-    )
-  }
-
-  # return updated workflow
-  x
-}
-
-#' Remove a step from the workflow
-#'
-#' This method removes a `workflowstep` from the `steps` list of a `workflow` object at a specified
-#' position. It also performs validation after removing the step and updates the current index and
-#' entries of all steps to maintain consistency.
-#'
-#' @param x The `workflow` object to update.
-#' @param position An integer index specifying which step to remove.
-#' @param ... Additional arguments (not used).
-#' @return The updated `workflow` object with the specified step removed.
-#' @export
-remove_step.workflow <- function(x, position, ...) {
-  position <- as.integer(position)
-  if (position < 1L || position > length(x$steps)) {
-    stop("Step index must be between 1 and ", length(x$steps), ".", call. = FALSE)
-  }
-  dots <- list(...)
-  warn_on_validation <- get_warn_on_validation(dots, default = FALSE)
-
-  x$steps <- x$steps[-position]
-  # validate workflow after removing step
-  validate_workflow_with_policy(x, warn_on_validation = warn_on_validation)
-  # update current index if needed
-  if (!is.na(x$current)) {
-    if (x$current == position) {
-      x$current <- NA_integer_
-    } else if (x$current > position) {
-      x$current <- x$current - 1L
-    }
-  }
-  # update entries of all steps to maintain numeric order
-  for (i in seq_along(x$steps)) {
-    x$steps[[i]]$entry <- i
-  }
-
-  # update the commands.json
-  updated_commands <- as.commands_record(x)
-
-  # Only write to disk for file-backed workflows with a valid commands_path
-  if (!is.null(x$workflow_file_paths) &&
-      length(x$workflow_file_paths) > 0L &&
-      !is.null(x$workflow_file_paths$commands_path)) {
-    write_json(
-      updated_commands,
-      path = x$workflow_file_paths$commands_path,
-      auto_unbox = TRUE,
-      pretty = TRUE
-    )
-  }
-
-  # return updated workflow
-  x
-}
-
-# current_step.workflow <- function(x, ...) {
-#   if (length(x$steps) == 0L || is.na(x$current)) {
-#     return(NULL)
-#   }
-#   x$steps[[x$current]]
-# }
-
-# next_step.workflow <- function(x, wrap = FALSE, ...) {
-#   if (length(x$steps) == 0L || is.na(x$current)) {
-#     return(x)
-#   }
-
-#   if (x$current < length(x$steps)) {
-#     x$current <- x$current + 1L
-#   } else if (wrap) {
-#     x$current <- 1L
-#   } # else stay at last
-
-#   x
-# }
-
-# previous_step.workflow <- function(x, wrap = FALSE, ...) {
-#   if (length(x$steps) == 0L || is.na(x$current)) {
-#     return(x)
-#   }
-
-#   if (x$current > 1L) {
-#     x$current <- x$current - 1L
-#   } else if (wrap) {
-#     x$current <- length(x$steps)
-#   } # else stay at first
-
-#   x
-# }
-
-# goto_step.workflow <- function(x, index = NULL, id = NULL, ...) {
-#   if (length(x$steps) == 0L || is.na(x$current)) {
-#     return(x)
-#   }
-
-#   if (!is.null(index)) {
-#     index <- as.integer(index)
-#     if (index >= 1L && index <= length(x$steps)) {
-#       x$current <- index
-#     } else {
-#       PEITHO:::logWarn("Index out of range; 'workflow$current' unchanged.")
-#     }
-#     return(x)
-#   }
-
-#   if (!is.null(id)) {
-#     ids <- vapply(x$steps, function(s) s$entry, integer(1))
-#     idx <- which(ids == as.integer(id))
-#     if (length(idx) == 1L) {
-#       x$current <- idx
-#     } else {
-#       PEITHO:::logWarn("No step with matching 'id'; 'workflow$current' unchanged.")
-#     }
-#     return(x)
-#   }
-
-#   PEITHO:::logWarn("Provide either 'index' or 'id' to goto_step().")
-#   x
-# }
 
 #' Run the entire workflow
 #'
@@ -843,32 +477,3 @@ run.workflow <- function(
   new_workflowrun(x, state, run_id = run_id)
 }
 
-
-# Helpers ----------------------------------------------------------------
-
-update_json_summary <- function(
-  result,
-  idx,
-  path_to_folder,
-  results_file    = "results_summary.json"
-) {
-  # load json
-  results <- read_json_if_exists(path = file.path(path_to_folder, results_file))
-
-  if (idx <= length(results)) {
-    results[[idx]] <- result
-    # remove all later results
-    if (length(results) > idx) {
-      results <- results[1:idx]
-    }
-  } else {
-    results[[length(results) + 1L]] <- result
-  }
-  # write into results file
-  jsonlite::write_json(
-    results,
-    file.path(path_to_folder, results_file),
-    auto_unbox = TRUE,
-    pretty = TRUE
-  )
-}

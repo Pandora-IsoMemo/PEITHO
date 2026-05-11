@@ -42,6 +42,9 @@ jobs:
           use-public-rspm: true
           extra-repositories: https://Pandora-IsoMemo.github.io/drat/
 
+      - name: Install system dependencies
+        run: sudo apt-get install -y libglpk-dev
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck

@@ -5,14 +5,14 @@
     "label": "Split addresses",
     "comments": "",
     "command": "simple_split",
-    "args": "x=@#*I*#@web_addresses_1@#*I*#@, split=\\n",
+    "args": "x=@#*I*#@empire_inputs@#*I*#@, split=\\n",
     "loop": "no",
     "prompt": ""
   },
   {
     "entry": 2,
     "name": "get_content",
-    "label": "get_content",
+    "label": "get content",
     "comments": "",
     "command": "fetch_WebText",
     "args": "url=@#*L*#@Split@#*L*#@[c(1, 3)]",
@@ -22,7 +22,7 @@
   {
     "entry": 3,
     "name": "paste_urls",
-    "label": "paste_urls",
+    "label": "paste urls",
     "comments": "",
     "command": "paste",
     "args": "x=@#*L*#@get_content@#*L*#@, collapse=\\n",
@@ -32,7 +32,7 @@
   {
     "entry": 4,
     "name": "substitute_content",
-    "label": "substitute_content",
+    "label": "substitute content",
     "comments": "",
     "command": "gsub",
     "args": "pattern=\"e\", replacement=\"HALLO\", x=@#*L*#@paste_urls@#*L*#@",
@@ -42,7 +42,7 @@
   {
     "entry": 5,
     "name": "split_content",
-    "label": "split_content",
+    "label": "split content",
     "comments": "",
     "command": "simple_split",
     "args": "x=@#*L*#@substitute_content@#*L*#@, split=\"HALLO\"",
@@ -55,14 +55,14 @@
     "label": "Split addresses",
     "comments": "",
     "command": "simple_split",
-    "args": "x=@#*I*#@web_addresses_2@#*I*#@, split=\\n",
+    "args": "x=@#*I*#@statistics_inputs@#*I*#@, split=\\n",
     "loop": "no",
     "prompt": ""
   },
   {
     "entry": 7,
     "name": "get_content_2",
-    "label": "get_content",
+    "label": "get content",
     "comments": "",
     "command": "fetch_WebText",
     "args": "url=@#*L*#@Split_2@#*L*#@",
@@ -72,7 +72,7 @@
   {
     "entry": 8,
     "name": "paste_urls_2",
-    "label": "paste_urls",
+    "label": "paste urls",
     "comments": "",
     "command": "paste",
     "args": "x=@#*L*#@get_content_2@#*L*#@, collapse=\\n",
@@ -82,7 +82,7 @@
   {
     "entry": 9,
     "name": "paste_content",
-    "label": "paste_content",
+    "label": "paste content",
     "comments": "",
     "command": "paste",
     "args": "x=@#*L*#@substitute_content@#*L*#@, y=@#*L*#@paste_urls_2@#*L*#@, sep=\\n---\\n",
