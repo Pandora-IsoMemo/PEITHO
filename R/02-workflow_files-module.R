@@ -43,7 +43,7 @@ workflow_files_ui <- function(id, title = "") {
             class = "btn-danger btn-block"
           ),
           tags$p(
-            "Deletes custom functions and reverts to package defaults.",
+            "Removes custom function definitions from the workflow and reverts to package defaults.",
             class = "text-danger small"
           )
         ),
