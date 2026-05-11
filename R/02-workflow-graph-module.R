@@ -1,25 +1,30 @@
-#' Workflow graph UI module
-#' This module provides a UI component and server logic to visualize a PEITHO workflow as a graph using DiagrammeR.
+#' Graph UI
 #'
-#' @param id A unique identifier for the module namespace.
-#' @param title The title to display above the graph (default: "Workflow graph").
-#' @param wf A reactive expression that returns the current workflow object to visualize.
-#' @return A Shiny UI component for the workflow graph and server logic to render it.
+#' @param id Module ID
+#' @param title Title to display above the graph (default: "Workflow graph").
+#' @return Shiny UI elements for the workflow graph
 #' @export 
 workflow_graph_ui <- function(id, title = "Workflow graph") {
   ns <- NS(id)
   tagList(
     tags$h4(title),
+    tags$p(
+      paste(
+        "Visualize the workflow structure.",
+        "Nodes represent inputs (circles) and steps (rectangles).",
+        "Edges indicate dependencies between inputs and steps."
+      ),
+      class = "text-muted"
+    ),
     DiagrammeR::grVizOutput(ns("graph"), height = "600px")
   )
 }
 
-#' Workflow graph server module
-#' This module renders a PEITHO workflow as a graph using DiagrammeR. It listens for changes to the workflow object and updates the graph accordingly.
+#' Graph Server
 #'
-#' @param id A unique identifier for the module namespace.
-#' @param wf A reactive expression that returns the current workflow object to visualize.
-#' @return Server logic to render the workflow graph.
+#' @param id Module ID
+#' @param wf Reactive expression containing the workflow object
+#' @return Shiny server logic for rendering the workflow graph
 #' @export
 workflow_graph_server <- function(id, wf) {
   moduleServer(id, function(input, output, session) {
