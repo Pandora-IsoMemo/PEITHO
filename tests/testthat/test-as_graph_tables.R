@@ -34,8 +34,8 @@ test_that("as.graph_tables produces correctly structured output", {
   # Verify result is a list with nodes and edges
   expect_type(result, "list")
   expect_named(result, c("nodes", "edges"))
-  expect_true(inherits(result$nodes, "tbl_df"))
-  expect_true(inherits(result$edges, "tbl_df"))
+  expect_true(inherits(result$nodes, "data.frame"))
+  expect_true(inherits(result$edges, "data.frame"))
 })
 
 test_that("as.graph_tables creates correct nodes for steps", {
@@ -256,9 +256,9 @@ test_that("as.graph_tables returns tibbles with expected classes", {
 
   result <- as.graph_tables(wf)
 
-  # Check that both are tibble dataframes
-  expect_s3_class(result$nodes, "tbl_df")
-  expect_s3_class(result$edges, "tbl_df")
+  # Check that both are data frames
+  expect_s3_class(result$nodes, "data.frame")
+  expect_s3_class(result$edges, "data.frame")
 
   # Check column types
   expect_equal(typeof(result$nodes$id), "character")

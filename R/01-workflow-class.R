@@ -238,24 +238,35 @@ as.graph_tables.workflow <- function(x, ...) {
   names(step_entries) <- step_names
 
   # Build step nodes with type = "step"
-  nodes <- tibble::tibble(
+  nodes <- data.frame(
     id = as.character(step_entries),
     name = step_names,
     label = vapply(steps, function(s) as.character(s$label), character(1)),
     command = vapply(steps, function(s) as.character(s$command), character(1)),
     entry = step_entries,
     order = seq_along(steps),
-    type = "step"
+    type = "step",
+    stringsAsFactors = FALSE
   )
 
   # Build step → step edges (required_steps)
   edge_list <- lapply(steps, function(step) {
     deps <- step$required_steps %||% character(0)
 
-    tibble::tibble(
+    if (length(deps) == 0) {
+      return(data.frame(
+        from = character(0),
+        to = character(0),
+        rel = character(0),
+        stringsAsFactors = FALSE
+      ))
+    }
+
+    data.frame(
       from = as.character(unname(step_entries[deps])),
       to = as.character(step$entry),
-      rel = "required_steps"
+      rel = "required_steps",
+      stringsAsFactors = FALSE
     )
   })
 
@@ -264,14 +275,15 @@ as.graph_tables.workflow <- function(x, ...) {
   # Build input nodes from input_list
   input_names <- names(x$input_list)
   if (length(input_names) > 0) {
-    input_nodes <- tibble::tibble(
+    input_nodes <- data.frame(
       id = paste0("input_", input_names),
       name = input_names,
       label = input_names,
       command = NA_character_,
       entry = NA_integer_,
       order = NA_integer_,
-      type = "input"
+      type = "input",
+      stringsAsFactors = FALSE
     )
     nodes <- rbind(nodes, input_nodes)
   }
@@ -279,16 +291,20 @@ as.graph_tables.workflow <- function(x, ...) {
   # Build input → step edges (required_inputs)
   input_edge_list <- lapply(steps, function(step) {
     req_inputs <- step$required_inputs %||% character(0)
-    if (length(req_inputs) > 0) {
-      tibble::tibble(
-        from = paste0("input_", req_inputs),
-        to = as.character(step$entry),
-        rel = "required_inputs"
-      )
-    } else {
-      NULL
+
+    if (length(req_inputs) == 0) {
+      return(NULL)
     }
+
+    data.frame(
+      from = paste0("input_", req_inputs),
+      to = as.character(step$entry),
+      rel = "required_inputs",
+      stringsAsFactors = FALSE
+    )
   })
+
+  input_edge_list <- Filter(Negate(is.null), input_edge_list)
 
   input_edges <- do.call(rbind, input_edge_list)
 
