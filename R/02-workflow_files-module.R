@@ -293,7 +293,7 @@ workflow_files_server <- function(id, active_dir) {
       dir_path <- active_dir()
 
       if (!is.null(dir_path) && dir.exists(dir_path)) {
-        functions_path <- PEITHO:::workflow_file_paths(path = dir_path)$functions_path
+        functions_path <- get_functions_path(dir_path)
 
         if (file_nonempty(functions_path)) {
           extra_env <- tryCatch(
