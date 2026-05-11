@@ -2,22 +2,18 @@
 % Please edit documentation in R/02-workflow-graph-module.R
 \name{workflow_graph_ui}
 \alias{workflow_graph_ui}
-\title{Workflow graph UI module
-This module provides a UI component and server logic to visualize a PEITHO workflow as a graph using DiagrammeR.}
+\title{Graph UI}
 \usage{
 workflow_graph_ui(id, title = "Workflow graph")
 }
 \arguments{
-\item{id}{A unique identifier for the module namespace.}
+\item{id}{Module ID}
 
-\item{title}{The title to display above the graph (default: "Workflow graph").}
-
-\item{wf}{A reactive expression that returns the current workflow object to visualize.}
+\item{title}{Title to display above the graph (default: "Workflow graph").}
 }
 \value{
-A Shiny UI component for the workflow graph and server logic to render it.
+Shiny UI elements for the workflow graph
 }
 \description{
-Workflow graph UI module
-This module provides a UI component and server logic to visualize a PEITHO workflow as a graph using DiagrammeR.
+Graph UI
 }

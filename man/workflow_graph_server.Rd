@@ -2,20 +2,18 @@
 % Please edit documentation in R/02-workflow-graph-module.R
 \name{workflow_graph_server}
 \alias{workflow_graph_server}
-\title{Workflow graph server module
-This module renders a PEITHO workflow as a graph using DiagrammeR. It listens for changes to the workflow object and updates the graph accordingly.}
+\title{Graph Server}
 \usage{
 workflow_graph_server(id, wf)
 }
 \arguments{
-\item{id}{A unique identifier for the module namespace.}
+\item{id}{Module ID}
 
-\item{wf}{A reactive expression that returns the current workflow object to visualize.}
+\item{wf}{Reactive expression containing the workflow object}
 }
 \value{
-Server logic to render the workflow graph.
+Shiny server logic for rendering the workflow graph
 }
 \description{
-Workflow graph server module
-This module renders a PEITHO workflow as a graph using DiagrammeR. It listens for changes to the workflow object and updates the graph accordingly.
+Graph Server
 }
