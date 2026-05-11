@@ -249,7 +249,7 @@ as.graph_tables.workflow <- function(x, ...) {
   )
 
   # Build step → step edges (required_steps)
-  edges <- purrr::map_dfr(steps, function(step) {
+  edge_list <- lapply(steps, function(step) {
     deps <- step$required_steps %||% character(0)
 
     tibble::tibble(
@@ -258,6 +258,8 @@ as.graph_tables.workflow <- function(x, ...) {
       rel = "required_steps"
     )
   })
+
+  edges <- do.call(rbind, edge_list)
 
   # Build input nodes from input_list
   input_names <- names(x$input_list)
@@ -275,7 +277,7 @@ as.graph_tables.workflow <- function(x, ...) {
   }
 
   # Build input → step edges (required_inputs)
-  input_edges <- purrr::map_dfr(steps, function(step) {
+  input_edge_list <- lapply(steps, function(step) {
     req_inputs <- step$required_inputs %||% character(0)
     if (length(req_inputs) > 0) {
       tibble::tibble(
@@ -284,11 +286,13 @@ as.graph_tables.workflow <- function(x, ...) {
         rel = "required_inputs"
       )
     } else {
-      tibble::tibble(from = character(0), to = character(0), rel = character(0))
+      NULL
     }
   })
 
-  if (nrow(input_edges) > 0) {
+  input_edges <- do.call(rbind, input_edge_list)
+
+  if (!is.null(input_edges) && nrow(input_edges) > 0) {
     edges <- rbind(edges, input_edges)
   }
 
