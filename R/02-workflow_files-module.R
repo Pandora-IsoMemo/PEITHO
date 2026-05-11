@@ -174,6 +174,45 @@ workflow_files_server <- function(id, active_dir) {
         file.access(path, 2) == 0
     }
 
+    get_functions_path <- function(dir_path = active_dir()) {
+      if (is.null(dir_path) || !dir.exists(dir_path)) return(NULL)
+      PEITHO:::workflow_file_paths(path = dir_path)$functions_path
+    }
+
+    write_text_file_utf8 <- function(path, value) {
+      if (is.null(value)) value <- ""
+      lines <- if (identical(value, "")) character(0) else strsplit(value, "\n", fixed = TRUE)[[1]]
+
+      con <- file(path, open = "w", encoding = "UTF-8")
+      on.exit(close(con), add = TRUE)
+      writeLines(lines, con = con)
+    }
+
+    is_functions_file <- function(path) {
+      functions_path <- get_functions_path(dirname(path))
+      if (is.null(functions_path)) return(FALSE)
+
+      identical(
+        normalizePath(path, winslash = "/", mustWork = TRUE),
+        normalizePath(functions_path, winslash = "/", mustWork = FALSE)
+      )
+    }
+
+    set_functions_saved_status <- function(path) {
+      if (is_running_online()) {
+        status_msg(sprintf(
+          "Saved %s. Warning: Running online; skipping loading %s into the environment!",
+          basename(path),
+          basename(path)
+        ))
+      } else {
+        status_msg(sprintf(
+          "Saved %s. Updated custom functions will be reloaded on the next workflow run.",
+          basename(path)
+        ))
+      }
+    }
+
     output$wf_dir <- renderUI({
       dir_path <- active_dir()
       if (is.null(dir_path) || !dir.exists(dir_path)) {
@@ -335,33 +374,12 @@ workflow_files_server <- function(id, active_dir) {
       req(file.exists(path), !dir.exists(path))
 
       value <- input$file_editor
-      if (is.null(value)) value <- ""
-      lines <- strsplit(value, "\n", fixed = TRUE)[[1]]
 
       tryCatch({
-        con <- file(path, open = "w", encoding = "UTF-8")
-        on.exit(close(con), add = TRUE)
-        writeLines(lines, con = con)
+        write_text_file_utf8(path, value)
 
-        functions_path <- PEITHO:::workflow_file_paths(path = dirname(path))$functions_path
-        is_functions_file <- identical(
-          normalizePath(path, winslash = "/", mustWork = TRUE),
-          normalizePath(functions_path, winslash = "/", mustWork = FALSE)
-        )
-
-        if (is_functions_file) {
-          if (is_running_online()) {
-            status_msg(sprintf(
-              "Saved %s. Warning: Running online; skipping loading %s into the environment!",
-              basename(path),
-              basename(path)
-            ))
-          } else {
-            status_msg(sprintf(
-              "Saved %s. Updated custom functions will be reloaded on the next workflow run.",
-              basename(path)
-            ))
-          }
+        if (is_functions_file(path)) {
+          set_functions_saved_status(path)
         } else {
           status_msg(sprintf("Saved %s", basename(path)))
         }
@@ -382,32 +400,16 @@ workflow_files_server <- function(id, active_dir) {
       )
       req(!is.null(defaults_text))
 
-      functions_path <- PEITHO:::workflow_file_paths(path = active_dir())$functions_path
+      functions_path <- get_functions_path()
       req(!is.null(functions_path))
 
-      lines <- strsplit(defaults_text, "\n", fixed = TRUE)[[1]]
-
       tryCatch({
-        con <- file(functions_path, open = "w", encoding = "UTF-8")
-        on.exit(close(con), add = TRUE)
-        writeLines(lines, con = con)
+        write_text_file_utf8(functions_path, defaults_text)
 
         selected_file(functions_path)
         selected_label(NULL)
         updateTextAreaInput(session, "file_editor", value = defaults_text)
-
-        if (is_running_online()) {
-          status_msg(sprintf(
-            "Saved %s. Warning: Running online; skipping loading %s into the environment!",
-            basename(functions_path),
-            basename(functions_path)
-          ))
-        } else {
-          status_msg(sprintf(
-            "Saved %s. Updated custom functions will be reloaded on the next workflow run.",
-            basename(functions_path)
-          ))
-        }
+        set_functions_saved_status(functions_path)
       }, error = function(e) {
         status_msg(paste("Could not copy defaults:", conditionMessage(e)))
       })
@@ -416,13 +418,11 @@ workflow_files_server <- function(id, active_dir) {
     observeEvent(input$reset_defaults, {
       req(active_dir(), dir.exists(active_dir()))
 
-      functions_path <- PEITHO:::workflow_file_paths(path = active_dir())$functions_path
+      functions_path <- get_functions_path()
       req(!is.null(functions_path))
 
       tryCatch({
-        con <- file(functions_path, open = "w", encoding = "UTF-8")
-        on.exit(close(con), add = TRUE)
-        writeLines(character(0), con = con)
+        write_text_file_utf8(functions_path, "")
 
         selected_file(functions_path)
         selected_label(NULL)
