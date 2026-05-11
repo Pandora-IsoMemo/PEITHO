@@ -7,7 +7,14 @@ and any additional metadata.
 ## Usage
 
 ``` r
-new_workflowsteprun(step, args, output = NULL, error = NULL, ...)
+new_workflowsteprun(
+  step,
+  args,
+  output = NULL,
+  error = NULL,
+  run_id = NULL,
+  ...
+)
 ```
 
 ## Arguments
@@ -23,11 +30,17 @@ new_workflowsteprun(step, args, output = NULL, error = NULL, ...)
 
 - output:
 
-  The output produced by the step, if successful.
+  List of outputs produced by the step if it executed successfully,
+  otherwise list(NULL).
 
 - error:
 
-  An error object if the step failed, otherwise \`NULL\`.
+  List of error conditions if the step encountered errors, otherwise
+  list(NULL).
+
+- run_id:
+
+  A unique identifier for the workflow run this step belongs to.
 
 - ...:
 

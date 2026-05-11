@@ -7,7 +7,7 @@ step runs.
 ## Usage
 
 ``` r
-new_workflowstate(initial_input = NULL)
+new_workflowstate(initial_input = NULL, run_id = NULL)
 ```
 
 ## Arguments
@@ -15,6 +15,10 @@ new_workflowstate(initial_input = NULL)
 - initial_input:
 
   The initial input provided to the workflow.
+
+- run_id:
+
+  A unique identifier for the workflow run (optional).
 
 ## Value
 

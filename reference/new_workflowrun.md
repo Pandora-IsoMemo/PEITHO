@@ -6,7 +6,7 @@ workflow definition and the final state after execution.
 ## Usage
 
 ``` r
-new_workflowrun(workflow, state)
+new_workflowrun(workflow, state, run_id = NULL)
 ```
 
 ## Arguments
@@ -18,6 +18,10 @@ new_workflowrun(workflow, state)
 - state:
 
   A \`workflowstate\` object.
+
+- run_id:
+
+  A unique identifier for the workflow run (optional).
 
 ## Value
 

@@ -11,7 +11,7 @@ and any additional metadata."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PEITHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.03.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.04.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +48,14 @@ and any additional metadata.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">new_workflowsteprun</span><span class="op">(</span><span class="va">step</span>, <span class="va">args</span>, output <span class="op">=</span> <span class="cn">NULL</span>, error <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">new_workflowsteprun</span><span class="op">(</span></span>
+<span>  <span class="va">step</span>,</span>
+<span>  <span class="va">args</span>,</span>
+<span>  output <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  error <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  run_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -65,11 +72,17 @@ Contains actual values used during execution (e.g. results of previous steps).</
 
 
 <dt id="arg-output">output<a class="anchor" aria-label="anchor" href="#arg-output"></a></dt>
-<dd><p>The output produced by the step, if successful.</p></dd>
+<dd><p>List of outputs produced by the step if it executed
+successfully, otherwise list(NULL).</p></dd>
 
 
 <dt id="arg-error">error<a class="anchor" aria-label="anchor" href="#arg-error"></a></dt>
-<dd><p>An error object if the step failed, otherwise `NULL`.</p></dd>
+<dd><p>List of error conditions if the step encountered errors,
+otherwise list(NULL).</p></dd>
+
+
+<dt id="arg-run-id">run_id<a class="anchor" aria-label="anchor" href="#arg-run-id"></a></dt>
+<dd><p>A unique identifier for the workflow run this step belongs to.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

@@ -1,5 +1,41 @@
 # Changelog
 
+## PEITHO 26.04.2
+
+### Updates
+
+- Updated run.workflowstep() to always store output/error as lists
+- Extended test coverage to assert list-shaped output/error and
+  list-shaped last_result
+- Added run_id to workflow run and state objects
+
+## PEITHO 26.04.1
+
+### Bug Fixes
+
+- Fixed loading of custom functions (from functions.R) into an
+  environment for the “Browse functions” modal and adjusted save
+  messaging for functions.R.
+- Fixed how custom workflow functions are loaded and surfaced in the
+  Shiny UI and workflow execution, with the goal of picking up updated
+  functions more reliably.
+
+## PEITHO 26.04.0
+
+### New Features
+
+- Added a “Folders & Files” tab to the Shiny app, enabling users to
+  browse workflow directories, view and edit supported workflow files,
+  and inspect package defaults and available functions. (#29)
+
+### Updates
+
+- Result selector support: extended workflow tag parsing to support
+  optional selectors (e.g., \[n\], \[a:b\], \[c(…)\]), including
+  `extract_result_ref`, new selector tag regex handling, and selector
+  application during execution when resolving results from previous
+  steps.
+
 ## PEITHO 26.03.1
 
 ### New Features

@@ -7,13 +7,13 @@
 ## Citation
 
 Runge A (2026). *PEITHO: Workflow Management and Reproducible Analysis
-in R*. R package version 26.03.1,
+in R*. R package version 26.04.2,
 <https://pandora-isomemo.github.io/PEITHO/>.
 
     @Manual{,
       title = {PEITHO: Workflow Management and Reproducible Analysis in R},
       author = {Antonia Runge},
       year = {2026},
-      note = {R package version 26.03.1},
+      note = {R package version 26.04.2},
       url = {https://pandora-isomemo.github.io/PEITHO/},
     }

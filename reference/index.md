@@ -101,6 +101,10 @@
   : Update the input list of a workflow
 - [`workflow_file_paths()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_file_paths.md)
   : Helper to get file paths for PEITHO workflow files
+- [`workflow_files_server()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_files_server.md)
+  : Workflow Files Server
+- [`workflow_files_ui()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_files_ui.md)
+  : Workflow Files UI
 - [`workflow_steps_from_files()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_steps_from_files.md)
   : Extract workflow steps from files in a folder
 - [`workflow_table_server()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_table_server.md)

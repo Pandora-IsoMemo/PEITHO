@@ -23,8 +23,8 @@ run(x, state, env = NULL, step_i = NULL, input_list = NULL, ...)
 
 - env:
 
-  An environment to look up the command function. Defaults to the step's
-  own env or the caller's env.
+  An environment to look up the command function. Defaults to the
+  caller's env.
 
 - step_i:
 

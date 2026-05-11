@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PEITHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.03.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.04.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,6 +35,34 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="26.04.2" id="peitho-26042">PEITHO 26.04.2<a class="anchor" aria-label="anchor" href="#peitho-26042"></a></h2>
+<div class="section level3">
+<h3 id="updates-26-04-2">Updates<a class="anchor" aria-label="anchor" href="#updates-26-04-2"></a></h3>
+<ul><li>Updated run.workflowstep() to always store output/error as lists</li>
+<li>Extended test coverage to assert list-shaped output/error and list-shaped last_result</li>
+<li>Added run_id to workflow run and state objects</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="26.04.1" id="peitho-26041">PEITHO 26.04.1<a class="anchor" aria-label="anchor" href="#peitho-26041"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-26-04-1">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-26-04-1"></a></h3>
+<ul><li>Fixed loading of custom functions (from functions.R) into an environment for the “Browse functions” modal and adjusted save messaging for functions.R.</li>
+<li>Fixed how custom workflow functions are loaded and surfaced in the Shiny UI and workflow execution, with the goal of picking up updated functions more reliably.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="26.04.0" id="peitho-26040">PEITHO 26.04.0<a class="anchor" aria-label="anchor" href="#peitho-26040"></a></h2>
+<div class="section level3">
+<h3 id="new-features-26-04-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-26-04-0"></a></h3>
+<ul><li>Added a “Folders &amp; Files” tab to the Shiny app, enabling users to browse workflow directories, view and edit supported workflow files, and inspect package defaults and available functions. (#29)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="updates-26-04-0">Updates<a class="anchor" aria-label="anchor" href="#updates-26-04-0"></a></h3>
+<ul><li>Result selector support: extended workflow tag parsing to support optional selectors (e.g., [n], [a:b], [c(…)]), including <code>extract_result_ref</code>, new selector tag regex handling, and selector application during execution when resolving results from previous steps.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="26.03.1" id="peitho-26031">PEITHO 26.03.1<a class="anchor" aria-label="anchor" href="#peitho-26031"></a></h2>
 <div class="section level3">

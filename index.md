@@ -26,6 +26,7 @@ follows. The documentation of the main branch is build automatically via
 github action.
 
 ``` r
+
 devtools::document() # or CTRL + SHIFT + D in RStudio
 devtools::build_site()
 ```

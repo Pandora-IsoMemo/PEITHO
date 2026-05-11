@@ -15,6 +15,7 @@ new_operationparam(
   label = "",
   type = c("literal", "input", "result"),
   loop = c("no", "yes", "auto"),
+  selector = NULL,
   ...
 )
 ```
@@ -52,6 +53,11 @@ new_operationparam(
   Looping behavior for this parameter. One of: - "no" : do not loop -
   "yes" : always loop - "auto" : automatically determine looping, loop
   if input is a list else not
+
+- selector:
+
+  Optional selector for result references (for example \`2\`, \`1:3\`,
+  \`c(1,3)\`).
 
 - ...:
 
