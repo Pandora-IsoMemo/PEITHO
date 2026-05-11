@@ -76,15 +76,15 @@ test_that("workflow can be converted to graph_table and rendered", {
   renderedGraph <- DiagrammeR::create_graph(directed = TRUE) |>
     DiagrammeR::add_nodes_from_table(
       my_graph_tables$nodes,
-      label_col = label,
-      type_col = type
+      label_col = "label",
+      type_col = "type"
     ) |>
     DiagrammeR::add_edges_from_table(
       my_graph_tables$edges,
-      from_col = from,
-      to_col = to,
-      from_to_map = id_external,
-      rel_col = rel
+      from_col = "from",
+      to_col = "to",
+      from_to_map = "id_external",
+      rel_col = "rel"
     ) |>
     DiagrammeR::render_graph(layout = "tree")
   # Verify graph was rendered successfully
