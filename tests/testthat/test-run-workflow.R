@@ -32,8 +32,8 @@ test_that("run.workflow executes all steps and returns results", {
   expect_s3_class(result$workflow, "workflow")
   expect_s3_class(result$state, "workflowstate")
   expect_length(result$state$stepruns, 2)
-  expect_equal(result$state$stepruns[[1]]$output, list(c("hallo", "test")))
-  expect_equal(result$state$stepruns[[2]]$output, list(c("foo", "bar")))
+  expect_equal(result$state$stepruns[[1]]$output, list(list(c("hallo", "test"))))
+  expect_equal(result$state$stepruns[[2]]$output, list(list(c("foo", "bar"))))
 })
 
 # Test workflow with error in step

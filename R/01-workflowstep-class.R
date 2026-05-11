@@ -1,6 +1,6 @@
 # ---- workflowstep class ----
 
-# constructor --------------------------------------------------------------
+# constructor -----------------------------------------------------------------
 
 #' Create a new workflow step object
 #'
@@ -17,8 +17,10 @@
 #' @param args           The original argument string from the workflow file, for reference.
 #' @param loop           A character string indicating if the step should be looped over.
 #'                       Can be "yes", "no", or "auto".
-#' @param env            An environment to look up the command function. Default is the parent
-#'                       frame.
+#' @param env            An environment to look up the command function.
+#'                       Defaults to the caller's env. Warns if the command
+#'                       cannot be found, but does not throw an error at this
+#'                       stage.
 #' @param ...            Additional metadata to store with the step.
 #' @return A `workflowstep` object.
 #' @export
@@ -30,13 +32,13 @@ new_workflowstep <- function(
   comments        = "",
   args            = "",          # original argument string from workflow file, for reference
   loop            = "auto",          # loop variable name (if any)
-  env             = parent.frame(),  # where to look up command
+  env             = parent.frame(),
   ...
 ) {
   if (is.null(name)) name <- paste("Step", entry)
   if (is.null(label)) label <- name
 
-  resolve_operation(command, env = env)
+  resolve_operation(command, env = env, warn_only = TRUE)
 
   required_fields <- parse_required_fields(args)
 
@@ -54,7 +56,6 @@ new_workflowstep <- function(
       required_steps  = required_steps,
       args            = args,
       loop            = loop,
-      env             = env,
       dots            = list(...)     # extension point
     ),
     class = c("workflowstep", "list")
@@ -232,7 +233,9 @@ update.workflowstep <- function(
   }
 
   # update the commands.json (only if the workflow is file-backed)
-  if (length(x$workflow_file_paths) && !is.null(x$workflow_file_paths$commands_path)) {
+  if (!is.null(workflow_file_paths) &&
+        length(workflow_file_paths) > 0L &&
+        !is.null(workflow_file_paths$commands_path)) {
     # get i-th entry from commands file, update it and write back to file
     commands_list <- read_json_if_exists(path = workflow_file_paths$commands_path)
 
@@ -258,13 +261,20 @@ update.workflowstep <- function(
   x
 }
 
-resolve_operation <- function(op_name, env) {
+resolve_operation <- function(op_name, env, warn_only = FALSE) {
   PEITHO:::logDebug("  Resolving command function: %s", op_name)
   if (!is.character(op_name) || length(op_name) != 1L || !nzchar(op_name)) {
     stop("'command' must be a non-empty character string.", call. = FALSE)
   }
   if (!exists(op_name, mode = "function", envir = env, inherits = TRUE)) {
-    stop("Command '", op_name, "' not found in given environment.", call. = FALSE)
+    msg <- sprintf("Command '%s' not found in given environment.", op_name)
+    if (warn_only) {
+      PEITHO:::logWarn("%s", msg)
+      warning(msg, immediate. = TRUE, call. = FALSE)
+      return(NULL)
+    } else {
+      stop(msg, call. = FALSE)
+    }
   }
   get(op_name, envir = env, mode = "function", inherits = TRUE)
 }
@@ -282,8 +292,7 @@ run_with_error <- function(fn, args) {
 #' with the result or error from the step execution.
 #' @param x  A `workflowstep` object representing the step to execute.
 #' @param state A `workflowstate` object representing the current state of the workflow.
-#' @param env   An environment to look up the command function. Defaults to the step's
-#'  own env or the caller's env.
+#' @param env   An environment to look up the command function. Defaults to the caller's env.
 #' @param step_i The number of the step in the workflow, used for logging purposes.
 #' @param input_list A list of inputs for argument parsing, loaded from the workflow's inputs file.
 #' @param ...   Additional arguments (not used).
@@ -300,9 +309,9 @@ run.workflowstep <- function(
   if (!inherits(state, "workflowstate")) {
     stop("'state' must be a 'workflowstate' object.", call. = FALSE)
   }
-  # default env: use step-specific env if present, else caller’s env
+  # Resolve environment: use provided env, or fall back to caller's env
   if (is.null(env)) {
-    env <- if (!is.null(x$env)) x$env else parent.frame()
+    env <- parent.frame()
   }
   # 1) resolve the function
   # for a package you might use: env = asNamespace("PEITHO")
@@ -333,7 +342,6 @@ run.workflowstep <- function(
   }
 
   if (length(args) == 0L) {
-    #browser()
     stop("No parameters found for workflow step.", call. = FALSE)
   }
 
@@ -391,7 +399,8 @@ run.workflowstep <- function(
       step   = x,
       args   = args,
       output = results,
-      error  = errors
+      error  = errors,
+      run_id = state$run_id
     )
   } else {
     PEITHO:::logDebug("  Running command: NO LOOPING")
@@ -407,11 +416,13 @@ run.workflowstep <- function(
       if (is_single_result) "" else "s"
     )
 
+    # return list of results/errors (to keep structure consistent)
     steprun <- new_workflowsteprun(
       step   = x,
       args   = args,
-      output = run$output,
-      error  = run$error
+      output = list(run$output),
+      error  = list(run$error),
+      run_id = state$run_id
     )
   }
 

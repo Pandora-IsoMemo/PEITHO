@@ -16,11 +16,12 @@ test_that("workflow can be exported, imported, and run as in example_wf.R", {
 
   # Export as zip
   PEITHO::save_as_zip(my_wf, file = zipfile_path)
-  expect_true(file.exists(zipfile_path))
+  expect_true(file_nonempty(zipfile_path))
 
   # Run workflow (steps 1 to 4)
   my_run_1 <- PEITHO::run(my_wf, from = 1, to = 4)
-  expect_type(my_run_1$state$last_result, "character")
+  expect_type(my_run_1$state$last_result, "list")
+  expect_type(my_run_1$state$last_result[[1]], "character")
   expect_length(my_run_1$state$last_result, 1)
 
   # Truncate output
@@ -39,7 +40,7 @@ test_that("workflow can be exported, imported, and run as in example_wf.R", {
   # Run imported workflow (steps 1 to 2)
   my_run_2 <- PEITHO::run(my_wf_imported, from = 1, to = 2)
   expect_type(my_run_2$state$last_result, "list")
-  expect_length(my_run_2$state$last_result, 3)
+  expect_length(my_run_2$state$last_result, 2)
 
   # Truncate output
   trunc_out2 <- PEITHO:::trunc(my_run_2$state$last_result, n_char = 100)

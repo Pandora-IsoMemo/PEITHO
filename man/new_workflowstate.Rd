@@ -4,10 +4,12 @@
 \alias{new_workflowstate}
 \title{Create a new workflow state object}
 \usage{
-new_workflowstate(initial_input = NULL)
+new_workflowstate(initial_input = NULL, run_id = NULL)
 }
 \arguments{
 \item{initial_input}{The initial input provided to the workflow.}
+
+\item{run_id}{A unique identifier for the workflow run (optional).}
 }
 \value{
 A `workflowstate` object.

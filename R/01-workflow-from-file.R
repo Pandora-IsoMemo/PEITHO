@@ -2,16 +2,57 @@
 
 normalize_varname <- function(x) {
   x <- trimws(x)
-  gsub(" ", "_", x)
+
+  # Keep selector semantics in optional trailing [...] by removing whitespace
+  # there, while normalizing label spaces to underscores.
+  has_selector <- grepl("\\[[^\\]]*\\]$", x, perl = TRUE)
+  selector <- ifelse(
+    has_selector,
+    sub("^.*(\\[[^\\]]*\\])$", "\\1", x, perl = TRUE),
+    ""
+  )
+  base <- ifelse(has_selector, sub("\\[[^\\]]*\\]$", "", x, perl = TRUE), x)
+
+  base <- gsub(" ", "_", base)
+  selector <- gsub("\\s+", "", selector, perl = TRUE)
+
+  paste0(base, selector)
+}
+
+normalize_name_part <- function(x) {
+  gsub(" ", "_", trimws(x))
+}
+
+extract_result_ref <- function(x) {
+  m <- regexec(result_pattern(), x, perl = TRUE)
+  captures <- regmatches(x, m)[[1]]
+
+  if (!length(captures)) {
+    stop("Invalid result tag reference: ", x, call. = FALSE)
+  }
+
+  label <- normalize_name_part(captures[[2]])
+  selector <- NULL
+
+  if (length(captures) >= 3L && nzchar(captures[[3]])) {
+    selector <- gsub("\\s+", "", captures[[3]], perl = TRUE)
+    if (grepl("^\\[\\[.*\\]\\]$", selector)) {
+      selector <- substr(selector, 3L, nchar(selector) - 2L)
+    } else {
+      selector <- substr(selector, 2L, nchar(selector) - 1L)
+    }
+  }
+
+  list(label = label, selector = selector)
 }
 
 extract_tag_varname <- function(x, pattern) {
-  varname <- sub(pattern, "\\1", x)
+  varname <- sub(pattern, "\\1\\2", x, perl = TRUE)
   normalize_varname(varname)
 }
 
 read_json_if_exists <- function(path) {
-  if (!file.exists(path)) return(list())
+  if (!file_nonempty(path)) return(list())
   jsonlite::fromJSON(path, simplifyVector = FALSE)
 }
 
@@ -25,7 +66,7 @@ load_inputs_to_list <- function(
     input_list <- read_json_if_exists(input_path)
   } else if (grepl("\\.txt$", input_path)) {
     # load input.txt
-    if (file.exists(input_path)) {
+    if (file_nonempty(input_path)) {
       lines <- readLines(input_path)
       tag_list_indx <- grepl(paste0("^", pattern, ".*", pattern, "$"), lines)
       tag_list <- unique(lines[tag_list_indx])
@@ -55,12 +96,15 @@ load_inputs_to_list <- function(
   input_list
 }
 
+input_pattern <- function() "^@#\\*I\\*#@((?:(?!@#\\*I\\*#@).)*)@#\\*I\\*#@$"
+result_pattern <- function() "^@#\\*L\\*#@((?:(?!@#\\*L\\*#@).)*)@#\\*L\\*#@((?:\\[\\[[^\\]]+\\]\\])|(?:\\[[^\\]]+\\]))?$"
+
 is_input_tag <- function(x) {
-  grepl("^@#\\*I\\*#@.*@#\\*I\\*#@$", x)
+  grepl(input_pattern(), x, perl = TRUE)
 }
 
 is_result_tag <- function(x) {
-  grepl("^@#\\*L\\*#@.*@#\\*L\\*#@$", x)
+  grepl(result_pattern(), x, perl = TRUE)
 }
 
 make_param_from_arg <- function(
@@ -72,60 +116,103 @@ make_param_from_arg <- function(
   input_list
 ) {
   if (!nzchar(arg_name)) arg_name <- NULL
+  selector <- NULL
 
   if (is_input_tag(arg)) {
-    varname <- extract_tag_varname(arg, "^@#\\*I\\*#@(.*)@#\\*I\\*#@$")
-
-    # if (!varname %in% names(input_list)) {
-    #   stop(
-    #     "Input variable '", varname, "' not found in input file.",
-    #     call. = FALSE
-    #   )
-    # }
-    new_operationparam(
-      step_id = step_i,
-      position = arg_i,
-      name     = arg_name,
-      value    = input_list[[varname]] %||% NULL,
-      type     = "input",
-      label    = varname,
-      loop     = cmd_loop %||% "no"
-    )
+    type <- "input"
+    label <- extract_tag_varname(arg, input_pattern())
+    value <- input_list[[label]] %||% NULL
   } else if (is_result_tag(arg)) {
-    varname <- extract_tag_varname(arg, "^@#\\*L\\*#@(.*)@#\\*L\\*#@$")
-
-    new_operationparam(
-      step_id = step_i,
-      position = arg_i,
-      name     = arg_name,
-      value    = NULL,
-      type     = "result",
-      label    = varname,
-      loop     = cmd_loop %||% "no"
-    )
+    result_ref <- extract_result_ref(arg)
+    type <- "result"
+    label <- result_ref$label
+    selector <- result_ref$selector
+    value <- NULL
   } else {
     # literal without name (no tag)
-    new_operationparam(
-      step_id = step_i,
-      position = arg_i,
-      name     = arg_name,
-      value    = strip_outer_quotes(arg),
-      type     = "literal",
-      loop     = cmd_loop %||% "no"
-    )
+    type <- "literal"
+    label <- ""
+    value <- strip_outer_quotes(arg)
   }
+
+  new_operationparam(
+    step_id = step_i,
+    position = arg_i,
+    name     = arg_name,
+    value    = value,
+    type     = type,
+    label    = label,
+    loop     = cmd_loop %||% "no",
+    selector = selector %||% NULL
+  )
 }
 
 parse_args <- function(arg_string) {
   if (is.null(arg_string) || !nzchar(arg_string)) {
     return(list(values = character(0), names = character(0)))
   }
-  # split on commas, but not inside single or double quotes
-  args_vec <- strsplit(
-    arg_string,
-    ",(?=(?:[^']*'[^']*')*[^']*$)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",
-    perl = TRUE
-  )[[1]] |> trimws()
+
+  split_top_level_args <- function(x) {
+    chars <- strsplit(x, "", fixed = TRUE)[[1]]
+    if (!length(chars)) return(character(0))
+
+    parts <- character(0)
+    current <- ""
+    in_single <- FALSE
+    in_double <- FALSE
+    bracket_depth <- 0L
+    paren_depth <- 0L
+
+    for (ch in chars) {
+      if (ch == "'" && !in_double) {
+        in_single <- !in_single
+        current <- paste0(current, ch)
+        next
+      }
+
+      if (ch == "\"" && !in_single) {
+        in_double <- !in_double
+        current <- paste0(current, ch)
+        next
+      }
+
+      if (!in_single && !in_double) {
+        if (ch == "[") {
+          bracket_depth <- bracket_depth + 1L
+          current <- paste0(current, ch)
+          next
+        }
+        if (ch == "]") {
+          bracket_depth <- max(0L, bracket_depth - 1L)
+          current <- paste0(current, ch)
+          next
+        }
+        if (ch == "(") {
+          paren_depth <- paren_depth + 1L
+          current <- paste0(current, ch)
+          next
+        }
+        if (ch == ")") {
+          paren_depth <- max(0L, paren_depth - 1L)
+          current <- paste0(current, ch)
+          next
+        }
+
+        if (ch == "," && bracket_depth == 0L && paren_depth == 0L) {
+          parts <- c(parts, trimws(current))
+          current <- ""
+          next
+        }
+      }
+
+      current <- paste0(current, ch)
+    }
+
+    c(parts, trimws(current))
+  }
+
+  args_vec <- split_top_level_args(arg_string)
+  args_vec <- args_vec[nzchar(args_vec)]
 
   arg_names <- character(length(args_vec))
   arg_values <- character(length(args_vec))
@@ -161,7 +248,7 @@ strip_outer_quotes <- function(x) {
 
 load_workflow_script_env <- function(script_path, parent_env, show_functions_path = TRUE) {
   if (is.null(script_path)) return(parent_env)
-  if (!file.exists(script_path) || file.info(script_path)$size == 0) {
+  if (!file_nonempty(script_path)) {
     info_msg <- sprintf(
       "Custom script file not found or is empty: %s. Using global environment for operations.",
       basename(script_path)
@@ -182,7 +269,20 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
     PEITHO:::logInfo("Loading custom script for workflow: %s", script_path)
   }
   script_env <- new.env(parent = parent_env)
-  sys.source(script_path, envir = script_env)
+  
+  tryCatch(
+    sys.source(script_path, envir = script_env),
+    error = function(e) {
+      err_msg <- sprintf(
+        "Error loading custom functions from %s: %s",
+        basename(script_path),
+        conditionMessage(e)
+      )
+      PEITHO:::logError("%s", err_msg)
+      stop(err_msg, call. = FALSE)
+    }
+  )
+  
   return(script_env)
 }
 
@@ -211,9 +311,9 @@ make_param_from_arg_loop <- function(args_string, loop, step_i, input_list) {
 
 extract_input_list_from_files <- function(inputs_path) {
   # return empty wf if no inputs
-  if (!file.exists(inputs_path)) {
+  if (!file_nonempty(inputs_path)) {
     warn_msg <- sprintf(
-      "%s not found in folder '%s'. Returning empty workflow.",
+      "%s not found or is empty in folder '%s'. Returning empty input list.",
       basename(inputs_path),
       dirname(inputs_path)
     )
@@ -230,19 +330,19 @@ extract_input_list_from_files <- function(inputs_path) {
 
 parse_required_fields <- function(args_string) {
   args_values <- parse_args(args_string)$values
+  result_args <- args_values[is_result_tag(args_values)]
 
   list(
     inputs = unique(vapply(
       args_values[is_input_tag(args_values)],
       extract_tag_varname,
       FUN.VALUE = character(1),
-      pattern = "^@#\\*I\\*#@(.*)@#\\*I\\*#@$"
+      pattern = input_pattern()
     )),
     steps = unique(vapply(
-      args_values[is_result_tag(args_values)],
-      extract_tag_varname,
-      FUN.VALUE = character(1),
-      pattern = "^@#\\*L\\*#@(.*)@#\\*L\\*#@$"
+      result_args,
+      function(x) extract_result_ref(x)$label,
+      FUN.VALUE = character(1)
     ))
   )
 }
@@ -259,9 +359,9 @@ workflow_steps_from_files <- function(
   show_functions_path = TRUE
 ) {
   # return empty wf if no commands
-  if (!file.exists(workflow_file_paths$commands_path)) {
+  if (!file_nonempty(workflow_file_paths$commands_path)) {
     warn_msg <- sprintf(
-      "%s not found in folder '%s'. Returning empty workflow.",
+      "%s not found or is empty in folder '%s'. Returning empty workflow.",
       basename(workflow_file_paths$commands_path),
       workflow_file_paths$path_to_folder
     )
@@ -271,8 +371,11 @@ workflow_steps_from_files <- function(
   }
 
   # create results file if not exists
-  if (!file.exists(workflow_file_paths$results_path)) {
-    PEITHO:::logInfo("Creating empty %s file.", basename(workflow_file_paths$results_path))
+  if (!file_nonempty(workflow_file_paths$results_path)) {
+    PEITHO:::logInfo(
+      "Creating empty %s file.",
+      basename(workflow_file_paths$results_path)
+    )
     jsonlite::write_json(
       list(),
       workflow_file_paths$results_path,

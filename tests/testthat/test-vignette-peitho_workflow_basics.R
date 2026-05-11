@@ -12,14 +12,14 @@ test_that("save_as_zip exports workflow to zip", {
   wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
   zipfile_path <- tempfile(fileext = ".peitho")
   save_as_zip(wf, file = zipfile_path)
-  expect_true(file.exists(zipfile_path))
+  expect_true(file_nonempty(zipfile_path))
   unlink(zipfile_path) # Clean up
 })
 
 # Test: Running a Workflow
 test_that("run executes workflow steps", {
   wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
-  run_result <- run(wf, from = 1, to = 5)
+  run_result <- run(wf, from = 1, to = length(wf$steps))
   expect_true(!is.null(run_result$state$last_result))
   expect_true(length(run_result$state$last_result) >= 0)
 })

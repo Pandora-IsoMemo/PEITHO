@@ -5,7 +5,7 @@
     "label": "Split addresses",
     "comments": "",
     "command": "simple_split",
-    "args": "x=@#*I*#@web_addresses@#*I*#@, split=\\n",
+    "args": "x=@#*I*#@web_addresses_1@#*I*#@, split=\\n",
     "loop": "no",
     "prompt": ""
   },
@@ -15,7 +15,7 @@
     "label": "get_content",
     "comments": "",
     "command": "fetch_WebText",
-    "args": "url=@#*L*#@Split@#*L*#@",
+    "args": "url=@#*L*#@Split@#*L*#@[c(1, 3)]",
     "loop": "auto",
     "prompt": ""
   },
@@ -55,7 +55,7 @@
     "label": "Split addresses",
     "comments": "",
     "command": "simple_split",
-    "args": "x=@#*I*#@web_addresses_wf_2@#*I*#@, split=\\n",
+    "args": "x=@#*I*#@web_addresses_2@#*I*#@, split=\\n",
     "loop": "no",
     "prompt": ""
   },

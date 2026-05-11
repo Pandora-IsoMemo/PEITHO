@@ -5,16 +5,17 @@
 #' This object keeps track of the state while executing a workflow,
 #' including the initial input, the last result, and the list of executed step runs.
 #' @param initial_input The initial input provided to the workflow.
+#' @param run_id A unique identifier for the workflow run (optional).
 #' @return A `workflowstate` object.
 #' @export
-new_workflowstate <- function(initial_input = NULL) {
+new_workflowstate <- function(initial_input = NULL, run_id = NULL) {
   structure(
     list(
       initial_input = initial_input,
       errors        = NULL,            # all errors encountered
       last_result   = initial_input,   # last step’s result
       stepruns      = list(),           # list of workflowsteprun objects
-
+      run_id        = run_id,           # unique identifier for the workflow run
       # caches (duplication on purpose, we may later decide if we use 'id' or 'name' at the end)
       results_by_id   = list(),
       results_by_name = list(),
@@ -44,6 +45,12 @@ truncate_many <- function(vals, n_char, n_items, collapse = ", \n") {
 
 trunc <- function(val, n_char = 40, n_items = 5) {
   if (is.null(val)) return("NULL")
+
+  # unwrap single-element lists
+  # (we often have lists of length 1 due to how we store outputs and errors)
+  if (is.list(val) && length(val) == 1L) {
+    val <- val[[1L]]
+  }
 
   # lists of characters
   if (is.list(val) && all(vapply(val, is.character, logical(1)))) {
@@ -75,7 +82,12 @@ print.workflowstate <- function(x, ...) {
   if (any(is_error)) {
     cat("  error in steps:", paste(which(is_error), collapse = ", "), "\n", sep = " ")
     cat("                 (use summary() to see error details)\n")
-    cat("  first error:   ", trunc(x$stepruns[[which(is_error)[1]]]$error), "\n", sep = "")
+    first_error <- x$stepruns[[which(is_error)[1]]]$error
+    if (is.list(first_error) && !inherits(first_error, "condition")) {
+      non_null <- Filter(function(e) !is.null(e), first_error)
+      first_error <- if (length(non_null) > 0L) non_null[[1L]] else NULL
+    }
+    cat("  first error:   ", trunc(first_error), "\n", sep = "")
   }
   cat("  initial_input: ", trunc(x$initial_input), "\n", sep = "")
   cat("  last_result:   ", trunc(x$last_result), "\n", sep = "")
