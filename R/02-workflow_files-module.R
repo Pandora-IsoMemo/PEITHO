@@ -369,5 +369,68 @@ workflow_files_server <- function(id, active_dir) {
         status_msg(paste("Could not save file:", conditionMessage(e)))
       })
     })
+
+    observeEvent(input$copy_defaults, {
+      req(active_dir(), dir.exists(active_dir()))
+
+      defaults_text <- tryCatch(
+        PEITHO:::default_workflow_functions_text(),
+        error = function(e) {
+          status_msg(paste("Could not load package defaults:", conditionMessage(e)))
+          NULL
+        }
+      )
+      req(!is.null(defaults_text))
+
+      functions_path <- PEITHO:::workflow_file_paths(path = active_dir())$functions_path
+      req(!is.null(functions_path))
+
+      lines <- strsplit(defaults_text, "\n", fixed = TRUE)[[1]]
+
+      tryCatch({
+        con <- file(functions_path, open = "w", encoding = "UTF-8")
+        on.exit(close(con), add = TRUE)
+        writeLines(lines, con = con)
+
+        selected_file(functions_path)
+        selected_label(NULL)
+        updateTextAreaInput(session, "file_editor", value = defaults_text)
+
+        if (is_running_online()) {
+          status_msg(sprintf(
+            "Saved %s. Warning: Running online; skipping loading %s into the environment!",
+            basename(functions_path),
+            basename(functions_path)
+          ))
+        } else {
+          status_msg(sprintf(
+            "Saved %s. Updated custom functions will be reloaded on the next workflow run.",
+            basename(functions_path)
+          ))
+        }
+      }, error = function(e) {
+        status_msg(paste("Could not copy defaults:", conditionMessage(e)))
+      })
+    })
+
+    observeEvent(input$reset_defaults, {
+      req(active_dir(), dir.exists(active_dir()))
+
+      functions_path <- PEITHO:::workflow_file_paths(path = active_dir())$functions_path
+      req(!is.null(functions_path))
+
+      tryCatch({
+        con <- file(functions_path, open = "w", encoding = "UTF-8")
+        on.exit(close(con), add = TRUE)
+        writeLines(character(0), con = con)
+
+        selected_file(functions_path)
+        selected_label(NULL)
+        updateTextAreaInput(session, "file_editor", value = "")
+        status_msg("Cleared functions.R. Workflow will use package defaults on next run.")
+      }, error = function(e) {
+        status_msg(paste("Could not clear functions.R:", conditionMessage(e)))
+      })
+    })
   })
 }
