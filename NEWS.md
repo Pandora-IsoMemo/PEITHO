@@ -1,7 +1,7 @@
 # PEITHO 26.05.0
 
 ## New Features
-- ...
+- Added the ability to convert a workflow into node/edge tables and display it as a rendered workflow graph in the Shiny app (#35)
 
 # PEITHO 26.04.2
 
