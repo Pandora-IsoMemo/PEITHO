@@ -71,6 +71,17 @@ summary.workflowsteprun <- function(object, ...) {
     errs <- list(errs)
   }
 
+  # Also check for error attributes on output (e.g., from functions that return errors as attributes)
+  if (is.list(object$output)) {
+    for (i in seq_along(object$output)) {
+      out_item <- object$output[[i]]
+      if (!is.null(out_item) && !is.null(attr(out_item, "error", exact = TRUE))) {
+        err_attr <- attr(out_item, "error", exact = TRUE)
+        errs[[length(errs) + 1L]] <- err_attr
+      }
+    }
+  }
+
   has_error <- function(x) {
     if (is.null(x)) return(FALSE)
     if (inherits(x, "condition")) return(TRUE)
