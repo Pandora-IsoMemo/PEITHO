@@ -179,15 +179,6 @@ workflow_files_server <- function(id, active_dir) {
       PEITHO:::workflow_file_paths(path = dir_path)$functions_path
     }
 
-    write_text_file_utf8 <- function(path, value) {
-      if (is.null(value)) value <- ""
-      lines <- if (identical(value, "")) character(0) else strsplit(value, "\n", fixed = TRUE)[[1]]
-
-      con <- file(path, open = "w", encoding = "UTF-8")
-      on.exit(close(con), add = TRUE)
-      writeLines(lines, con = con)
-    }
-
     is_functions_file <- function(path) {
       functions_path <- get_functions_path(dirname(path))
       if (is.null(functions_path)) return(FALSE)
@@ -399,12 +390,8 @@ workflow_files_server <- function(id, active_dir) {
         }
       )
       req(!is.null(defaults_text))
-
-      functions_path <- get_functions_path()
-      req(!is.null(functions_path))
-
       tryCatch({
-        write_text_file_utf8(functions_path, defaults_text)
+        write_functions_file(active_dir(), defaults_text)
 
         selected_file(functions_path)
         selected_label(NULL)
@@ -417,12 +404,8 @@ workflow_files_server <- function(id, active_dir) {
 
     observeEvent(input$reset_defaults, {
       req(active_dir(), dir.exists(active_dir()))
-
-      functions_path <- get_functions_path()
-      req(!is.null(functions_path))
-
       tryCatch({
-        write_text_file_utf8(functions_path, "")
+        write_functions_file(active_dir(), "")
 
         selected_file(functions_path)
         selected_label(NULL)

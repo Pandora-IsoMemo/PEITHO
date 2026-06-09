@@ -132,3 +132,92 @@ fetch_WebText <- function(
     warnings    = warn_msgs
   )
 }
+
+#' Generate letter combinations
+#'
+#' This function generates all possible combinations of lowercase letters of a specified length,
+#' starting from a given string and ending at another string. The combinations are generated
+#' in lexicographical order. The function validates the input parameters to ensure they are
+#' appropriate for generating the desired combinations.
+#'
+#' @param n_letters An integer specifying the number of letters in each combination.
+#'  Must be a positive integer.
+#' @param start A character string specifying the starting combination.
+#'  Must be of length `n_letters` and consist of lowercase letters.
+#'  If `NULL`, defaults to a string of 'a's (e.g., "aaa" for `n_letters = 3`).
+#' @param stop A character string specifying the ending combination.
+#'  Must be of length `n_letters` and consist of lowercase letters.
+#'  If `NULL`, defaults to a string of 'z's (e.g., "zzz" for `n_letters = 3`).
+#' @return A character vector containing all combinations of letters from `start` to `stop`,
+#'  inclusive, in lexicographical order.
+generate_letter_combinations <- function(
+  n_letters = 3,
+  start = NULL,
+  stop = NULL
+) {
+
+  # Input validation
+  if (n_letters < 1 || n_letters %% 1 != 0) {
+    stop("n_letters must be a positive integer")
+  }
+
+  # Define the alphabet
+  letters_vec <- letters # Built-in R constant for lowercase letters
+
+  # Set default start and stop values
+  if (is.null(start)) {
+    start <- paste(rep("a", n_letters), collapse = "")
+  }
+  if (is.null(stop)) {
+    stop <- paste(rep("z", n_letters), collapse = "")
+  }
+
+  # Validate start and stop strings
+  if (nchar(start) != n_letters) {
+    stop(paste0("start must be a string of length ", n_letters))
+  }
+  if (nchar(stop) != n_letters) {
+    stop(paste0("stop must be a string of length ", n_letters))
+  }
+
+  # Convert start and stop to numeric indices
+  start_idx <- match(strsplit(start, "")[[1]], letters_vec)
+  stop_idx <- match(strsplit(stop, "")[[1]], letters_vec)
+
+  # Check for invalid characters
+  if (any(is.na(start_idx))) {
+    stop("start contains non-letter characters")
+  }
+  if (any(is.na(stop_idx))) {
+    stop("stop contains non-letter characters")
+  }
+
+  # Check that start <= stop
+  start_num <- sum((start_idx - 1) * 26^((n_letters-1):0)) + 1
+  stop_num <- sum((stop_idx - 1) * 26^((n_letters-1):0)) + 1
+
+  if (start_num > stop_num) {
+    stop("start must be lexicographically less than or equal to stop")
+  }
+
+  # Generate all combinations
+  all_combinations <- expand.grid(rep(list(letters_vec), n_letters))
+  all_combinations <- all_combinations[, n_letters:1] # Reverse to get correct order
+  combination_strings <- apply(all_combinations, 1, paste, collapse = "")
+
+  # Filter to the desired range
+  result <- combination_strings[start_num:stop_num]
+
+  return(result)
+}
+
+paste_prompt_list <- function(string_list, prefix, suffix) {
+  full_string <- paste0(prefix, "%s", suffix)
+
+  vapply(
+    string_list,
+    sprintf,
+    character(1),
+    fmt = full_string
+  )
+}

@@ -17,6 +17,7 @@ Imports:
     httr2,
     futile.logger,
     jsonlite,
+    llmModule (>= 26.06.1),
     rvest,
     shiny,
     shinyjs,

@@ -35,6 +35,11 @@ You can create a workflow object from your own files by specifying a path, or us
 my_wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 ```
 
+# Creating a workflow
+
+## Commands.json File
+
+## Inputs.json File
 
 
 # Exporting a Workflow as a Zip File

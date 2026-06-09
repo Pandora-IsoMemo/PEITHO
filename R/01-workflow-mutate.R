@@ -74,6 +74,66 @@ update_input_list.workflow <- function(
   x
 }
 
+write_text_file_utf8 <- function(path, value) {
+  if (is.null(value)) value <- ""
+
+  lines <- if (identical(value, "")) {
+    character(0)
+  } else {
+    strsplit(value, "\n", fixed = TRUE)[[1]]
+  }
+
+  con <- file(path, open = "w", encoding = "UTF-8")
+  on.exit(close(con), add = TRUE)
+  writeLines(lines, con = con)
+}
+
+#' Write content to the functions file of a workflow
+#'
+#' This helper function writes the provided content to the functions file
+#' of a workflow, if the workflow is file-backed and has a valid functions path.
+#' If the directory path is NULL or does not exist, the function will return
+#' NULL without performing any write operation.
+#'
+#' @param dir_path The directory path of the workflow. If NULL or non-existent,
+#'                 no write will occur.
+#' @param content The content to write to the functions file.
+#' @return NULL if the directory path is invalid; otherwise,
+#'         the content is written to the functions file.
+#' @export
+write_functions_file <- function(dir_path, content) {
+  if (is.null(dir_path) || !dir.exists(dir_path)) return(NULL)
+
+  functions_path <- PEITHO:::workflow_file_paths(path = dir_path)$functions_path
+  if (is.null(functions_path)) {
+    stop("No functions path available in this workflow.")
+  }
+
+  write_text_file_utf8(functions_path, content)
+}
+
+#' Update the functions file of a workflow
+#'
+#' This method updates the content of the functions file associated with a
+#' `workflow` object. If the workflow is file-backed, the updated content
+#' will be written to the functions file.
+#'
+#' @param x The `workflow` object to update.
+#' @param new_functions new functions
+#' @param ... Additional arguments (not used).
+#' @return The updated `workflow` object with the new functions file content.
+#' @export
+update_functions.workflow <- function(x, new_functions, ...) {
+  if (!is.character(new_functions) || length(new_functions) != 1L) {
+    stop("'new_functions' must be a single character string.", call. = FALSE)
+  }
+
+  # update functions file (if file-backed)
+  write_functions_file(x$workflow_file_paths$path_to_folder, new_functions)
+
+  x
+}
+
 #' Add a new step to the workflow
 #'
 #' This method adds a new `workflowstep` to the `steps` list of a `workflow` object at a specified
