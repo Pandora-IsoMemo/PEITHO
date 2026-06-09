@@ -211,13 +211,50 @@ generate_letter_combinations <- function(
   return(result)
 }
 
+#' Paste a list of strings with a prefix and suffix
+#'
+#' This function takes a list of strings and concatenates each string
+#' with a specified prefix and suffix.
+#' It returns a character vector where each element is the result of pasting the prefix,
+#' the string, and the suffix together. The function also includes error handling for
+#' invalid inputs and warnings for NA values in the string list.
+#'
+#' @param string_list A list of strings to be concatenated with the prefix and suffix.
+#'  If `NULL`, the function returns an empty character vector.
+#' @param prefix A single character string to be prefixed to each element of `string_list`.
+#'  Must be a single character string.
+#' @param suffix A single character string to be suffixed to each element of `string_list`.
+#'  Must be a single character string.
+#' @return A character vector where each element is the result of pasting the prefix,
+#'  the string from `string_list`, and the suffix together.
+#'  If `string_list` is `NULL`, returns an empty character vector.
+#'  If `string_list` contains NA values, they will be included as "NA" in the output,
+#'  and a warning will be issued.
+#' @export
 paste_prompt_list <- function(string_list, prefix, suffix) {
-  full_string <- paste0(prefix, "%s", suffix)
+  if (is.null(string_list)) return(character(0))
 
-  vapply(
+  if (is.null(prefix) || !is.character(prefix) || length(prefix) != 1) {
+    stop("prefix must be a single character string")
+  }
+  if (is.null(suffix) || !is.character(suffix) || length(suffix) != 1) {
+    stop("suffix must be a single character string")
+  }
+
+  if (anyNA(string_list)) {
+    warning("string_list contains NA values; they will appear as \"NA\" in the output")
+  }
+  string_list <- as.character(string_list)
+
+  # Escape any literal '%' in prefix/suffix so sprintf does not misinterpret them
+  safe_prefix <- gsub("%", "%%", prefix, fixed = TRUE)
+  safe_suffix <- gsub("%", "%%", suffix, fixed = TRUE)
+  full_string <- paste0(safe_prefix, "%s", safe_suffix)
+
+  unname(vapply(
     string_list,
     sprintf,
     character(1),
     fmt = full_string
-  )
+  ))
 }
