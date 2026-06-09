@@ -202,7 +202,7 @@ generate_letter_combinations <- function(
 
   # Generate all combinations
   all_combinations <- expand.grid(rep(list(letters_vec), n_letters))
-  all_combinations <- all_combinations[, n_letters:1] # Reverse to get correct order
+  all_combinations <- all_combinations[, n_letters:1, drop = FALSE] # Reverse to get correct order
   combination_strings <- apply(all_combinations, 1, paste, collapse = "")
 
   # Filter to the desired range
