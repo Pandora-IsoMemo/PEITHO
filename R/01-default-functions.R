@@ -157,9 +157,15 @@ generate_letter_combinations <- function(
 ) {
 
   # Input validation
-  if (n_letters < 1 || n_letters %% 1 != 0) {
+  if (!is.numeric(n_letters) ||
+      length(n_letters) != 1 ||
+      is.na(n_letters) ||
+      !is.finite(n_letters) ||
+      n_letters < 1 ||
+      n_letters %% 1 != 0) {
     stop("n_letters must be a positive integer")
   }
+  n_letters <- as.integer(n_letters)
 
   # Define the alphabet
   letters_vec <- letters # Built-in R constant for lowercase letters
@@ -173,16 +179,23 @@ generate_letter_combinations <- function(
   }
 
   # Validate start and stop strings
-  if (nchar(start) != n_letters) {
+  if (!is.character(start) || length(start) != 1 || is.na(start)) {
+    stop("start must be a single, non-missing character string")
+  }
+  if (!is.character(stop) || length(stop) != 1 || is.na(stop)) {
+    stop("stop must be a single, non-missing character string")
+  }
+
+  if (nchar(start, type = "chars") != n_letters) {
     stop(paste0("start must be a string of length ", n_letters))
   }
-  if (nchar(stop) != n_letters) {
+  if (nchar(stop, type = "chars") != n_letters) {
     stop(paste0("stop must be a string of length ", n_letters))
   }
 
   # Convert start and stop to numeric indices
-  start_idx <- match(strsplit(start, "")[[1]], letters_vec)
-  stop_idx <- match(strsplit(stop, "")[[1]], letters_vec)
+  start_idx <- match(strsplit(start, "", fixed = TRUE)[[1]], letters_vec)
+  stop_idx <- match(strsplit(stop, "", fixed = TRUE)[[1]], letters_vec)
 
   # Check for invalid characters
   if (any(is.na(start_idx))) {
@@ -193,20 +206,27 @@ generate_letter_combinations <- function(
   }
 
   # Check that start <= stop
-  start_num <- sum((start_idx - 1) * 26^((n_letters-1):0)) + 1
-  stop_num <- sum((stop_idx - 1) * 26^((n_letters-1):0)) + 1
+  powers <- 26^((n_letters - 1):0)
+  start_num <- sum((start_idx - 1) * powers) + 1
+  stop_num <- sum((stop_idx - 1) * powers) + 1
 
   if (start_num > stop_num) {
     stop("start must be lexicographically less than or equal to stop")
   }
 
-  # Generate all combinations
-  all_combinations <- expand.grid(rep(list(letters_vec), n_letters))
-  all_combinations <- all_combinations[, n_letters:1, drop = FALSE] # Reverse to get correct order
-  combination_strings <- apply(all_combinations, 1, paste, collapse = "")
+  # Generate only the requested range as base-26 numbers
+  nums <- seq.int(start_num - 1L, stop_num - 1L)
+  n_out <- length(nums)
+  chars <- matrix("", nrow = n_out, ncol = n_letters)
+  x <- nums
 
-  # Filter to the desired range
-  result <- combination_strings[start_num:stop_num]
+  for (col in n_letters:1) {
+    digit <- x %% 26L
+    chars[, col] <- letters_vec[digit + 1L]
+    x <- x %/% 26L
+  }
+
+  result <- do.call(paste0, as.data.frame(chars, stringsAsFactors = FALSE))
 
   return(result)
 }

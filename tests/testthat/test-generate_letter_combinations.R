@@ -37,14 +37,33 @@ test_that("generate_letter_combinations errors on non-integer n_letters", {
   expect_error(PEITHO:::generate_letter_combinations(n_letters = 1.5))
 })
 
+test_that("generate_letter_combinations errors on invalid n_letters scalars", {
+  expect_error(PEITHO:::generate_letter_combinations(n_letters = NA_real_))
+  expect_error(PEITHO:::generate_letter_combinations(n_letters = Inf))
+  expect_error(PEITHO:::generate_letter_combinations(n_letters = "3"))
+  expect_error(PEITHO:::generate_letter_combinations(n_letters = c(2, 3)))
+})
+
 test_that("generate_letter_combinations errors when start length != n_letters", {
   expect_error(PEITHO:::generate_letter_combinations(n_letters = 3, start = "ab"))
   expect_error(PEITHO:::generate_letter_combinations(n_letters = 3, start = "abcd"))
 })
 
+test_that("generate_letter_combinations errors when start is not scalar character", {
+  expect_error(PEITHO:::generate_letter_combinations(n_letters = 3, start = NA_character_))
+  expect_error(PEITHO:::generate_letter_combinations(n_letters = 3, start = c("abc", "def")))
+  expect_error(PEITHO:::generate_letter_combinations(n_letters = 3, start = 123))
+})
+
 test_that("generate_letter_combinations errors when stop length != n_letters", {
   expect_error(PEITHO:::generate_letter_combinations(n_letters = 3, stop = "ab"))
   expect_error(PEITHO:::generate_letter_combinations(n_letters = 3, stop = "abcd"))
+})
+
+test_that("generate_letter_combinations errors when stop is not scalar character", {
+  expect_error(PEITHO:::generate_letter_combinations(n_letters = 3, stop = NA_character_))
+  expect_error(PEITHO:::generate_letter_combinations(n_letters = 3, stop = c("abc", "def")))
+  expect_error(PEITHO:::generate_letter_combinations(n_letters = 3, stop = 123))
 })
 
 test_that("generate_letter_combinations errors on non-letter characters in start", {
