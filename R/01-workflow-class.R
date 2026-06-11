@@ -465,8 +465,6 @@ run.workflow <- function(
     # update workflow state and append steprun
     state <- update(state, steprun, idx = i)
 
-    steprun_summary <- summary(steprun)
-
     # save final row for a single step to results file
     if (length(x$workflow_file_paths) > 0) {
       step_record <- new_step_final_record(
@@ -482,9 +480,10 @@ run.workflow <- function(
     }
 
     # handle errors
-    if (stop_on_error && !(length(steprun_summary$errors) == 1 && steprun_summary$errors == "")) {
+    steprun_summary <- summary(steprun)
+    if (stop_on_error && !is.null(steprun_summary$error)) {
       stop(
-        "step ", i, " (entry=", step$entry, "): ", paste(steprun_summary$errors, collapse = "; "),
+        "step ", i, " (entry=", step$entry, "): ", steprun_summary$error,
         call. = FALSE
       )
     }
