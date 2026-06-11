@@ -377,14 +377,19 @@ run.workflowstep <- function(
     loop_index <- loop_param_indices[1]
     loop_values <- args[[loop_index]]
 
-    runs <- lapply(loop_values, function(v) {
+    # if loop != false and an argument is a list -> loop over the list
+    step_parts <- lapply(loop_values, function(v) {
       args[[loop_index]] <- v
-      run_with_error(fn, args) # <--- RUN FUNCTION HERE, loop run
-    })
-    results <- lapply(runs, `[[`, "output")
-    errors  <- lapply(runs, `[[`, "error")
 
-    PEITHO:::logInfo("  %d loop iterations for command '%s':", length(runs), x$command)
+      step_part <- run_with_error(fn, args) # <--- RUN FUNCTION HERE, loop run
+      # we should write results during loop to keep results even if errors
+
+      step_part
+    })
+    results <- lapply(step_parts, `[[`, "output")
+    errors  <- lapply(step_parts, `[[`, "error")
+
+    PEITHO:::logInfo("  %d loop iterations for command '%s':", length(step_parts), x$command)
     max_result_length <- max(lengths(results))
     if (max_result_length > 1L) {
       PEITHO:::logWarn(

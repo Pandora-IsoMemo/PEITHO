@@ -444,9 +444,10 @@ run.workflow <- function(
 
     # update workflow state and append steprun
     state <- update(state, steprun, idx = i)
-    # save summary to results file and handle errors
+
     steprun_summary <- summary(steprun)
 
+    # save summary of a single step to to the results file
     if (length(x$workflow_file_paths) > 0) {
       if (!file_nonempty(x$workflow_file_paths$results_path) || i == 1L) {
         # if missing or first step, create empty results file
@@ -466,6 +467,7 @@ run.workflow <- function(
       )
     }
 
+    # handle errors
     if (stop_on_error && !(length(steprun_summary$errors) == 1 && steprun_summary$errors == "")) {
       stop(
         "step ", i, " (entry=", step$entry, "): ", paste(steprun_summary$errors, collapse = "; "),
