@@ -143,6 +143,22 @@ new_step_final_record <- function(
   )
 }
 
+#' Reconstruct legacy per-step results from flat iteration records
+#'
+#' Converts the flat list of result records (written by the intermediate
+#' persistence layer) back into the legacy per-step summary format that
+#' consumers such as the Shiny results table expect. For looped steps the
+#' individual `iteration_result` records are collected in order and their
+#' results are assembled into a list; for non-looped steps the single
+#' `step_result` record is returned as-is.
+#'
+#' @param records A list of result records as read from the results JSON file.
+#' @param run_id Optional character string. When supplied only records matching
+#'   this run identifier are included.
+#' @return A list with one element per workflow step, each element being a
+#'   named list with fields `run_id`, `entry`, `name`, `label`, `result`, and
+#'   `errors` — matching the legacy per-step summary format.
+#' @export
 reconstruct_step_results <- function(records, run_id = NULL) {
   if (!is.null(run_id)) {
     records <- Filter(function(x) identical(x$run_id, run_id), records)
@@ -181,6 +197,21 @@ reconstruct_step_results <- function(records, run_id = NULL) {
   })
 }
 
+#' Read and reconstruct per-step results from the results JSON file
+#'
+#' Reads the flat results JSON file from disk and reconstructs the legacy
+#' per-step summary format via `reconstruct_step_results()`. Use this as the
+#' compatibility entry-point for consumers that expect one result entry per
+#' workflow step (e.g. resume logic, export helpers).
+#'
+#' @param path_to_folder Path to the workflow folder containing the results file.
+#' @param results_file Name of the results JSON file (default:
+#'   `"results_summary.json"`).
+#' @param run_id Optional character string. When supplied only records matching
+#'   this run identifier are included.
+#' @return A list with one element per workflow step in the legacy per-step
+#'   summary format. See `reconstruct_step_results()` for details.
+#' @export
 read_reconstructed_step_results <- function(
   path_to_folder,
   results_file = "results_summary.json",
