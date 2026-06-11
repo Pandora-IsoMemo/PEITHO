@@ -12,10 +12,11 @@
 #'   - "input"  : value comes from user input or external input
 #'   - "result" : value refers to a previous step's result
 #'   - "literal": value is used as-is (a literal argument)
-#' @param loop     Looping behavior for this parameter. One of:
-#'   - "no"   : do not loop
-#'   - "yes"  : always loop
-#'   - "auto" : automatically determine looping, loop if input is a list else not
+#' @param iteration Iteration behavior for this parameter. One of:
+#'   - "no"   : do not iterate
+#'   - "yes"  : always iterate
+#'   - "auto" : automatically determine iteration, iterate if input is a list else not
+#' @param loop     Deprecated alias for `iteration` (kept for backward compatibility).
 #' @param selector Optional selector for result references (for example `2`, `1:3`, `c(1,3)`).
 #' @param ...      Additional metadata (optional).
 #'
@@ -28,12 +29,17 @@ new_operationparam <- function(
   value = "",
   label = "",
   type = c("literal", "input", "result"),
-  loop = c("no", "yes", "auto"),
+  iteration = c("no", "yes", "auto"),
+  loop = NULL,
   selector = NULL,
   ...
 ) {
   type <- match.arg(type)
-  loop <- match.arg(loop)
+
+  if (!is.null(loop)) {
+    iteration <- loop
+  }
+  iteration <- match.arg(iteration)
 
   tags <- c(literal = "", input = "@#*I*#@", result = "@#*L*#@")
   tag <- tags[type]
@@ -47,7 +53,8 @@ new_operationparam <- function(
       type     = type,
       tag      = tag,
       label    = label,
-      loop     = loop,
+      iteration = iteration,
+      loop     = iteration,
       selector = selector,
       dots     = list(...)
     ),
@@ -69,7 +76,7 @@ print.operationparam <- function(x, ...) {
   cat("  label:    ", x$label, "\n", sep = "")
   cat("  selector: ", x$selector %||% "", "\n", sep = "")
   cat("  type:     ", x$type, "\n", sep = "")
-  cat("  loop:     ", x$loop, "\n", sep = "")
+  cat("  iteration:", x$iteration %||% x$loop, "\n", sep = "")
   invisible(x)
 }
 

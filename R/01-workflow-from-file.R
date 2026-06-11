@@ -141,7 +141,7 @@ make_param_from_arg <- function(
     value    = value,
     type     = type,
     label    = label,
-    loop     = cmd_loop %||% "no",
+    iteration = cmd_loop %||% "no",
     selector = selector %||% NULL
   )
 }
@@ -406,7 +406,7 @@ workflow_steps_from_files <- function(
       comments        = cmd$comments %||% "",
       command         = cmd$command,
       args            = cmd$args %||% "",
-      loop            = cmd$loop %||% "no",
+      iteration       = cmd$iteration %||% cmd$loop %||% "no",
       env             = env
     )
   })

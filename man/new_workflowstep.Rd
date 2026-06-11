@@ -11,7 +11,8 @@ new_workflowstep(
   label = NULL,
   comments = "",
   args = "",
-  loop = "auto",
+  iteration = "auto",
+  loop = NULL,
   env = parent.frame(),
   ...
 )
@@ -32,8 +33,10 @@ name space or in a custom script environment.}
 
 \item{args}{The original argument string from the workflow file, for reference.}
 
-\item{loop}{A character string indicating if the step should be looped over.
-Can be "yes", "no", or "auto".}
+\item{iteration}{A character string indicating if the step should iterate over
+list arguments. Can be "yes", "no", or "auto".}
+
+\item{loop}{Deprecated alias for `iteration` (kept for backward compatibility).}
 
 \item{env}{An environment to look up the command function.
 Defaults to the caller's env. Warns if the command

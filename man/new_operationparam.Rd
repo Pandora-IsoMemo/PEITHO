@@ -11,7 +11,8 @@ new_operationparam(
   value = "",
   label = "",
   type = c("literal", "input", "result"),
-  loop = c("no", "yes", "auto"),
+  iteration = c("no", "yes", "auto"),
+  loop = NULL,
   selector = NULL,
   ...
 )
@@ -32,10 +33,12 @@ new_operationparam(
 - "result" : value refers to a previous step's result
 - "literal": value is used as-is (a literal argument)}
 
-\item{loop}{Looping behavior for this parameter. One of:
-- "no"   : do not loop
-- "yes"  : always loop
-- "auto" : automatically determine looping, loop if input is a list else not}
+\item{iteration}{Iteration behavior for this parameter. One of:
+- "no"   : do not iterate
+- "yes"  : always iterate
+- "auto" : automatically determine iteration, iterate if input is a list else not}
+
+\item{loop}{Deprecated alias for `iteration` (kept for backward compatibility).}
 
 \item{selector}{Optional selector for result references (for example `2`, `1:3`, `c(1,3)`).}
 

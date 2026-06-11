@@ -15,13 +15,13 @@ renumber_workflow_steps <- function(x) {
 #' Update a workflow step with a new value
 #'
 #' This function updates a specific field of a `workflowstep` object with a new value. It is used
-#' to modify step details such as name, label, comments, command, parameters, or loop settings.
+#' to modify step details such as name, label, comments, command, parameters, or iteration settings.
 #'
 #' @param x A `workflow` object to update.
 #' @param step The index of the step to update.
 #' @param value The new value to assign to the specified field.
 #' @param field The name of the field to update (one of "name", "label", "comments", "command",
-#'  "args", "loop")
+#'  "args", "iteration", "loop")
 #' @param ... Additional arguments (not used).
 #' @return The updated `workflow` object.
 #' @export

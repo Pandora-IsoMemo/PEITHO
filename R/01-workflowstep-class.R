@@ -15,8 +15,9 @@
 #' @param label          A label for the step, used in UIs. Defaults to the same as `name`.
 #' @param comments       A character string with comments or description for the step.
 #' @param args           The original argument string from the workflow file, for reference.
-#' @param loop           A character string indicating if the step should be looped over.
-#'                       Can be "yes", "no", or "auto".
+#' @param iteration      A character string indicating if the step should iterate over
+#'                       list arguments. Can be "yes", "no", or "auto".
+#' @param loop           Deprecated alias for `iteration` (kept for backward compatibility).
 #' @param env            An environment to look up the command function.
 #'                       Defaults to the caller's env. Warns if the command
 #'                       cannot be found, but does not throw an error at this
@@ -31,7 +32,8 @@ new_workflowstep <- function(
   label           = NULL,
   comments        = "",
   args            = "",          # original argument string from workflow file, for reference
-  loop            = "auto",          # loop variable name (if any)
+  iteration       = "auto",      # iteration behavior for list arguments
+  loop            = NULL,          # deprecated alias
   env             = parent.frame(),
   ...
 ) {
@@ -41,6 +43,11 @@ new_workflowstep <- function(
   resolve_operation(command, env = env, warn_only = TRUE)
 
   required_fields <- parse_required_fields(args)
+
+  # Backward compatibility: `loop` overrides when explicitly supplied.
+  if (!is.null(loop)) {
+    iteration <- loop
+  }
 
   required_inputs <- required_fields$inputs
   required_steps  <- required_fields$steps
@@ -55,7 +62,8 @@ new_workflowstep <- function(
       required_inputs = required_inputs,
       required_steps  = required_steps,
       args            = args,
-      loop            = loop,
+      iteration       = iteration,
+      loop            = iteration,
       dots            = list(...)     # extension point
     ),
     class = c("workflowstep", "list")
@@ -137,7 +145,7 @@ as.commands_record.workflowstep <- function(x, ...) {
     comments = as.character(x$comments),
     command  = as.character(x$command),
     args     = as.character(x$args),
-    loop     = as.character(x$loop),
+    iteration = as.character(x$iteration %||% x$loop),
     prompt   = ""
   )
 }
@@ -177,7 +185,7 @@ get_field.workflowstep <- function(x, field, with_map_field = TRUE, ...) {
 #' @param workflow_file_paths The paths to the workflow files, used for updating related files.
 #' @param value The new value to assign to the specified field.
 #' @param field The name of the field to update. Must be one of "name", "label", "comments",
-#'  "command", "args", or "loop".
+#'  "command", "args", "iteration", or "loop".
 #' @param with_map_field Logical, whether to map the field name using `map_field()`.
 #'  Defaults to `TRUE`.
 #' @param ... Additional arguments (not used).
@@ -203,13 +211,18 @@ update.workflowstep <- function(
     }
     field <- map_field()[[field]]
   }
-  if (!field %in% c(unlist(map_field(), use.names = FALSE), "loop")) {
-    allowed_entries <- c(unlist(map_field(), use.names = FALSE), "loop")
+  if (!field %in% c(unlist(map_field(), use.names = FALSE), "iteration", "loop")) {
+    allowed_entries <- c(unlist(map_field(), use.names = FALSE), "iteration", "loop")
     stop(sprintf(
       "Invalid field '%s'. Must be one of %s.",
       field,
       paste(allowed_entries, collapse = ", ")
     ), call. = FALSE)
+  }
+
+  # Backward compatibility for old field name
+  if (field == "loop") {
+    field <- "iteration"
   }
 
   # validate value
@@ -222,6 +235,11 @@ update.workflowstep <- function(
 
   # update the specified field in the workflowstep object
   x[[field]] <- value
+
+  # Keep deprecated alias in sync for compatibility with older internal code paths.
+  if (field == "iteration") {
+    x$loop <- value
+  }
 
   # update required fields also here, to keep them in sync
   if (field == "args") {
@@ -324,7 +342,7 @@ run.workflowstep <- function(
   PEITHO:::logInfo("Parsing arguments for command %s", x$command)
   params <- make_param_from_arg_loop(
     args_string = x$args,
-    loop = x$loop,
+    loop = x$iteration %||% x$loop,
     step_i = step_i,
     input_list = input_list
   )
@@ -364,10 +382,11 @@ run.workflowstep <- function(
 
   # if loop_param and loop_arg disagree, throw error
   if (!identical(loop_param_indices, arg_list_indices)) {
+    configured_iteration <- params[[arg_list_indices[1]]]$iteration %||% params[[arg_list_indices[1]]]$loop
     PEITHO:::logWarn(
-      "WARNING! Detected list argument(s) for command '%s', but 'loop' is set to '%s'.",
+      "WARNING! Detected list argument(s) for command '%s', but 'iteration' is set to '%s'.",
       x$command,
-      params[[arg_list_indices[1]]]$loop
+      configured_iteration
     )
   }
 
@@ -511,10 +530,11 @@ detect_list_args <- function(args) {
 
 detect_param_config_loop <- function(params, is_arg_list) {
   mapply(function(param, is_list) {
+    param_iteration <- param$iteration %||% param$loop
     if (is_list) {
-      param$loop %in% c("yes", "auto")
+      param_iteration %in% c("yes", "auto")
     } else {
-      param$loop == "yes"
+      param_iteration == "yes"
     }
   }, params, is_arg_list)
 }
