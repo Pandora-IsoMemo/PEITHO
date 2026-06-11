@@ -4,7 +4,15 @@
 \alias{run.workflow}
 \title{Run the entire workflow}
 \usage{
-\method{run}{workflow}(x, state = list(), from = 1L, to = length(x$steps), env = NULL, ...)
+\method{run}{workflow}(
+  x,
+  state = list(),
+  from = 1L,
+  to = length(x$steps),
+  env = NULL,
+  resume_run_id = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{A `workflow` object.}

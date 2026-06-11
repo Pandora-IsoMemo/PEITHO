@@ -301,11 +301,12 @@ run_with_error <- function(fn, args) {
 run.workflowstep <- function(
   x,
   state,
-  env = NULL,  # where to look up function
-  step_i = NULL, # for logging purposes
-  step_idx = NULL, # absolute workflow index for persistence
-  input_list = NULL, # for arguments parsing
-  results_path = NULL, # optional results file path for intermediate writes
+  env = NULL,            # where to look up function
+  step_i = NULL,         # for logging purposes
+  step_idx = NULL,       # absolute workflow index for persistence
+  input_list = NULL,     # for arguments parsing
+  results_path = NULL,   # optional results file path for intermediate writes
+  resume_from_iteration = NULL, # first iteration index still needing execution (NULL = run all)
   ...
 ) {
   if (!inherits(state, "workflowstate")) {
@@ -389,8 +390,42 @@ run.workflowstep <- function(
       results_path_to_folder <- dirname(results_path)
     }
 
+    # Pre-load prior iteration records for resume (only when needed)
+    prior_iter_records <- NULL
+    if (!is.null(resume_from_iteration) && resume_from_iteration > 1L &&
+        !is.null(results_path_to_folder) && !is.null(results_file_name)) {
+      prior_iter_records <- read_iteration_records_for_step(
+        run_id  = state$run_id,
+        step    = step_idx %||% step_i %||% x$entry,
+        path_to_folder = results_path_to_folder,
+        results_file   = results_file_name
+      )
+    }
+
     # if loop != false and an argument is a list -> loop over the list
     for (iter_i in seq_along(loop_values)) {
+
+      # Resume: reconstruct already-completed iterations from JSON
+      if (!is.null(resume_from_iteration) && iter_i < resume_from_iteration) {
+        prior_record <- if (!is.null(prior_iter_records)) {
+          Find(function(r) as.integer(r$iteration_id %||% 0L) == iter_i, prior_iter_records)
+        } else {
+          NULL
+        }
+        if (!is.null(prior_record)) {
+          err_str <- prior_record$error
+          step_parts[[iter_i]] <- list(
+            output = prior_record$result,
+            error  = if (!is.null(err_str) && nzchar(err_str)) err_str else NULL
+          )
+        } else {
+          # Prior record missing — treat as missing output, no error
+          step_parts[[iter_i]] <- list(output = NULL, error = NULL)
+        }
+        PEITHO:::logInfo("  Iteration %d: skipped (loaded from prior run)", iter_i)
+        next
+      }
+
       v <- loop_values[[iter_i]]
       args[[loop_index]] <- v
 

@@ -221,6 +221,142 @@ read_reconstructed_step_results <- function(
   reconstruct_step_results(records, run_id = run_id)
 }
 
+# -------------------------------------------------------------------------
+# Resume cursor helpers
+# -------------------------------------------------------------------------
+
+#' Determine where to resume a partially completed workflow run
+#'
+#' Reads the flat results records and returns the step index and iteration
+#' index at which execution should continue.  A step is considered finished
+#' when a `step_result` or `step_summary` record with `status = "finished"`
+#' exists for that step.  For a looped step that started but never finished,
+#' `resume_iteration` is set to `max(completed iteration_id) + 1`.
+#'
+#' @param run_id Character.  The run identifier to search for.
+#' @param path_to_folder Path to the workflow folder.
+#' @param results_file Name of the results JSON file (default:
+#'   `"results_summary.json"`).
+#' @return A list with two elements:
+#'   \describe{
+#'     \item{`resume_step`}{Integer.  Index of the first step to execute.}
+#'     \item{`resume_iteration`}{Integer or `NULL`.  For a looped step that
+#'       was partially completed, the first iteration index that still needs
+#'       to run.  `NULL` when no iterations have been recorded yet.}
+#'   }
+#' @export
+get_resume_cursor <- function(
+  run_id,
+  path_to_folder,
+  results_file = "results_summary.json"
+) {
+  records <- read_json_if_exists(results_file_path(path_to_folder, results_file))
+
+  if (!is.null(run_id) && nzchar(run_id)) {
+    records <- Filter(function(x) identical(x$run_id, run_id), records)
+  }
+
+  if (length(records) == 0L) {
+    return(list(resume_step = 1L, resume_iteration = NULL))
+  }
+
+  # Steps that have a completed final record
+  final_records <- Filter(
+    function(x) x$record_kind %in% c("step_result", "step_summary"),
+    records
+  )
+  finished_steps <- vapply(
+    Filter(function(x) identical(x$status, "finished"), final_records),
+    function(x) as.integer(x$step %||% 0L),
+    integer(1)
+  )
+
+  # All step indices seen in any record
+  all_steps <- sort(unique(vapply(
+    records,
+    function(x) as.integer(x$step %||% 0L),
+    integer(1)
+  )))
+  all_steps <- all_steps[all_steps > 0L]
+
+  if (length(all_steps) == 0L) {
+    return(list(resume_step = 1L, resume_iteration = NULL))
+  }
+
+  # First step not yet finished
+  unfinished <- setdiff(all_steps, finished_steps)
+  resume_step <- if (length(unfinished) > 0L) {
+    min(unfinished)
+  } else {
+    # All seen steps finished — continue from the step after the last
+    max(all_steps) + 1L
+  }
+
+  # For the resume step, find the maximum completed iteration_id
+  iter_records_for_step <- Filter(
+    function(x) {
+      as.integer(x$step %||% 0L) == resume_step &&
+        identical(x$record_kind, "iteration_result")
+    },
+    records
+  )
+
+  resume_iteration <- if (length(iter_records_for_step) > 0L) {
+    max(vapply(
+      iter_records_for_step,
+      function(x) as.integer(x$iteration_id %||% 0L),
+      integer(1)
+    )) + 1L
+  } else {
+    NULL
+  }
+
+  list(resume_step = resume_step, resume_iteration = resume_iteration)
+}
+
+#' Read existing iteration records for a specific step and run
+#'
+#' Returns only `iteration_result` records, ordered by `iteration_id`.
+#' Used by `run.workflowstep()` to reconstruct skipped-iteration outputs
+#' when resuming a partially completed looped step.
+#'
+#' @param run_id Character.  The run identifier.
+#' @param step Integer.  The step index.
+#' @param path_to_folder Path to the workflow folder.
+#' @param results_file Name of the results JSON file (default:
+#'   `"results_summary.json"`).
+#' @return A list of matching records, each a named list, ordered by
+#'   `iteration_id`.
+read_iteration_records_for_step <- function(
+  run_id,
+  step,
+  path_to_folder,
+  results_file = "results_summary.json"
+) {
+  records <- read_json_if_exists(results_file_path(path_to_folder, results_file))
+  step <- as.integer(step)
+
+  iter_records <- Filter(
+    function(x) {
+      identical(x$run_id, run_id) &&
+        as.integer(x$step %||% 0L) == step &&
+        identical(x$record_kind, "iteration_result")
+    },
+    records
+  )
+
+  if (length(iter_records) > 0L) {
+    ord <- order(vapply(
+      iter_records,
+      function(x) as.integer(x$iteration_id %||% 0L),
+      integer(1)
+    ))
+    iter_records <- iter_records[ord]
+  }
+
+  iter_records
+}
+
 update_json_summary <- function(
   result,
   idx,

@@ -12,6 +12,7 @@
   step_idx = NULL,
   input_list = NULL,
   results_path = NULL,
+  resume_from_iteration = NULL,
   ...
 )
 }
