@@ -12,6 +12,7 @@ new_workflowstep(
   comments = "",
   args = "",
   iteration = "auto",
+  samples = 1L,
   loop = NULL,
   env = parent.frame(),
   ...
@@ -35,6 +36,9 @@ name space or in a custom script environment.}
 
 \item{iteration}{A character string indicating if the step should iterate over
 list arguments. Can be "yes", "no", or "auto".}
+
+\item{samples}{Integer number of samples to run per iteration. Must be
+>= 1. Defaults to 1 (current behavior).}
 
 \item{loop}{Deprecated alias for `iteration` (kept for backward compatibility).}
 

@@ -6,7 +6,8 @@
     "comments": "",
     "command": "simple_split",
     "args": "x=@#*I*#@empire_inputs@#*I*#@, split=\\n",
-    "loop": "no",
+    "iteration": "no",
+    "samples": 1,
     "prompt": ""
   },
   {
@@ -16,7 +17,8 @@
     "comments": "",
     "command": "fetch_WebText",
     "args": "url=@#*L*#@Split@#*L*#@[c(1, 3)]",
-    "loop": "auto",
+    "iteration": "auto",
+    "samples": 1,
     "prompt": ""
   },
   {
@@ -26,7 +28,8 @@
     "comments": "",
     "command": "paste",
     "args": "x=@#*L*#@get_content@#*L*#@, collapse=\\n",
-    "loop": "no",
+    "iteration": "no",
+    "samples": 1,
     "prompt": ""
   },
   {
@@ -36,7 +39,8 @@
     "comments": "",
     "command": "gsub",
     "args": "pattern=\"e\", replacement=\"HALLO\", x=@#*L*#@paste_urls@#*L*#@",
-    "loop": "no",
+    "iteration": "no",
+    "samples": 1,
     "prompt": ""
   },
   {
@@ -46,7 +50,8 @@
     "comments": "",
     "command": "simple_split",
     "args": "x=@#*L*#@substitute_content@#*L*#@, split=\"HALLO\"",
-    "loop": "no",
+    "iteration": "no",
+    "samples": 1,
     "prompt": ""
   },
   {
@@ -56,7 +61,8 @@
     "comments": "",
     "command": "simple_split",
     "args": "x=@#*I*#@statistics_inputs@#*I*#@, split=\\n",
-    "loop": "no",
+    "iteration": "no",
+    "samples": 1,
     "prompt": ""
   },
   {
@@ -66,7 +72,8 @@
     "comments": "",
     "command": "fetch_WebText",
     "args": "url=@#*L*#@Split_2@#*L*#@",
-    "loop": "auto",
+    "iteration": "auto",
+    "samples": 1,
     "prompt": ""
   },
   {
@@ -76,7 +83,8 @@
     "comments": "",
     "command": "paste",
     "args": "x=@#*L*#@get_content_2@#*L*#@, collapse=\\n",
-    "loop": "no",
+    "iteration": "no",
+    "samples": 1,
     "prompt": ""
   },
   {
@@ -86,7 +94,8 @@
     "comments": "",
     "command": "paste",
     "args": "x=@#*L*#@substitute_content@#*L*#@, y=@#*L*#@paste_urls_2@#*L*#@, sep=\\n---\\n",
-    "loop": "no",
+    "iteration": "no",
+    "samples": 1,
     "prompt": ""
   }
 ]

@@ -445,8 +445,9 @@ run.workflow <- function(
     )
     from <- max(from, resume_cursor$resume_step)
     PEITHO:::logInfo(
-      "Resume cursor: step %d, iteration %s",
+      "Resume cursor: step %d, sample %s, iteration %s",
       resume_cursor$resume_step,
+      if (is.null(resume_cursor$resume_sample)) "NULL" else as.character(resume_cursor$resume_sample),
       if (is.null(resume_cursor$resume_iteration)) "NULL" else as.character(resume_cursor$resume_iteration)
     )
   }
@@ -484,6 +485,13 @@ run.workflow <- function(
     } else {
       NULL
     }
+    step_resume_sample <- if (
+      !is.null(resume_cursor) && i == resume_cursor$resume_step
+    ) {
+      resume_cursor$resume_sample
+    } else {
+      NULL
+    }
 
     steprun <- run(
       step,
@@ -493,6 +501,7 @@ run.workflow <- function(
       step_idx = i,
       input_list = x$input_list,
       results_path = x$workflow_file_paths$results_path %||% NULL,
+      resume_from_sample = step_resume_sample,
       resume_from_iteration = step_resume_iteration,
       ...
     )

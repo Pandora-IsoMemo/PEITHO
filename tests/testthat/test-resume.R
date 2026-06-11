@@ -289,3 +289,137 @@ test_that("run.workflow without resume_run_id generates a fresh run_id", {
   expect_type(result$run_id, "character")
   expect_true(nzchar(result$run_id))
 })
+
+test_that("get_resume_cursor returns sample-aware cursor for sample_result records", {
+  dir <- tempfile()
+  dir.create(dir)
+
+  records <- list(
+    list(
+      run_id = "run_sample",
+      step = 1L,
+      entry = 1L,
+      name = "Step 1",
+      label = "Step 1",
+      record_kind = "sample_result",
+      sample_id = 1L,
+      sample_total = 2L,
+      iteration_id = 1L,
+      iteration_total = 2L,
+      status = "ok",
+      result = "A",
+      error = NULL
+    ),
+    list(
+      run_id = "run_sample",
+      step = 1L,
+      entry = 1L,
+      name = "Step 1",
+      label = "Step 1",
+      record_kind = "sample_result",
+      sample_id = 1L,
+      sample_total = 2L,
+      iteration_id = 2L,
+      iteration_total = 2L,
+      status = "ok",
+      result = "B",
+      error = NULL
+    )
+  )
+
+  make_results_file(dir, records)
+
+  cursor <- PEITHO:::get_resume_cursor("run_sample", dir)
+  expect_equal(cursor$resume_step, 1L)
+  expect_equal(cursor$resume_sample, 2L)
+  expect_equal(cursor$resume_iteration, 2L)
+})
+
+test_that("run.workflowstep resumes from sample + iteration for sampled runs", {
+  dir <- tempfile()
+  dir.create(dir)
+  results_path <- file.path(dir, "results_summary.json")
+
+  # Completed sample 1 (all iterations) and sample 2 iteration 1
+  make_results_file(dir, list(
+    list(
+      run_id = "run_sample_resume",
+      step = 2L,
+      entry = 2L,
+      name = "Step 2",
+      label = "Step 2",
+      record_kind = "sample_result",
+      sample_id = 1L,
+      sample_total = 2L,
+      iteration_id = 1L,
+      iteration_total = 2L,
+      status = "ok",
+      result = "HELLO",
+      error = NULL
+    ),
+    list(
+      run_id = "run_sample_resume",
+      step = 2L,
+      entry = 2L,
+      name = "Step 2",
+      label = "Step 2",
+      record_kind = "sample_result",
+      sample_id = 1L,
+      sample_total = 2L,
+      iteration_id = 2L,
+      iteration_total = 2L,
+      status = "ok",
+      result = "WORLD",
+      error = NULL
+    ),
+    list(
+      run_id = "run_sample_resume",
+      step = 2L,
+      entry = 2L,
+      name = "Step 2",
+      label = "Step 2",
+      record_kind = "sample_result",
+      sample_id = 2L,
+      sample_total = 2L,
+      iteration_id = 1L,
+      iteration_total = 2L,
+      status = "ok",
+      result = "HELLO",
+      error = NULL
+    )
+  ))
+
+  call_env <- new.env(parent = emptyenv())
+  call_env$count <- 0L
+  spy_toupper <- function(x) {
+    call_env$count <- call_env$count + 1L
+    toupper(x)
+  }
+  assign("spy_toupper", spy_toupper, envir = .GlobalEnv)
+  on.exit(rm("spy_toupper", envir = .GlobalEnv), add = TRUE)
+
+  step <- new_workflowstep(
+    entry = 2L,
+    command = "spy_toupper",
+    args = "x = @#*L*#@step 1@#*L*#@",
+    iteration = "auto",
+    samples = 2
+  )
+  state <- new_workflowstate(run_id = "run_sample_resume")
+  state$results_by_name[["step_1"]] <- c("hello", "world")
+
+  steprun <- run.workflowstep(
+    step,
+    state,
+    env = globalenv(),
+    step_i = 2L,
+    step_idx = 2L,
+    results_path = results_path,
+    resume_from_sample = 2L,
+    resume_from_iteration = 2L
+  )
+
+  expect_equal(call_env$count, 1L)
+  expect_length(steprun$output, 4L)
+  expect_equal(steprun$output[[4]], "WORLD")
+})

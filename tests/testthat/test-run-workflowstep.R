@@ -134,3 +134,49 @@ test_that("extract_arg_list applies selector to previous result", {
   out <- PEITHO:::extract_arg_list(param, state)
   expect_equal(out$x, list("a", "c"))
 })
+
+test_that("run.workflowstep with samples repeats each iteration", {
+  step <- new_workflowstep(
+    entry = 2,
+    command = "toupper",
+    args = "x = @#*L*#@step 1@#*L*#@",
+    iteration = "auto",
+    samples = 2
+  )
+
+  state <- new_workflowstate(run_id = "sample_run")
+  state$results_by_name[["step_1"]] <- c("hello", "world")
+
+  steprun <- run.workflowstep(step, state, step_i = 2, step_idx = 2, env = globalenv())
+
+  expect_length(steprun$output, 4L)
+  expect_equal(steprun$output, list("HELLO", "HELLO", "WORLD", "WORLD"))
+  expect_equal(steprun$meta$sample_total, 2L)
+  expect_equal(steprun$meta$iteration_total, 2L)
+})
+
+test_that("run.workflowstep with samples on non-iterative step repeats command", {
+  call_env <- new.env(parent = emptyenv())
+  call_env$count <- 0L
+  sampled_upper <- function(x) {
+    call_env$count <- call_env$count + 1L
+    toupper(x)
+  }
+  assign("sampled_upper", sampled_upper, envir = .GlobalEnv)
+  on.exit(rm("sampled_upper", envir = .GlobalEnv), add = TRUE)
+
+  step <- new_workflowstep(
+    entry = 1,
+    command = "sampled_upper",
+    args = "x = \"hello\"",
+    iteration = "no",
+    samples = 3
+  )
+
+  state <- new_workflowstate(run_id = "sample_run_non_iter")
+  steprun <- run.workflowstep(step, state, env = globalenv())
+
+  expect_equal(call_env$count, 3L)
+  expect_length(steprun$output, 3L)
+  expect_equal(steprun$output, list("HELLO", "HELLO", "HELLO"))
+})

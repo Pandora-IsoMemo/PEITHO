@@ -407,6 +407,7 @@ workflow_steps_from_files <- function(
       command         = cmd$command,
       args            = cmd$args %||% "",
       iteration       = cmd$iteration %||% cmd$loop %||% "no",
+      samples         = cmd$samples %||% 1L,
       env             = env
     )
   })

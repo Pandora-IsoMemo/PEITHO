@@ -47,11 +47,13 @@ normalize_error_message <- function(err) {
 
 is_same_record_key <- function(a, b) {
   same_iteration_id <- is.null(a$iteration_id) && is.null(b$iteration_id) || identical(a$iteration_id, b$iteration_id)
+  same_sample_id <- is.null(a$sample_id) && is.null(b$sample_id) || identical(a$sample_id, b$sample_id)
 
   identical(a$run_id, b$run_id) &&
     identical(a$step, b$step) &&
     identical(a$record_kind, b$record_kind) &&
-    same_iteration_id
+    same_iteration_id &&
+    same_sample_id
 }
 
 upsert_results_record <- function(
@@ -86,11 +88,16 @@ new_iteration_result_record <- function(
   workflowstep,
   iteration_id,
   iteration_total,
+  sample_id = 1L,
+  sample_total = 1L,
   result,
   error,
   timestamp = results_timestamp_utc()
 ) {
   err <- normalize_error_message(error)
+  sample_id <- as.integer(sample_id %||% 1L)
+  sample_total <- as.integer(sample_total %||% 1L)
+  has_samples <- sample_total > 1L
 
   list(
     run_id = run_id,
@@ -98,9 +105,11 @@ new_iteration_result_record <- function(
     entry = workflowstep$entry,
     name = workflowstep$name,
     label = workflowstep$label,
-    record_kind = "iteration_result",
+    record_kind = if (has_samples) "sample_result" else "iteration_result",
     iteration_id = as.integer(iteration_id),
     iteration_total = as.integer(iteration_total),
+    sample_id = if (has_samples) sample_id else NULL,
+    sample_total = if (has_samples) sample_total else NULL,
     status = if (is.null(err) || !nzchar(err)) "ok" else "error",
     result = result,
     error = err,
@@ -115,7 +124,9 @@ new_step_final_record <- function(
   timestamp = results_timestamp_utc()
 ) {
   iteration_total <- steprun$meta$iteration_total %||% length(steprun$output)
+  sample_total <- steprun$meta$sample_total %||% 1L
   is_looped <- isTRUE(steprun$meta$is_looped)
+  completed_iterations <- steprun$meta$completed_iterations %||% if (sample_total > 1L) length(steprun$output) %/% sample_total else length(steprun$output)
 
   errs <- lapply(steprun$error %||% list(), normalize_error_message)
   errs <- Filter(function(x) !is.null(x) && nzchar(x), errs)
@@ -131,14 +142,19 @@ new_step_final_record <- function(
     record_kind = if (is_looped) "step_summary" else "step_result",
     iteration_id = NULL,
     iteration_total = if (is_looped) as.integer(iteration_total) else NULL,
+    sample_id = NULL,
+    sample_total = if (sample_total > 1L) as.integer(sample_total) else NULL,
     status = if (length(errs)) "error" else "finished",
     result = if (is_looped) NULL else steprun$output,
     error = err_text,
     errors = if (is.null(err_text)) if (is_looped) NULL else "" else err_text,
-    completed_iterations = if (is_looped) as.integer(length(steprun$output)) else NULL,
+    completed_iterations = if (is_looped) as.integer(completed_iterations) else NULL,
+    completed_samples = if (is_looped && sample_total > 1L) as.integer(sample_total) else NULL,
     error_count = as.integer(length(errs)),
     first_iteration_id = if (is_looped && length(steprun$output) > 0L) 1L else NULL,
-    last_iteration_id = if (is_looped) as.integer(length(steprun$output)) else NULL,
+    last_iteration_id = if (is_looped) as.integer(completed_iterations) else NULL,
+    first_sample_id = if (is_looped && sample_total > 1L) 1L else NULL,
+    last_sample_id = if (is_looped && sample_total > 1L) as.integer(sample_total) else NULL,
     timestamp = timestamp
   )
 }
@@ -170,9 +186,12 @@ reconstruct_step_results <- function(records, run_id = NULL) {
   lapply(step_ids, function(step_id) {
     step_records <- Filter(function(x) as.integer(x$step %||% x$entry) == step_id, records)
 
-    iter_records <- Filter(function(x) identical(x$record_kind, "iteration_result"), step_records)
+    iter_records <- Filter(function(x) x$record_kind %in% c("iteration_result", "sample_result"), step_records)
     if (length(iter_records) > 0L) {
-      iter_order <- order(vapply(iter_records, function(x) x$iteration_id %||% 0L, integer(1)))
+      iter_order <- order(
+        vapply(iter_records, function(x) as.integer(x$iteration_id %||% 0L), integer(1)),
+        vapply(iter_records, function(x) as.integer(x$sample_id %||% 1L), integer(1))
+      )
       iter_records <- iter_records[iter_order]
     }
 
@@ -237,12 +256,15 @@ read_reconstructed_step_results <- function(
 #' @param path_to_folder Path to the workflow folder.
 #' @param results_file Name of the results JSON file (default:
 #'   `"results_summary.json"`).
-#' @return A list with two elements:
+#' @return A list with three elements:
 #'   \describe{
 #'     \item{`resume_step`}{Integer.  Index of the first step to execute.}
 #'     \item{`resume_iteration`}{Integer or `NULL`.  For a looped step that
 #'       was partially completed, the first iteration index that still needs
 #'       to run.  `NULL` when no iterations have been recorded yet.}
+#'     \item{`resume_sample`}{Integer or `NULL`.  For sampled runs, the
+#'       sample index for the first unfinished pair. `NULL` for legacy
+#'       iteration-only rows.}
 #'   }
 #' @export
 get_resume_cursor <- function(
@@ -257,7 +279,7 @@ get_resume_cursor <- function(
   }
 
   if (length(records) == 0L) {
-    return(list(resume_step = 1L, resume_iteration = NULL))
+    return(list(resume_step = 1L, resume_iteration = NULL, resume_sample = NULL))
   }
 
   # Steps that have a completed final record
@@ -280,7 +302,7 @@ get_resume_cursor <- function(
   all_steps <- all_steps[all_steps > 0L]
 
   if (length(all_steps) == 0L) {
-    return(list(resume_step = 1L, resume_iteration = NULL))
+    return(list(resume_step = 1L, resume_iteration = NULL, resume_sample = NULL))
   }
 
   # First step not yet finished
@@ -293,30 +315,51 @@ get_resume_cursor <- function(
   }
 
   # For the resume step, find the maximum completed iteration_id
-  iter_records_for_step <- Filter(
+  detail_records_for_step <- Filter(
     function(x) {
       as.integer(x$step %||% 0L) == resume_step &&
-        identical(x$record_kind, "iteration_result")
+        x$record_kind %in% c("iteration_result", "sample_result")
     },
     records
   )
 
-  resume_iteration <- if (length(iter_records_for_step) > 0L) {
-    max(vapply(
-      iter_records_for_step,
-      function(x) as.integer(x$iteration_id %||% 0L),
-      integer(1)
-    )) + 1L
-  } else {
-    NULL
+  resume_iteration <- NULL
+  resume_sample <- NULL
+  if (length(detail_records_for_step) > 0L) {
+    sample_ids <- vapply(detail_records_for_step, function(x) as.integer(x$sample_id %||% 1L), integer(1))
+    iter_ids <- vapply(detail_records_for_step, function(x) as.integer(x$iteration_id %||% 0L), integer(1))
+    ord <- order(iter_ids, sample_ids)
+    last <- detail_records_for_step[[ord[length(ord)]]]
+
+    last_sample <- as.integer(last$sample_id %||% 1L)
+    last_iteration <- as.integer(last$iteration_id %||% 0L)
+    iteration_total <- as.integer(last$iteration_total %||% 1L)
+    sample_total <- as.integer(last$sample_total %||% 1L)
+
+    if (last_sample < sample_total) {
+      resume_sample <- last_sample + 1L
+      resume_iteration <- last_iteration
+    } else if (last_iteration < iteration_total) {
+      resume_sample <- 1L
+      resume_iteration <- last_iteration + 1L
+    }
+
+    # Legacy iteration-only records should keep sample cursor NULL.
+    if (sample_total <= 1L) {
+      resume_sample <- NULL
+      if (!is.null(resume_iteration) && resume_iteration == 1L) {
+        resume_iteration <- NULL
+      }
+    }
   }
 
-  list(resume_step = resume_step, resume_iteration = resume_iteration)
+  list(resume_step = resume_step, resume_iteration = resume_iteration, resume_sample = resume_sample)
 }
 
 #' Read existing iteration records for a specific step and run
 #'
-#' Returns only `iteration_result` records, ordered by `iteration_id`.
+#' Returns detail records (`iteration_result` and `sample_result`) ordered by
+#' `(iteration_id, sample_id)`.
 #' Used by `run.workflowstep()` to reconstruct skipped-iteration outputs
 #' when resuming a partially completed looped step.
 #'
@@ -340,7 +383,7 @@ read_iteration_records_for_step <- function(
     function(x) {
       identical(x$run_id, run_id) &&
         as.integer(x$step %||% 0L) == step &&
-        identical(x$record_kind, "iteration_result")
+        x$record_kind %in% c("iteration_result", "sample_result")
     },
     records
   )
@@ -349,6 +392,10 @@ read_iteration_records_for_step <- function(
     ord <- order(vapply(
       iter_records,
       function(x) as.integer(x$iteration_id %||% 0L),
+      integer(1)
+    ), vapply(
+      iter_records,
+      function(x) as.integer(x$sample_id %||% 1L),
       integer(1)
     ))
     iter_records <- iter_records[ord]

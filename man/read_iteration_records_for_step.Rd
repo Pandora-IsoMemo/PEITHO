@@ -26,7 +26,8 @@ A list of matching records, each a named list, ordered by
   `iteration_id`.
 }
 \description{
-Returns only `iteration_result` records, ordered by `iteration_id`.
+Returns detail records (`iteration_result` and `sample_result`) ordered by
+`(iteration_id, sample_id)`.
 Used by `run.workflowstep()` to reconstruct skipped-iteration outputs
 when resuming a partially completed looped step.
 }

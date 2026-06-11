@@ -19,12 +19,15 @@ get_resume_cursor(
 `"results_summary.json"`).}
 }
 \value{
-A list with two elements:
+A list with three elements:
   \describe{
     \item{`resume_step`}{Integer.  Index of the first step to execute.}
     \item{`resume_iteration`}{Integer or `NULL`.  For a looped step that
       was partially completed, the first iteration index that still needs
       to run.  `NULL` when no iterations have been recorded yet.}
+    \item{`resume_sample`}{Integer or `NULL`.  For sampled runs, the
+      sample index for the first unfinished pair. `NULL` for legacy
+      iteration-only rows.}
   }
 }
 \description{

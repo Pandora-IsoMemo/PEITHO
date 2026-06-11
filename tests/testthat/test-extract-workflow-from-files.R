@@ -221,3 +221,30 @@ test_that("parse_args keeps selectors with commas intact", {
   expect_equal(parsed$names, c("url", "timeout"))
   expect_equal(parsed$values, c("@#*L*#@Split@#*L*#@[c(1, 3)]", "30"))
 })
+
+test_that("workflow_steps_from_files reads samples and defaults missing values to 1", {
+  commands <- list(
+    list(
+      name = "Step 1",
+      command = "toupper",
+      args = "x = \"a\"",
+      iteration = "no",
+      samples = 3
+    ),
+    list(
+      name = "Step 2",
+      command = "toupper",
+      args = "x = \"b\"",
+      iteration = "no"
+    )
+  )
+
+  tmpdir <- create_test_files(commands = commands, inputs = list())
+  wf_paths <- workflow_file_paths(path = tmpdir)
+  steps <- suppressWarnings(workflow_steps_from_files(workflow_file_paths = wf_paths))
+
+  expect_equal(steps[[1]]$samples, 3L)
+  expect_equal(steps[[2]]$samples, 1L)
+
+  unlink(tmpdir, recursive = TRUE)
+})
