@@ -249,7 +249,7 @@ update.workflowstep <- function(
     )
     commands_list[[x$entry]] <- as.commands_record(x)
     # write back to file
-    write_json(
+    jsonlite::write_json(
       commands_list,
       path = workflow_file_paths$commands_path,
       auto_unbox = TRUE,
@@ -303,7 +303,9 @@ run.workflowstep <- function(
   state,
   env = NULL,  # where to look up function
   step_i = NULL, # for logging purposes
+  step_idx = NULL, # absolute workflow index for persistence
   input_list = NULL, # for arguments parsing
+  results_path = NULL, # optional results file path for intermediate writes
   ...
 ) {
   if (!inherits(state, "workflowstate")) {
@@ -376,16 +378,44 @@ run.workflowstep <- function(
     )
     loop_index <- loop_param_indices[1]
     loop_values <- args[[loop_index]]
+    iteration_total <- length(loop_values)
+
+    step_parts <- vector("list", iteration_total)
+    results_file_name <- NULL
+    results_path_to_folder <- NULL
+
+    if (!is.null(results_path) && nzchar(results_path)) {
+      results_file_name <- basename(results_path)
+      results_path_to_folder <- dirname(results_path)
+    }
 
     # if loop != false and an argument is a list -> loop over the list
-    step_parts <- lapply(loop_values, function(v) {
+    for (iter_i in seq_along(loop_values)) {
+      v <- loop_values[[iter_i]]
       args[[loop_index]] <- v
 
       step_part <- run_with_error(fn, args) # <--- RUN FUNCTION HERE, loop run
-      # we should write results during loop to keep results even if errors
+      step_parts[[iter_i]] <- step_part
 
-      step_part
-    })
+      if (!is.null(results_file_name) && !is.null(results_path_to_folder)) {
+        iteration_record <- new_iteration_result_record(
+          run_id = state$run_id,
+          step = step_idx %||% step_i %||% x$entry,
+          workflowstep = x,
+          iteration_id = iter_i,
+          iteration_total = iteration_total,
+          result = step_part$output,
+          error = step_part$error
+        )
+        upsert_results_record(
+          record = iteration_record,
+          path_to_folder = results_path_to_folder,
+          results_file = results_file_name
+        )
+      }
+
+    }
+
     results <- lapply(step_parts, `[[`, "output")
     errors  <- lapply(step_parts, `[[`, "error")
 
@@ -405,7 +435,9 @@ run.workflowstep <- function(
       args   = args,
       output = results,
       error  = errors,
-      run_id = state$run_id
+      run_id = state$run_id,
+      is_looped = TRUE,
+      iteration_total = iteration_total
     )
   } else {
     PEITHO:::logDebug("  Running command: NO LOOPING")
@@ -427,7 +459,9 @@ run.workflowstep <- function(
       args   = args,
       output = list(run$output),
       error  = list(run$error),
-      run_id = state$run_id
+      run_id = state$run_id,
+      is_looped = FALSE,
+      iteration_total = 1L
     )
   }
 

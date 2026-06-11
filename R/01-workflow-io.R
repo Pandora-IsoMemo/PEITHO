@@ -13,6 +13,183 @@ read_json_if_exists <- function(path) {
   jsonlite::fromJSON(path, simplifyVector = FALSE)
 }
 
+results_file_path <- function(path_to_folder, results_file = "results_summary.json") {
+  file.path(path_to_folder, results_file)
+}
+
+results_timestamp_utc <- function(time = Sys.time()) {
+  format(as.POSIXct(time, tz = "UTC"), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+}
+
+normalize_error_message <- function(err) {
+  if (is.null(err)) return(NULL)
+
+  if (inherits(err, "condition")) {
+    msg <- conditionMessage(err)
+    return(if (nzchar(msg)) msg else NULL)
+  }
+
+  if (is.character(err)) {
+    err <- err[!is.na(err)]
+    err <- err[nzchar(err)]
+    return(if (length(err)) paste(err, collapse = "\n") else NULL)
+  }
+
+  msg <- tryCatch(
+    paste(capture.output(str(err)), collapse = "\n"),
+    error = function(...) NULL
+  )
+
+  if (!is.null(msg) && nzchar(msg)) return(msg)
+
+  as.character(err)
+}
+
+is_same_record_key <- function(a, b) {
+  same_iteration_id <- is.null(a$iteration_id) && is.null(b$iteration_id) || identical(a$iteration_id, b$iteration_id)
+
+  identical(a$run_id, b$run_id) &&
+    identical(a$step, b$step) &&
+    identical(a$record_kind, b$record_kind) &&
+    same_iteration_id
+}
+
+upsert_results_record <- function(
+  record,
+  path_to_folder,
+  results_file = "results_summary.json"
+) {
+  path <- results_file_path(path_to_folder, results_file)
+  records <- read_json_if_exists(path)
+
+  replace_idx <- which(vapply(records, function(x) is_same_record_key(x, record), logical(1)))
+  if (length(replace_idx)) {
+    records[[replace_idx[1L]]] <- record
+  } else {
+    records[[length(records) + 1L]] <- record
+  }
+
+  jsonlite::write_json(
+    records,
+    path,
+    auto_unbox = TRUE,
+    pretty = TRUE,
+    null = "null"
+  )
+
+  invisible(TRUE)
+}
+
+new_iteration_result_record <- function(
+  run_id,
+  step,
+  workflowstep,
+  iteration_id,
+  iteration_total,
+  result,
+  error,
+  timestamp = results_timestamp_utc()
+) {
+  err <- normalize_error_message(error)
+
+  list(
+    run_id = run_id,
+    step = as.integer(step),
+    entry = workflowstep$entry,
+    name = workflowstep$name,
+    label = workflowstep$label,
+    record_kind = "iteration_result",
+    iteration_id = as.integer(iteration_id),
+    iteration_total = as.integer(iteration_total),
+    status = if (is.null(err) || !nzchar(err)) "ok" else "error",
+    result = result,
+    error = err,
+    errors = if (is.null(err)) "" else err,
+    timestamp = timestamp
+  )
+}
+
+new_step_final_record <- function(
+  steprun,
+  step,
+  timestamp = results_timestamp_utc()
+) {
+  iteration_total <- steprun$meta$iteration_total %||% length(steprun$output)
+  is_looped <- isTRUE(steprun$meta$is_looped)
+
+  errs <- lapply(steprun$error %||% list(), normalize_error_message)
+  errs <- Filter(function(x) !is.null(x) && nzchar(x), errs)
+
+  err_text <- if (length(errs)) paste(errs, collapse = "\n") else NULL
+
+  list(
+    run_id = steprun$run_id,
+    step = as.integer(step),
+    entry = steprun$step$entry,
+    name = steprun$step$name,
+    label = steprun$step$label,
+    record_kind = if (is_looped) "step_summary" else "step_result",
+    iteration_id = NULL,
+    iteration_total = if (is_looped) as.integer(iteration_total) else NULL,
+    status = if (length(errs)) "error" else "finished",
+    result = if (is_looped) NULL else steprun$output,
+    error = err_text,
+    errors = if (is.null(err_text)) if (is_looped) NULL else "" else err_text,
+    completed_iterations = if (is_looped) as.integer(length(steprun$output)) else NULL,
+    error_count = as.integer(length(errs)),
+    first_iteration_id = if (is_looped && length(steprun$output) > 0L) 1L else NULL,
+    last_iteration_id = if (is_looped) as.integer(length(steprun$output)) else NULL,
+    timestamp = timestamp
+  )
+}
+
+reconstruct_step_results <- function(records, run_id = NULL) {
+  if (!is.null(run_id)) {
+    records <- Filter(function(x) identical(x$run_id, run_id), records)
+  }
+  if (length(records) == 0L) return(list())
+
+  step_ids <- sort(unique(vapply(records, function(x) as.integer(x$step %||% x$entry), integer(1))))
+
+  lapply(step_ids, function(step_id) {
+    step_records <- Filter(function(x) as.integer(x$step %||% x$entry) == step_id, records)
+
+    iter_records <- Filter(function(x) identical(x$record_kind, "iteration_result"), step_records)
+    if (length(iter_records) > 0L) {
+      iter_order <- order(vapply(iter_records, function(x) x$iteration_id %||% 0L, integer(1)))
+      iter_records <- iter_records[iter_order]
+    }
+
+    final_record <- Filter(function(x) x$record_kind %in% c("step_result", "step_summary"), step_records)
+    final_record <- if (length(final_record)) final_record[[length(final_record)]] else step_records[[1L]]
+
+    errors <- vapply(iter_records, function(x) x$error %||% "", character(1))
+    errors <- errors[nzchar(errors)]
+
+    list(
+      run_id = final_record$run_id,
+      entry = final_record$entry,
+      name = final_record$name,
+      label = final_record$label,
+      result = if (length(iter_records)) {
+        lapply(iter_records, function(x) x$result)
+      } else {
+        final_record$result
+      },
+      errors = if (length(errors)) errors else ""
+    )
+  })
+}
+
+read_reconstructed_step_results <- function(
+  path_to_folder,
+  results_file = "results_summary.json",
+  run_id = NULL
+) {
+  records <- read_json_if_exists(results_file_path(path_to_folder, results_file))
+  reconstruct_step_results(records, run_id = run_id)
+}
+
 update_json_summary <- function(
   result,
   idx,

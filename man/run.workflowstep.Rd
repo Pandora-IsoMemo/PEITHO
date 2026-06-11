@@ -4,7 +4,16 @@
 \alias{run.workflowstep}
 \title{Run a workflow step}
 \usage{
-\method{run}{workflowstep}(x, state, env = NULL, step_i = NULL, input_list = NULL, ...)
+\method{run}{workflowstep}(
+  x,
+  state,
+  env = NULL,
+  step_i = NULL,
+  step_idx = NULL,
+  input_list = NULL,
+  results_path = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{A `workflowstep` object representing the step to execute.}

@@ -429,6 +429,17 @@ run.workflow <- function(
   to   <- min(length(x$steps), as.integer(to))
   idxs <- seq(from, to)
 
+  if (length(x$workflow_file_paths) > 0) {
+    if (!file_nonempty(x$workflow_file_paths$results_path) || from == 1L) {
+      jsonlite::write_json(
+        list(),
+        x$workflow_file_paths$results_path,
+        auto_unbox = TRUE,
+        pretty = TRUE
+      )
+    }
+  }
+
   PEITHO:::logDebug("Running workflow from step %d to %d", from, to)
 
   for (j in seq_along(idxs)) {
@@ -440,28 +451,31 @@ run.workflow <- function(
     step <- x$steps[[i]]
 
     # run the step, with env explicitly passed
-    steprun <- run(step, state, env = env, step_i = j, input_list = x$input_list, ...)
+    steprun <- run(
+      step,
+      state,
+      env = env,
+      step_i = j,
+      step_idx = i,
+      input_list = x$input_list,
+      results_path = x$workflow_file_paths$results_path %||% NULL,
+      ...
+    )
 
     # update workflow state and append steprun
     state <- update(state, steprun, idx = i)
 
     steprun_summary <- summary(steprun)
 
-    # save summary of a single step to to the results file
+    # save final row for a single step to results file
     if (length(x$workflow_file_paths) > 0) {
-      if (!file_nonempty(x$workflow_file_paths$results_path) || i == 1L) {
-        # if missing or first step, create empty results file
-        jsonlite::write_json(
-          list(),
-          x$workflow_file_paths$results_path,
-          auto_unbox = TRUE,
-          pretty = TRUE
-        )
-      }
+      step_record <- new_step_final_record(
+        steprun = steprun,
+        step = i
+      )
 
-      update_json_summary(
-        steprun_summary,
-        idx = i,
+      upsert_results_record(
+        record = step_record,
         path_to_folder = x$workflow_file_paths$path_to_folder,
         results_file = basename(x$workflow_file_paths$results_path)
       )
