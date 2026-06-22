@@ -26,13 +26,18 @@ simple_split <- function(x, split, ...) {
 #' @param return_text_blocks_only A logical indicating whether to return
 #'   only the extracted text blocks as a character vector (`TRUE`),
 #'   or a full `WebText` object with metadata (`FALSE`). Default is `TRUE`.
+#' @param stop_on_error A logical indicating whether to stop execution
+#'   and throw an error if the request fails or if the HTML cannot be parsed.
+#'   If `FALSE`, the function will return `NULL` and log a warning instead.
+#'   Default is `TRUE`.
 #' @return A `WebText` object containing the extracted text and metadata.
 #' @export
 fetch_WebText <- function(
   url,
   timeout_sec  = 10,
   user_agent   = NULL,
-  return_text_blocks_only = TRUE
+  return_text_blocks_only = TRUE,
+  stop_on_error = TRUE
 ) {
   # allow user to set default user agent via options()
   if (is.null(user_agent)) {
@@ -61,13 +66,21 @@ fetch_WebText <- function(
     }
   )
 
-  if (is.null(resp)) stop(err_msgs)
+  if (is.null(resp)) {
+    if (stop_on_error) stop(err_msgs)
+
+    PEITHO:::logWarn(paste(err_msgs, collapse = "\n"))
+    return(NULL)
+  }
 
   status_code <- httr2::resp_status(resp)
 
   if (status_code >= 400) {
     err_msgs <- c(err_msgs, paste("HTTP error", status_code))
-    stop(err_msgs)
+    if (stop_on_error) stop(err_msgs)
+
+    PEITHO:::logWarn(paste(err_msgs, collapse = "\n"))
+    return(NULL)
   }
 
   # Parse HTML
@@ -79,7 +92,12 @@ fetch_WebText <- function(
     }
   )
 
-  if (is.null(html)) stop(err_msgs)
+  if (is.null(html)) {
+    if (stop_on_error) stop(err_msgs)
+
+    PEITHO:::logWarn(paste(err_msgs, collapse = "\n"))
+    return(NULL)
+  }
 
   # Title
   title_node <- rvest::html_element(html, "title")
@@ -131,6 +149,25 @@ fetch_WebText <- function(
     status_code = as.integer(status_code),
     warnings    = warn_msgs
   )
+}
+
+#' Recursively clean a list by removing NULL values
+#' This function takes a list and recursively removes any NULL values from it.
+#' If the input is not a list, it returns the input unchanged.
+#' If the input is NULL, it returns NULL.
+#'
+#' @param x A list to be cleaned, or any other R object.
+#' @return A cleaned list with all NULL values removed, or the original input if it is not a list.
+clean_list <- function(x) {
+  if (is.null(x)) return(NULL)
+  if (is.list(x)) {
+    cleaned <- lapply(x, clean_list)
+    cleaned[!vapply(cleaned, is.null, logical(1))]
+  } else if (is.atomic(x)) {
+    x
+  } else {
+    stop("Unsupported type in list")
+  }
 }
 
 #' Generate letter combinations

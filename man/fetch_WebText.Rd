@@ -8,7 +8,8 @@ fetch_WebText(
   url,
   timeout_sec = 10,
   user_agent = NULL,
-  return_text_blocks_only = TRUE
+  return_text_blocks_only = TRUE,
+  stop_on_error = TRUE
 )
 }
 \arguments{
@@ -24,6 +25,11 @@ string is used.}
 \item{return_text_blocks_only}{A logical indicating whether to return
 only the extracted text blocks as a character vector (`TRUE`),
 or a full `WebText` object with metadata (`FALSE`). Default is `TRUE`.}
+
+\item{stop_on_error}{A logical indicating whether to stop execution
+and throw an error if the request fails or if the HTML cannot be parsed.
+If `FALSE`, the function will return `NULL` and log a warning instead.
+Default is `TRUE`.}
 }
 \value{
 A `WebText` object containing the extracted text and metadata.

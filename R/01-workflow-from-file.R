@@ -277,7 +277,6 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
         basename(script_path),
         conditionMessage(e)
       )
-      PEITHO:::logError("%s", err_msg)
       stop(err_msg, call. = FALSE)
     }
   )

@@ -551,6 +551,9 @@ run.workflowstep <- function(
       if (is_single_result) "" else "s"
     )
 
+    PEITHO:::logDebug(
+      "  Always returning a list of results/errors for consistency with looped execution."
+    )
     # return list of results/errors (to keep structure consistent)
     steprun <- new_workflowsteprun(
       step   = x,
