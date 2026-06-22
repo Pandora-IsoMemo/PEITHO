@@ -4,9 +4,11 @@ RUN echo "options(repos = c(getOption('repos'), CRAN = 'https://cloud.r-project.
 
 ADD . .
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     pandoc \
-    libglpk40
+    libglpk40 \
+    libuv1-dev \
+ && rm -rf /var/lib/apt/lists/*
 
 RUN installPackage
 
