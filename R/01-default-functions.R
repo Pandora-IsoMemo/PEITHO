@@ -37,7 +37,10 @@ fetch_WebText <- function(
   timeout_sec  = 10,
   user_agent   = NULL,
   return_text_blocks_only = TRUE,
-  stop_on_error = TRUE
+  stop_on_error = TRUE,
+  max_retries = 3,
+  backoff_multiplier = 2,
+  initial_delay_sec = 1
 ) {
   # allow user to set default user agent via options()
   if (is.null(user_agent)) {
@@ -58,6 +61,10 @@ fetch_WebText <- function(
       httr2::request(url) |>
         httr2::req_user_agent(user_agent) |>
         httr2::req_timeout(timeout_sec) |>
+        httr2::req_retry(
+          max_tries = max_retries + 1,
+          backoff = function(attempt) initial_delay_sec * (backoff_multiplier ^ (attempt - 1))
+        ) |>
         httr2::req_perform()
     },
     error = function(e) {
@@ -69,8 +76,8 @@ fetch_WebText <- function(
   if (is.null(resp)) {
     if (stop_on_error) stop(err_msgs)
 
-    PEITHO:::logWarn(paste(err_msgs, collapse = "\n"))
-    return(NULL)
+    PEITHO:::logWarn("  %s: %s", url, paste(err_msgs, collapse = "\n"))
+    if (return_text_blocks_only) return(stats::setNames("", url)) else return(NULL)
   }
 
   status_code <- httr2::resp_status(resp)
@@ -79,8 +86,8 @@ fetch_WebText <- function(
     err_msgs <- c(err_msgs, paste("HTTP error", status_code))
     if (stop_on_error) stop(err_msgs)
 
-    PEITHO:::logWarn(paste(err_msgs, collapse = "\n"))
-    return(NULL)
+    PEITHO:::logWarn("  %s: %s", url, paste(err_msgs, collapse = "\n"))
+    if (return_text_blocks_only) return(stats::setNames("", url)) else return(NULL)
   }
 
   # Parse HTML
@@ -95,8 +102,8 @@ fetch_WebText <- function(
   if (is.null(html)) {
     if (stop_on_error) stop(err_msgs)
 
-    PEITHO:::logWarn(paste(err_msgs, collapse = "\n"))
-    return(NULL)
+    PEITHO:::logWarn("  %s: %s", url, paste(err_msgs, collapse = "\n"))
+    if (return_text_blocks_only) return(stats::setNames("", url)) else return(NULL)
   }
 
   # Title
@@ -131,7 +138,7 @@ fetch_WebText <- function(
         warn_msgs,
         "No <body> element found in HTML. Unable to extract text."
       )
-      PEITHO:::logWarn(paste(warn_msgs, collapse = "\n"))
+      PEITHO:::logWarn("  %s: %s", url, paste(warn_msgs, collapse = "\n"))
     }
   }
 
@@ -139,7 +146,10 @@ fetch_WebText <- function(
     text_blocks <- stringr::str_squish(text_blocks)
   }
 
-  if (return_text_blocks_only) return(text_blocks)
+  if (return_text_blocks_only) {
+    out <- if (length(text_blocks) > 0 && nzchar(text_blocks[1])) text_blocks[1] else ""
+    return(stats::setNames(out, url))
+  }
 
   new_WebText(
     url         = url,
@@ -158,10 +168,10 @@ fetch_WebText <- function(
 #'
 #' @param x A list to be cleaned, or any other R object.
 #' @return A cleaned list with all NULL values removed, or the original input if it is not a list.
-clean_list <- function(x) {
+prune_nulls <- function(x) {
   if (is.null(x)) return(NULL)
   if (is.list(x)) {
-    cleaned <- lapply(x, clean_list)
+    cleaned <- lapply(x, prune_nulls)
     cleaned[!vapply(cleaned, is.null, logical(1))]
   } else if (is.atomic(x)) {
     x
@@ -314,4 +324,41 @@ paste_prompt_list <- function(string_list, prefix, suffix) {
     character(1),
     fmt = full_string
   ))
+}
+
+export_fetched_text <- function(fetched_text, output_dir = "wikipedia_results") {
+  dir.create(output_dir, showWarnings = FALSE)
+
+  # Export successful contents to individual text files
+  successful <- Filter(function(x) x != "", fetched_text)
+
+  for (fetched_success in successful) {
+    # Create a safe filename from URL
+    safe_filename <- names(fetched_success) |>
+      stringr::str_remove_all("https?://") |>
+      stringr::str_remove_all("www\\.") |>
+      stringr::str_replace_all("[^a-zA-Z0-9]", "_") |>
+      stringr::str_squish() |>
+      substr(1, 100)
+
+    file_path <- file.path(output_dir, paste0(safe_filename, ".txt"))
+    writeLines(fetched_success, file_path)
+  }
+
+  # Export summary CSV
+  summary_df <- do.call(rbind, lapply(seq_along(fetched_text), function(i) {
+    x <- fetched_text[[i]]
+    data.frame(
+      url = names(fetched_text[[i]]),
+      success = (x != ""),
+      char_count = nchar(x),
+      word_count = length(strsplit(x, "\\s+")[[1]]),
+      stringsAsFactors = FALSE
+    )
+  }))
+
+  write.csv(summary_df, file.path(output_dir, "fetch_summary.csv"), row.names = FALSE)
+
+  cat(sprintf("\nResults exported to %s/\n", output_dir))
+  return(invisible(fetched_text))
 }

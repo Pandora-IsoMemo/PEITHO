@@ -9,7 +9,10 @@ fetch_WebText(
   timeout_sec = 10,
   user_agent = NULL,
   return_text_blocks_only = TRUE,
-  stop_on_error = TRUE
+  stop_on_error = TRUE,
+  max_retries = 3,
+  backoff_multiplier = 2,
+  initial_delay_sec = 1
 )
 }
 \arguments{
