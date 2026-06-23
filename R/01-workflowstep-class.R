@@ -319,6 +319,117 @@ run_with_error <- function(fn, args) {
   )
 }
 
+normalize_step_output <- function(output, step_label, coerce_atomic = TRUE) {
+  if (is.null(output)) {
+    msg <- sprintf(
+      "Step '%s' returned NULL output; converting to empty character vector.",
+      step_label
+    )
+    PEITHO:::logWarn("%s", msg)
+    warning(msg, immediate. = TRUE, call. = FALSE)
+    return(character(0))
+  }
+
+  if (is.character(output)) {
+    return(output)
+  }
+
+  if (is.atomic(output) && !is.character(output)) {
+    if (!isTRUE(coerce_atomic)) {
+      stop(
+        sprintf(
+          "Step '%s' returned non-character atomic output of class '%s'.",
+          step_label,
+          paste(class(output), collapse = "/")
+        ),
+        call. = FALSE
+      )
+    }
+
+    msg <- sprintf(
+      "Step '%s' returned atomic non-character output of class '%s'; coercing with as.character().",
+      step_label,
+      paste(class(output), collapse = "/")
+    )
+    PEITHO:::logWarn("%s", msg)
+    warning(msg, immediate. = TRUE, call. = FALSE)
+    return(as.character(output))
+  }
+
+  if (is.list(output)) {
+    if (all(vapply(output, is.character, logical(1)))) {
+      return(output)
+    }
+
+    can_coerce_list <- isTRUE(coerce_atomic) && all(vapply(
+      output,
+      function(x) is.atomic(x) && !is.null(x),
+      logical(1)
+    ))
+
+    if (can_coerce_list) {
+      msg <- sprintf(
+        "Step '%s' returned list with non-character atomic elements; coercing each element with as.character().",
+        step_label
+      )
+      PEITHO:::logWarn("%s", msg)
+      warning(msg, immediate. = TRUE, call. = FALSE)
+      return(lapply(output, as.character))
+    }
+
+    stop(
+      sprintf(
+        paste0(
+          "Step '%s' returned unsupported list output. Expected list of character vectors ",
+          "(or coercible atomic elements)."
+        ),
+        step_label
+      ),
+      call. = FALSE
+    )
+  }
+
+  stop(
+    sprintf(
+      "Step '%s' returned unsupported output type '%s'. Expected character vector or list of character vectors.",
+      step_label,
+      paste(class(output), collapse = "/")
+    ),
+    call. = FALSE
+  )
+}
+
+normalize_step_part <- function(step_part, step_label, coerce_atomic = TRUE) {
+  # Check for error in step_part first (e.g., from run_with_error), and return early if present
+  if (!is.null(step_part$error)) {
+    return(list(output = character(0), error = step_part$error))
+  }
+  # Check for error attribute on the output itself (for backward compatibility)
+  if (!is.null(attr(step_part$output, "error"))) {
+    return(list(output = character(0), error = attr(step_part$output, "error")))
+  }
+  # Check for errors on list elements
+  if (is.list(step_part$output)) {
+    for (i in seq_along(step_part$output)) {
+      if (!is.null(attr(step_part$output[[i]], "error"))) {
+        return(list(output = character(0), error = attr(step_part$output[[i]], "error")))
+      }
+    }
+  }
+
+  tryCatch(
+    list(
+      output = normalize_step_output(
+        output = step_part$output,
+        step_label = step_label,
+        coerce_atomic = coerce_atomic
+      ),
+      error = NULL
+    ),
+    error = function(e) list(output = character(0), error = e)
+  )
+}
+
 #' Run a workflow step
 #'
 #' This function executes a single workflow step, updating the workflow state
@@ -488,6 +599,11 @@ run.workflowstep <- function(
         }
 
         step_part <- run_with_error(fn, args)
+        step_part <- normalize_step_part(
+          step_part = step_part,
+          step_label = sprintf("%s (entry=%d)", x$name, x$entry),
+          coerce_atomic = TRUE
+        )
         step_parts[[part_idx]] <- step_part
 
         if (!is.null(results_file_name) && !is.null(results_path_to_folder)) {
@@ -541,6 +657,11 @@ run.workflowstep <- function(
     PEITHO:::logDebug("  Running command: NO LOOPING")
 
     run <- run_with_error(fn, args) # <--- RUN FUNCTION HERE, single run
+    run <- normalize_step_part(
+      step_part = run,
+      step_label = sprintf("%s (entry=%d)", x$name, x$entry),
+      coerce_atomic = TRUE
+    )
 
     # check if result has length > 1 or not
     is_single_result <- length(run$output) == 1L

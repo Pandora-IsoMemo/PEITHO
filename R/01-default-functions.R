@@ -357,7 +357,7 @@ export_fetched_text <- function(fetched_text, output_dir = "wikipedia_results") 
     )
   }))
 
-  write.csv(summary_df, file.path(output_dir, "fetch_summary.csv"), row.names = FALSE)
+  utils::write.csv(summary_df, file.path(output_dir, "fetch_summary.csv"), row.names = FALSE)
 
   cat(sprintf("\nResults exported to %s/\n", output_dir))
   return(invisible(fetched_text))

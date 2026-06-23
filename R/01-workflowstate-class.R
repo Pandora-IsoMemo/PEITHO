@@ -157,7 +157,9 @@ update.workflowstate <- function(x, steprun, idx, ...) {
 
   sr_summary <- summary(steprun)
   
-  if (is.null(sr_summary$error)) {
+  #if (is.null(sr_summary$error)) {
+    # Always cache results, even if they have errors
+    # (errored steps will have character(0) as output from normalize_step_part)
     x$last_result <- steprun$output
 
     # cache with stable keys
@@ -172,7 +174,7 @@ update.workflowstate <- function(x, steprun, idx, ...) {
 
     # key by name (names should be unique once you start prefixing subflows)
     x$results_by_name[[sname]] <- steprun$output
-  } # else: on error, do not update last_result or caches
+  #} # else: on error, do not update last_result or caches
 
   x$errors <- if (!is.null(sr_summary$error)) c(x$errors, list(sr_summary$error)) else x$errors
   x

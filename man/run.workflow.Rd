@@ -11,6 +11,7 @@
   to = length(x$steps),
   env = NULL,
   resume_run_id = NULL,
+  stop_on_error = TRUE,
   ...
 )
 }
@@ -25,6 +26,12 @@
 
 \item{env}{An environment to look up command functions. Defaults to `NULL`, which uses
 each step's own env or the caller's env.}
+
+\item{resume_run_id}{A character string representing the run ID to resume from.
+If `NULL`, a new run ID is generated.}
+
+\item{stop_on_error}{Logical; if `TRUE`, the workflow stops on the first error encountered.
+If `FALSE`, it continues running subsequent steps.}
 
 \item{...}{Additional arguments passed to `run.workflowstep()`.}
 }

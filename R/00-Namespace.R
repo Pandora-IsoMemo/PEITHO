@@ -15,9 +15,9 @@ utils::globalVariables(
 #' @importFrom shinyTools headerButtonsUI shinyTryCatch
 #' @importFrom shinyTree renderTree shinyTree
 #' @importFrom stats setNames
-#' @importFrom stringr str_squish
+#' @importFrom stringr str_remove_all str_replace_all str_squish
 #' @importFrom tibble tibble
-#' @importFrom utils capture.output str
+#' @importFrom utils capture.output str write.csv
 #' @importFrom xml2 xml_remove
 #' @importFrom yaml yaml.load_file
 NULL
