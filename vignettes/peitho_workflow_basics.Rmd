@@ -29,17 +29,106 @@ library(PEITHO)
 
 # Loading the Example Workflow
 
-You can create a workflow object from your own files by specifying a path, or use the example workflow included with PEITHO by passing an empty string as the path:
+You can use the example workflow included with PEITHO by passing an empty string as the path:
 
 ```{r, echo=TRUE}
 my_wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 ```
 
+# Loading a Workflow from a Custom Folder
+
+If you have workflow configuration files (`commands.json`, `inputs.json`, etc.) stored in a local folder, you can load them directly by specifying the folder path:
+
+```{r, echo=TRUE}
+my_custom_wf <- new_workflow(
+  workflow_file_paths = workflow_file_paths(
+    path = file.path("YOUR", "PATH", "TO", "YOUR_CUSTOM_WORKFLOW_FOLDER")
+  )
+)
+```
+
+This approach is useful for:
+- Testing custom workflows during development
+- Loading workflows from local directories without packaging them as zip files
+- Working with multiple workflow variants stored in different folders
+
 # Creating a workflow
+
+A workflow consists of two main configuration files:
+
+## Inputs.json File
+
+The `inputs.json` file defines the input data for your workflow. It's a JSON object with key-value pairs:
+
+```json
+{
+  "input_name_1": "value or data for first input",
+  "input_name_2": "value or data for second input"
+}
+```
+
+**Example:**
+```json
+{
+  "empire_inputs": "https://en.wikipedia.org/wiki/Roman_Empire\nhttps://en.wikipedia.org/wiki/Achaemenid_Empire",
+  "statistics_inputs": "https://en.wikipedia.org/wiki/Coefficient_of_determination"
+}
+```
 
 ## Commands.json File
 
-## Inputs.json File
+The `commands.json` file defines the workflow steps. It's a JSON array of command objects, where each object specifies a step in your workflow:
+
+```json
+[
+  {
+    "entry": 1,
+    "name": "step_name",
+    "label": "Human-readable step label",
+    "comments": "Optional comments about this step",
+    "command": "function_to_execute",
+    "args": "function arguments and references",
+    "iteration": "no|yes|auto",
+    "samples": 1
+  }
+]
+```
+
+**Field Descriptions:**
+- `entry`: Step number (integer)
+- `name`: Unique identifier for the step
+- `label`: Human-readable description shown in the UI
+- `comments`: Optional notes about the step
+- `command`: Function/command name to execute
+- `args`: Arguments passed to the command. Use `@#*I*#@input_name@#*I*#@` to reference inputs and `@#*L*#@step_name@#*L*#@` to reference outputs from previous steps
+- `iteration`: Whether to iterate over results (`no`, `yes`, or `auto`)
+- `samples`: Number of samples to process
+
+**Example:**
+```json
+[
+  {
+    "entry": 1,
+    "name": "Split",
+    "label": "Split addresses",
+    "comments": "",
+    "command": "simple_split",
+    "args": "x=@#*I*#@empire_inputs@#*I*#@, split=\\n",
+    "iteration": "no",
+    "samples": 1
+  },
+  {
+    "entry": 2,
+    "name": "get_content",
+    "label": "Fetch web content",
+    "comments": "",
+    "command": "fetch_WebText",
+    "args": "url=@#*L*#@Split@#*L*#@",
+    "iteration": "auto",
+    "samples": 1
+  }
+]
+```
 
 
 # Exporting a Workflow as a Zip File
@@ -94,6 +183,7 @@ PEITHO:::trunc(my_run_2$state$last_result, n_char = 100)
 
 PEITHO's workflow system allows you to:
 
+- Load workflows from the built-in example or custom folder paths
 - Load and execute multi-step workflows from configuration files
 - Export workflows as zip files for sharing or backup
 - Import and modify workflows from zip files
