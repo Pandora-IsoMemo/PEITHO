@@ -33,6 +33,16 @@ or a full `WebText` object with metadata (`FALSE`). Default is `TRUE`.}
 and throw an error if the request fails or if the HTML cannot be parsed.
 If `FALSE`, the function will return `NULL` and log a warning instead.
 Default is `TRUE`.}
+
+\item{max_retries}{An integer specifying the maximum number of retries for the HTTP request
+in case of transient failures. Default is `3`.}
+
+\item{backoff_multiplier}{A numeric value specifying the multiplier for the exponential backoff
+strategy used during retries. Default is `2`.}
+
+\item{initial_delay_sec}{A numeric value specifying the initial delay in seconds before the first
+retry attempt. The delay will increase exponentially based on the `backoff_multiplier`.
+Default is `1`.}
 }
 \value{
 A `WebText` object containing the extracted text and metadata.

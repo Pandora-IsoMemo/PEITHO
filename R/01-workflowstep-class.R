@@ -438,7 +438,11 @@ normalize_step_part <- function(step_part, step_label, coerce_atomic = TRUE) {
 #' @param state A `workflowstate` object representing the current state of the workflow.
 #' @param env   An environment to look up the command function. Defaults to the caller's env.
 #' @param step_i The number of the step in the workflow, used for logging purposes.
+#' @param step_idx The absolute index of the step in the workflow, used for persistence.
 #' @param input_list A list of inputs for argument parsing, loaded from the workflow's inputs file.
+#' @param results_path An optional path to a results file for intermediate writes.
+#' @param resume_from_sample The first sample index still needing execution (NULL = run all).
+#' @param resume_from_iteration The first iteration index still needing execution (NULL = run all).
 #' @param ...   Additional arguments (not used).
 #' @return A `workflowsteprun` object recording the execution of the step.
 #' @export
