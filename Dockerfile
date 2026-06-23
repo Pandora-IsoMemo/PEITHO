@@ -13,8 +13,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libuv1-dev \
  && rm -rf /var/lib/apt/lists/*
 
-# Remove corrupted pkgbuild package entirely - it will be reinstalled as a dependency
+# Remove corrupted pkgbuild package entirely
 RUN rm -rf /usr/local/lib/R/site-library/pkgbuild
+
+# Reinstall pkgbuild from scratch
+RUN Rscript -e "install.packages('pkgbuild', repos='https://cloud.r-project.org', clean=TRUE)"
 
 RUN installPackage
 
