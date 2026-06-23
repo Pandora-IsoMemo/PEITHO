@@ -40,11 +40,18 @@ my_wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 If you have workflow configuration files (`commands.json`, `inputs.json`, etc.) stored in a local folder, you can load them directly by specifying the folder path:
 
 ```{r, eval=FALSE}
+# define the workflow
 my_custom_wf <- new_workflow(
   workflow_file_paths = workflow_file_paths(
     path = file.path("PATH", "TO", "YOUR_CUSTOM_WORKFLOW_FOLDER")
   )
 )
+
+# run the workflow, e.g. steps 2 through 4
+my_run <- run(my_custom_wf, from = 2, to = 4)
+
+# check the result of the last step
+my_run$state$last_result
 ```
 
 This approach is useful for:
