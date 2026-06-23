@@ -13,8 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libuv1-dev \
  && rm -rf /var/lib/apt/lists/*
 
-# Remove corrupted pkgbuild database files
-RUN rm -f /usr/local/lib/R/site-library/pkgbuild/R/pkgbuild.rdb /usr/local/lib/R/site-library/pkgbuild/R/pkgbuild.rdx
+# Remove corrupted pkgbuild package entirely - it will be reinstalled as a dependency
+RUN rm -rf /usr/local/lib/R/site-library/pkgbuild
 
 RUN installPackage
 
