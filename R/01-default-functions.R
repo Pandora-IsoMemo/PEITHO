@@ -23,9 +23,9 @@ simple_split <- function(x, split, ...) {
 #' @param user_agent An optional character string specifying the User-Agent
 #'   header for the HTTP request. If `NULL`, a default User-Agent
 #'   string is used.
-#' @param return_text_blocks_only A logical indicating whether to return
-#'   only the extracted text blocks as a character vector (`TRUE`),
-#'   or a full `WebText` object with metadata (`FALSE`). Default is `TRUE`.
+#' @param return_text_blocks_only A logical indicating whether to return only the extracted text
+#'   blocks as a single character string (collapsed with double newlines) or to return a
+#'   `WebText` object containing the text blocks and metadata. Default is `TRUE`.
 #' @param stop_on_error A logical indicating whether to stop execution
 #'   and throw an error if the request fails or if the HTML cannot be parsed.
 #'   If `FALSE`, the function will return `NULL` and log a warning instead.
@@ -37,7 +37,10 @@ simple_split <- function(x, split, ...) {
 #' @param initial_delay_sec A numeric value specifying the initial delay in seconds before the first
 #'  retry attempt. The delay will increase exponentially based on the `backoff_multiplier`.
 #'  Default is `1`.
-#' @return A `WebText` object containing the extracted text and metadata.
+#' @return If `return_text_blocks_only` is `TRUE`, a named character vector containing the extracted
+#'   text blocks as a single string, with the URL as the name. If `return_text_blocks_only` is
+#'   `FALSE`, a `WebText` object containing the URL, title, text blocks, fetch timestamp,
+#'   HTTP status code, and any warnings encountered during the fetch process. 
 #' @export
 fetch_WebText <- function(
   url,
@@ -120,41 +123,44 @@ fetch_WebText <- function(
   }
 
   # Text nodes
-  main_node <- rvest::html_element(html, "main")
-
-  if (is.null(main_node)) {
-    main_node <- rvest::html_element(html, "article")
+  content_node <- rvest::html_element(html, "main")
+  if (is.null(content_node)) {
+    content_node <- rvest::html_element(html, "article")
+  }
+  if (is.null(content_node)) {
+    content_node <- rvest::html_element(html, "body")
   }
 
-  if (!is.null(main_node)) {
-    text_blocks <- rvest::html_text2(main_node)
-  } else {
-    body_node <- rvest::html_element(html, "body")
+  if (!is.null(content_node)) {
+    # Remove common non-content sections from the selected content container.
+    content_node |>
+      rvest::html_elements(
+        xpath = ".//*[self::nav or self::header or self::footer or self::aside or self::script or self::style or self::noscript or self::form or self::button]"
+      ) |>
+      xml2::xml_remove()
 
-    if (!is.null(body_node)) {
-      # Remove unwanted sections (modifies body_node in place)
-      body_node |>
-        rvest::html_elements(
-          xpath = ".//*[self::nav or self::footer or self::aside or self::script or self::style]"
-        ) |>
-        xml2::xml_remove()
+    block_nodes <- rvest::html_elements(content_node, "p, li, h2, h3, h4, blockquote")
 
-      text_blocks <- rvest::html_text2(body_node)
+    if (length(block_nodes) > 0) {
+      text_blocks <- rvest::html_text2(block_nodes)
     } else {
-      warn_msgs <- c(
-        warn_msgs,
-        "No <body> element found in HTML. Unable to extract text."
-      )
-      PEITHO:::logWarn("  %s: %s", url, paste(warn_msgs, collapse = "\n"))
+      text_blocks <- rvest::html_text2(content_node)
     }
+  } else {
+    warn_msgs <- c(
+      warn_msgs,
+      "No <body> element found in HTML. Unable to extract text."
+    )
+    PEITHO:::logWarn("  %s: %s", url, paste(warn_msgs, collapse = "\n"))
   }
 
-  if (length(text_blocks) > 0 && nzchar(text_blocks)) {
+  if (length(text_blocks) > 0) {
     text_blocks <- stringr::str_squish(text_blocks)
+    text_blocks <- text_blocks[nzchar(text_blocks)]
   }
 
   if (return_text_blocks_only) {
-    out <- if (length(text_blocks) > 0 && nzchar(text_blocks[1])) text_blocks[1] else ""
+    out <- if (length(text_blocks) > 0) paste(text_blocks, collapse = "\n\n") else ""
     return(stats::setNames(out, url))
   }
 
