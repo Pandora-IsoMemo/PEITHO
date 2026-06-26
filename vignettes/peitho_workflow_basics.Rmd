@@ -1,15 +1,26 @@
 ---
-title: "Working with Workflows in PEITHO: Import, Export, and Execution"
+title: "Workflow Quickstart in PEITHO: Load, Run, Import, Export"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Working with Workflows in PEITHO: Import, Export, and Execution}
+  %\VignetteIndexEntry{Workflow Quickstart in PEITHO: Load, Run, Import, Export}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 # Introduction
 
-This vignette demonstrates how to use the PEITHO package to manage, export, import, and execute workflows. The workflow system in PEITHO allows you to define a sequence of steps (such as data fetching, processing, or analysis), save and share workflows as zip files, and re-import or modify them for further use. This guide is aimed at users with basic R knowledge, but no advanced R expertise is required.
+This quickstart shows the fastest path to run a workflow in PEITHO and share it as a `.peitho` file. You will:
+
+- Load a workflow
+- Run selected steps
+- Inspect results
+- Export and re-import the workflow bundle
+
+For advanced execution topics (resume, robust error handling), see the vignette `peitho_workflow_execution_recovery`. For workflow authoring and editing, see `peitho_workflow_authoring_editing`.
+
+# When to Use This Vignette
+
+Use this vignette when you want a fast first success with PEITHO workflows. It intentionally focuses on the core run/import/export flow and skips advanced execution and authoring details.
 
 
 # Prerequisites
@@ -29,13 +40,42 @@ library(PEITHO)
 
 # Loading the Example Workflow
 
-You can create a workflow object from your own files by specifying a path, or use the example workflow included with PEITHO by passing an empty string as the path:
+You can use the example workflow included with PEITHO by passing an empty string as the path:
 
 ```{r, echo=TRUE}
 my_wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 ```
 
+You can inspect what was loaded:
 
+```{r, echo=TRUE}
+my_wf
+```
+
+# Loading a Workflow from a Custom Folder
+
+If you have workflow configuration files (`commands.json`, `inputs.json`, etc.) stored in a local folder, you can load them directly by specifying the folder path:
+
+```{r, eval=FALSE}
+# define the workflow
+my_custom_wf <- new_workflow(
+  workflow_file_paths = workflow_file_paths(
+    path = file.path("PATH", "TO", "YOUR_CUSTOM_WORKFLOW_FOLDER")
+  )
+)
+
+# run the workflow, e.g. steps 2 through 4
+my_run <- run(my_custom_wf, from = 2, to = 4)
+
+# check the result of the last step
+my_run$state$last_result
+```
+
+This approach is useful for:
+
+- Testing custom workflows during development
+- Loading workflows from local directories without packaging them as zip files
+- Working with multiple workflow variants stored in different folders
 
 # Exporting a Workflow as a Zip File
 
@@ -65,9 +105,9 @@ PEITHO:::trunc(my_run_1$state$last_result, n_char = 100)
 
 
 
-# Importing and Modifying a Workflow from a Zip File
+# Importing a Workflow from a Zip File
 
-To import a workflow from a zip file, first define the directory where the workflow files will be extracted. You may also modify the workflow steps (for example, by editing `commands.json` or `inputs.json` in the extracted folder) before running it.
+To import a workflow from a zip file, first define the directory where the workflow files will be extracted.
 ```{r, echo=TRUE}
 zipfile_path <- "./examples/my_workflow.peitho"
 
@@ -77,7 +117,7 @@ my_wf_imported <- PEITHO::import_workflow(
 )
 ```
 
-You can now run the imported (and possibly modified) workflow and inspect the results as before:
+You can now run the imported workflow and inspect the results as before:
 ```{r, echo=TRUE}
 my_run_2 <- run(my_wf_imported, from = 1, to = 4)
 
@@ -89,9 +129,15 @@ PEITHO:::trunc(my_run_2$state$last_result, n_char = 100)
 
 PEITHO's workflow system allows you to:
 
+- Load workflows from the built-in example or custom folder paths
 - Load and execute multi-step workflows from configuration files
 - Export workflows as zip files for sharing or backup
-- Import and modify workflows from zip files
+- Import workflows from zip files
 - Inspect and print results from workflow execution
 
 This makes it easy to share, reuse, and adapt complex analysis pipelines in a reproducible way.
+
+# Next Steps
+
+- Advanced execution and recovery (resume runs, error handling): `vignette("peitho_workflow_execution_recovery")`
+- Authoring and editing workflows (JSON schema, tags, selectors, update APIs): `vignette("peitho_workflow_authoring_editing")`

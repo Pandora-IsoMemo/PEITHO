@@ -1,3 +1,15 @@
+# PEITHO 26.06.0
+
+## New Features
+- Introduced resumable workflow execution
+- Added “samples per iteration” support to PEITHO’s workflow runner
+- Expanded new persistence utilities and helper functions
+
+## Updates
+- Expanded tests and documentation to cover the new behavior.
+- Reworked workflow documentation into three focused vignettes (quickstart, execution/recovery, and authoring/editing), including cross-links between guides (#39).
+- Updated README documentation navigation to link all workflow guides directly and trimmed duplicated workflow walkthrough content.
+
 # PEITHO 26.05.1
 
 ## Updates

@@ -1,3 +1,14 @@
 url: https://pandora-isomemo.github.io/PEITHO/
 template:
   bootstrap: 5
+
+articles:
+  - title: Workflow Basics
+    contents:
+      - peitho_workflow_basics
+  - title: Workflow Execution
+    contents:
+      - peitho_workflow_execution_recovery
+  - title: Workflow Authoring
+    contents:
+      - peitho_workflow_authoring_editing

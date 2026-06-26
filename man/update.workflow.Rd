@@ -12,7 +12,7 @@
 \item{step}{The index of the step to update.}
 
 \item{field}{The name of the field to update (one of "name", "label", "comments", "command",
-"args", "loop")}
+"args", "iteration", "loop")}
 
 \item{value}{The new value to assign to the specified field.}
 
@@ -23,5 +23,5 @@ The updated `workflow` object.
 }
 \description{
 This function updates a specific field of a `workflowstep` object with a new value. It is used
-to modify step details such as name, label, comments, command, parameters, or loop settings.
+to modify step details such as name, label, comments, command, parameters, or iteration settings.
 }

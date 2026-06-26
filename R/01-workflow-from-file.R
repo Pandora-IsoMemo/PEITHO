@@ -141,7 +141,7 @@ make_param_from_arg <- function(
     value    = value,
     type     = type,
     label    = label,
-    loop     = cmd_loop %||% "no",
+    iteration = cmd_loop %||% "no",
     selector = selector %||% NULL
   )
 }
@@ -277,7 +277,6 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
         basename(script_path),
         conditionMessage(e)
       )
-      PEITHO:::logError("%s", err_msg)
       stop(err_msg, call. = FALSE)
     }
   )
@@ -406,7 +405,8 @@ workflow_steps_from_files <- function(
       comments        = cmd$comments %||% "",
       command         = cmd$command,
       args            = cmd$args %||% "",
-      loop            = cmd$loop %||% "no",
+      iteration       = cmd$iteration %||% cmd$loop %||% "no",
+      samples         = cmd$samples %||% 1L,
       env             = env
     )
   })

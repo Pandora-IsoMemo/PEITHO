@@ -50,6 +50,16 @@ update_input_list <- function(x, ...) {
   UseMethod("update_input_list")
 }
 
+#' Update the custom functions of a workflow
+#'
+#' Generic method to update the custom functions file of a workflow object.
+#' @param x The object to update.
+#' @param ... Additional arguments passed to methods.
+#' @export
+update_functions <- function(x, ...) {
+  UseMethod("update_functions")
+}
+
 #' Add a step to a workflow
 #'
 #' Generic method to add a step to a workflow object.

@@ -368,6 +368,10 @@ extract_step_names <- function(x) {
 #' @param to An integer index of the step to end at.
 #' @param env An environment to look up command functions. Defaults to `NULL`, which uses
 #'  each step's own env or the caller's env.
+#' @param resume_run_id A character string representing the run ID to resume from.
+#'  If `NULL`, a new run ID is generated.
+#' @param stop_on_error Logical; if `TRUE`, the workflow stops on the first error encountered.
+#'  If `FALSE`, it continues running subsequent steps.
 #' @param ... Additional arguments passed to `run.workflowstep()`.
 #' @return A list containing the final workflow, state, and results of each step.
 #' @export
@@ -377,11 +381,10 @@ run.workflow <- function(
   from  = 1L,
   to    = length(x$steps),
   env = NULL,
+  resume_run_id = NULL,  # when set, resume an existing run with this ID,
+  stop_on_error = TRUE,
   ...
 ) {
-  # for now we always stop on error!!!
-  stop_on_error <- TRUE
-
   # validata workflow
   if (!inherits(x, "workflow")) {
     stop("Argument 'x' must be of class 'workflow'.")
@@ -398,11 +401,17 @@ run.workflow <- function(
     )
   }
 
-  # create run_id
-  ts <- format(Sys.time(), "%Y%m%d%H%M%S", tz = "UTC")
-  rdm_suffix <- sprintf("%08x", sample.int(.Machine$integer.max, 1L))
-  run_id <- paste0(ts, "_", rdm_suffix)
-  PEITHO:::logInfo("Starting workflow run with ID: '%s'", run_id)
+  # create run_id — reuse supplied ID when resuming
+  is_resuming <- !is.null(resume_run_id) && nzchar(resume_run_id)
+  if (is_resuming) {
+    run_id <- resume_run_id
+    PEITHO:::logInfo("Resuming workflow run with ID: '%s'", run_id)
+  } else {
+    ts <- format(Sys.time(), "%Y%m%d%H%M%S", tz = "UTC")
+    rdm_suffix <- sprintf("%08x", sample.int(.Machine$integer.max, 1L))
+    run_id <- paste0(ts, "_", rdm_suffix)
+    PEITHO:::logInfo("Starting workflow run with ID: '%s'", run_id)
+  }
 
   # initialize state if not already a workflowstate
   if (!inherits(state, "workflowstate")) {
@@ -427,7 +436,37 @@ run.workflow <- function(
   # RUN workflow steps
   from <- max(1L, as.integer(from))
   to   <- min(length(x$steps), as.integer(to))
+
+  # When resuming, advance 'from' to the first unfinished step
+  resume_cursor <- NULL
+  if (is_resuming && length(x$workflow_file_paths) > 0L) {
+    resume_cursor <- get_resume_cursor(
+      run_id         = run_id,
+      path_to_folder = x$workflow_file_paths$path_to_folder,
+      results_file   = basename(x$workflow_file_paths$results_path)
+    )
+    from <- max(from, resume_cursor$resume_step)
+    PEITHO:::logInfo(
+      "Resume cursor: step %d, sample %s, iteration %s",
+      resume_cursor$resume_step,
+      if (is.null(resume_cursor$resume_sample)) "NULL" else as.character(resume_cursor$resume_sample),
+      if (is.null(resume_cursor$resume_iteration)) "NULL" else as.character(resume_cursor$resume_iteration)
+    )
+  }
+
   idxs <- seq(from, to)
+
+  if (length(x$workflow_file_paths) > 0) {
+    # Only wipe the results file when starting fresh from step 1
+    if (!file_nonempty(x$workflow_file_paths$results_path) || (from == 1L && !is_resuming)) {
+      jsonlite::write_json(
+        list(),
+        x$workflow_file_paths$results_path,
+        auto_unbox = TRUE,
+        pretty = TRUE
+      )
+    }
+  }
 
   PEITHO:::logDebug("Running workflow from step %d to %d", from, to)
 
@@ -440,35 +479,57 @@ run.workflow <- function(
     step <- x$steps[[i]]
 
     # run the step, with env explicitly passed
-    steprun <- run(step, state, env = env, step_i = j, input_list = x$input_list, ...)
+    # For the resume step that was partially completed, pass the iteration cursor
+    step_resume_iteration <- if (
+      !is.null(resume_cursor) && i == resume_cursor$resume_step
+    ) {
+      resume_cursor$resume_iteration
+    } else {
+      NULL
+    }
+    step_resume_sample <- if (
+      !is.null(resume_cursor) && i == resume_cursor$resume_step
+    ) {
+      resume_cursor$resume_sample
+    } else {
+      NULL
+    }
+
+    steprun <- run(
+      step,
+      state,
+      env = env,
+      step_i = j,
+      step_idx = i,
+      input_list = x$input_list,
+      results_path = x$workflow_file_paths$results_path %||% NULL,
+      resume_from_sample = step_resume_sample,
+      resume_from_iteration = step_resume_iteration,
+      ...
+    )
 
     # update workflow state and append steprun
     state <- update(state, steprun, idx = i)
-    # save summary to results file and handle errors
-    steprun_summary <- summary(steprun)
 
+    # save final row for a single step to results file
     if (length(x$workflow_file_paths) > 0) {
-      if (!file_nonempty(x$workflow_file_paths$results_path) || i == 1L) {
-        # if missing or first step, create empty results file
-        jsonlite::write_json(
-          list(),
-          x$workflow_file_paths$results_path,
-          auto_unbox = TRUE,
-          pretty = TRUE
-        )
-      }
+      step_record <- new_step_final_record(
+        steprun = steprun,
+        step = i
+      )
 
-      update_json_summary(
-        steprun_summary,
-        idx = i,
+      upsert_results_record(
+        record = step_record,
         path_to_folder = x$workflow_file_paths$path_to_folder,
         results_file = basename(x$workflow_file_paths$results_path)
       )
     }
 
-    if (stop_on_error && !(length(steprun_summary$errors) == 1 && steprun_summary$errors == "")) {
+    # handle errors
+    steprun_summary <- summary(steprun)
+    if (stop_on_error && !is.null(steprun_summary$error)) {
       stop(
-        "step ", i, " (entry=", step$entry, "): ", paste(steprun_summary$errors, collapse = "; "),
+        "step ", i, " (entry=", step$entry, "): ", steprun_summary$error,
         call. = FALSE
       )
     }
