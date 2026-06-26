@@ -10,13 +10,18 @@ See the latest release notes in [NEWS.md](./NEWS.md)
 
 ### Documentation
 
-https://pandora-isomemo.github.io/PEITHO/
+- Documentation home: https://pandora-isomemo.github.io/PEITHO/
+- Workflow quickstart (load, run, import/export): https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_basics.html
+- Workflow execution and recovery (errors, resume): https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_execution_recovery.html
+- Workflow authoring and editing (files, tags, update APIs): https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_authoring_editing.html
 
 ## Quick Example
 
+This README provides a minimal starting point. Detailed workflow guidance is split across the workflow vignettes listed below.
+
 ### Local Installation
 
-```{r, eval=FALSE}
+```R
 # Add repositories
 options(
   repos = c(
@@ -33,41 +38,35 @@ install.packages("PEITHO")
 library("PEITHO")
 ```
 
-### Use a workflow from a folder
+### Run the built-in example workflow
 
-If you have workflow configuration files (`commands.json`, `inputs.json`, etc.) stored in a local folder, you can load them directly by specifying the folder path:
+Use the bundled example workflow to quickly verify your setup:
 
-```{r, eval=FALSE}
-# define the workflow
-my_custom_wf <- new_workflow(
-  workflow_file_paths = workflow_file_paths(
-    path = file.path("PATH", "TO", "YOUR_CUSTOM_WORKFLOW_FOLDER")
-  )
-)
+```R
+# Load workflow from package example files
+my_wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 
-# run the workflow, e.g. steps 2 through 4 
-my_run <- run(my_custom_wf, from = 2, to = 4)
+# Run a subset of steps
+my_run <- run(my_wf, from = 1, to = 3)
 
-# check the result of the last step
-my_run$state$last_result
+# Inspect result size
+length(my_run$state$last_result)
 ```
 
-This approach is useful for:
-- Testing custom workflows during development
-- Loading workflows from local directories without packaging them as zip files
-- Working with multiple workflow variants stored in different folders
+For custom-folder workflows, import/export workflows, and result inspection patterns, see the quickstart vignette in the Documentation section above.
 
-## How to use this Package
+## Choose a Workflow Guide
 
-For a full description of the usage of the PEITHO package we refer to the [vignette](https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_basics.html). You can find it in the [Documentation](#documentation) above.
+- Quickstart: [Workflow Quickstart in PEITHO](https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_basics.html)
+- Execution and recovery: [Workflow Execution in PEITHO](https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_execution_recovery.html)
+- Authoring and editing: [Workflow Authoring in PEITHO](https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_authoring_editing.html)
 
 ## Notes for developers
 
 ### Documentation Updates
 
-When adding information to the _help_ sites, _docstrings_ or the _vignette_ of this 
-package, please update documentation locally as follows. The documentation of
-the main branch is built automatically via github action.
+When adding information to help pages, docstrings, or vignettes, please update documentation locally as follows. The documentation of
+the main branch is built automatically via GitHub Actions. Run these commands before opening a PR with doc or vignette changes.
 
 ```R
 devtools::document() # or CTRL + SHIFT + D in RStudio
