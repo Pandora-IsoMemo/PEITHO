@@ -331,12 +331,7 @@ paste_prompt_list <- function(string_list, prefix, suffix) {
   safe_suffix <- gsub("%", "%%", suffix, fixed = TRUE)
   full_string <- paste0(safe_prefix, "%s", safe_suffix)
 
-  unname(vapply(
-    string_list,
-    sprintf,
-    character(1),
-    fmt = full_string
-  ))
+  unname(sprintf(full_string, string_list))
 }
 
 export_fetched_text <- function(fetched_text, output_dir = "wikipedia_results") {
