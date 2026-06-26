@@ -18,6 +18,10 @@ This vignette explains how to author and modify workflows in PEITHO. It covers:
 
 For first-time usage, start with `vignette("peitho_workflow_basics")`.
 
+# When to Use This Vignette
+
+Use this vignette when you need to define workflows from files, use tag-based references, or programmatically modify workflow objects.
+
 # Prerequisites
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
@@ -163,3 +167,8 @@ You can author workflows through both file definitions and R APIs:
 - Apply safe, scripted updates with workflow mutation methods
 
 For robust run/recovery patterns, see `vignette("peitho_workflow_execution_recovery")`.
+
+# Related Vignettes
+
+- Quickstart (load, run, import/export): `vignette("peitho_workflow_basics")`
+- Execution and recovery (errors, run IDs, resume): `vignette("peitho_workflow_execution_recovery")`

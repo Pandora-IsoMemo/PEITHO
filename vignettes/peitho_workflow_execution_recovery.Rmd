@@ -18,6 +18,10 @@ This vignette covers robust workflow execution patterns in PEITHO. It focuses on
 
 If you are new to PEITHO workflows, start with `vignette("peitho_workflow_basics")`.
 
+# When to Use This Vignette
+
+Use this vignette when your workflow runs are long-running, error-prone, or need restart/resume behavior.
+
 # Prerequisites
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
@@ -114,3 +118,8 @@ You now have a robust execution workflow:
 - Resume incomplete runs without reprocessing completed steps
 
 For schema details and editing workflows, continue with `vignette("peitho_workflow_authoring_editing")`.
+
+# Related Vignettes
+
+- Quickstart (load, run, import/export): `vignette("peitho_workflow_basics")`
+- Authoring and editing (files, tags, selectors, update APIs): `vignette("peitho_workflow_authoring_editing")`
