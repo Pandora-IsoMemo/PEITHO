@@ -590,7 +590,9 @@ run.workflowstep <- function(
               output = prior_record$result,
               error  = if (!is.null(err_str) && nzchar(err_str)) err_str else NULL
             )
+          } else {
             step_parts[[part_idx]] <- list(output = character(0), error = NULL)
+          }
           PEITHO:::logInfo("  Iteration %d, sample %d: skipped (loaded from prior run)", iter_i, sample_i)
           next
         }
