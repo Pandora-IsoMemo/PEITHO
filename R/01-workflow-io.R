@@ -198,7 +198,9 @@ reconstruct_step_results <- function(records, run_id = NULL) {
     final_record <- Filter(function(x) x$record_kind %in% c("step_result", "step_summary"), step_records)
     final_record <- if (length(final_record)) final_record[[length(final_record)]] else step_records[[1L]]
 
-    errors <- vapply(iter_records, function(x) x$error %||% "", character(1))
+    iter_errors <- vapply(iter_records, function(x) x$error %||% "", character(1))
+    final_error <- final_record$error %||% final_record$errors %||% ""
+    errors <- c(iter_errors, final_error)
     errors <- errors[nzchar(errors)]
 
     list(
