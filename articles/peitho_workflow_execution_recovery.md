@@ -39,36 +39,36 @@ wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 run_1 <- run(wf, from = 1, to = 3)
 ```
 
-    ## INFO [2026-06-29 19:46:26] Starting workflow run with ID: '20260629194626_14acd597'
+    ## INFO [2026-06-29 20:09:22] Starting workflow run with ID: '20260629200922_14acd597'
 
-    ## INFO [2026-06-29 19:46:26] Running step 1 of 3
+    ## INFO [2026-06-29 20:09:22] Running step 1 of 3
 
-    ## INFO [2026-06-29 19:46:26] Parsing arguments for command simple_split
+    ## INFO [2026-06-29 20:09:22] Parsing arguments for command simple_split
 
-    ## INFO [2026-06-29 19:46:26]   Command 'simple_split': 3 results
+    ## INFO [2026-06-29 20:09:22]   Command 'simple_split': 3 results
 
-    ## INFO [2026-06-29 19:46:26] Running step 2 of 3
+    ## INFO [2026-06-29 20:09:22] Running step 2 of 3
 
-    ## INFO [2026-06-29 19:46:26] Parsing arguments for command fetch_WebText
+    ## INFO [2026-06-29 20:09:22] Parsing arguments for command fetch_WebText
 
-    ## INFO [2026-06-29 19:46:27]   2 sample x iteration runs for command 'fetch_WebText':
+    ## INFO [2026-06-29 20:09:24]   2 sample x iteration runs for command 'fetch_WebText':
 
-    ## INFO [2026-06-29 19:46:27]      2 single results.
+    ## INFO [2026-06-29 20:09:24]      2 single results.
 
-    ## INFO [2026-06-29 19:46:27] Running step 3 of 3
+    ## INFO [2026-06-29 20:09:24] Running step 3 of 3
 
-    ## INFO [2026-06-29 19:46:27] Parsing arguments for command paste
+    ## INFO [2026-06-29 20:09:24] Parsing arguments for command paste
 
-    ## WARN [2026-06-29 19:46:27] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
+    ## WARN [2026-06-29 20:09:24] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
 
-    ## INFO [2026-06-29 19:46:27]   Command 'paste': single result
+    ## INFO [2026-06-29 20:09:24]   Command 'paste': single result
 
 ``` r
 
 run_1$run_id
 ```
 
-    ## [1] "20260629194626_14acd597"
+    ## [1] "20260629200922_14acd597"
 
 The `run_id` uniquely identifies a workflow execution and is used for
 resume operations.
