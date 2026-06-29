@@ -19,6 +19,9 @@ RUN rm -rf /usr/local/lib/R/site-library/pkgbuild
 # Reinstall pkgbuild from scratch
 RUN Rscript -e "install.packages('pkgbuild', repos='https://cloud.r-project.org', clean=TRUE)"
 
+# Install ellmer from GitHub
+RUN Rscript -e "remotes::install_github('tidyverse/ellmer', upgrade='never')"
+
 RUN installPackage
 
 # Expose ports
