@@ -116,7 +116,7 @@ zipfile_path <- "./examples/my_workflow.peitho"
 save_as_zip(my_wf, file = zipfile_path)
 ```
 
-    ## INFO [2026-06-29 08:03:55] Creating directory './examples' for saving zip file.
+    ## INFO [2026-06-29 08:09:10] Creating directory './examples' for saving zip file.
 
 ## Running a Workflow
 
@@ -129,41 +129,41 @@ function. You can specify which steps to run (e.g., from step 1 to 5):
 my_run_1 <- run(my_wf, from = 1, to = 5)
 ```
 
-    ## INFO [2026-06-29 08:03:55] Starting workflow run with ID: '20260629080355_19cb283f'
+    ## INFO [2026-06-29 08:09:10] Starting workflow run with ID: '20260629080910_19cb283f'
 
-    ## INFO [2026-06-29 08:03:55] Running step 1 of 5
+    ## INFO [2026-06-29 08:09:10] Running step 1 of 5
 
-    ## INFO [2026-06-29 08:03:55] Parsing arguments for command simple_split
+    ## INFO [2026-06-29 08:09:10] Parsing arguments for command simple_split
 
-    ## INFO [2026-06-29 08:03:55]   Command 'simple_split': 3 results
+    ## INFO [2026-06-29 08:09:10]   Command 'simple_split': 3 results
 
-    ## INFO [2026-06-29 08:03:55] Running step 2 of 5
+    ## INFO [2026-06-29 08:09:10] Running step 2 of 5
 
-    ## INFO [2026-06-29 08:03:55] Parsing arguments for command fetch_WebText
+    ## INFO [2026-06-29 08:09:10] Parsing arguments for command fetch_WebText
 
-    ## INFO [2026-06-29 08:03:56]   2 sample x iteration runs for command 'fetch_WebText':
+    ## INFO [2026-06-29 08:09:11]   2 sample x iteration runs for command 'fetch_WebText':
 
-    ## INFO [2026-06-29 08:03:56]      2 single results.
+    ## INFO [2026-06-29 08:09:11]      2 single results.
 
-    ## INFO [2026-06-29 08:03:56] Running step 3 of 5
+    ## INFO [2026-06-29 08:09:12] Running step 3 of 5
 
-    ## INFO [2026-06-29 08:03:56] Parsing arguments for command paste
+    ## INFO [2026-06-29 08:09:12] Parsing arguments for command paste
 
-    ## WARN [2026-06-29 08:03:56] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
+    ## WARN [2026-06-29 08:09:12] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
 
-    ## INFO [2026-06-29 08:03:56]   Command 'paste': single result
+    ## INFO [2026-06-29 08:09:12]   Command 'paste': single result
 
-    ## INFO [2026-06-29 08:03:56] Running step 4 of 5
+    ## INFO [2026-06-29 08:09:12] Running step 4 of 5
 
-    ## INFO [2026-06-29 08:03:56] Parsing arguments for command gsub
+    ## INFO [2026-06-29 08:09:12] Parsing arguments for command gsub
 
-    ## INFO [2026-06-29 08:03:56]   Command 'gsub': single result
+    ## INFO [2026-06-29 08:09:12]   Command 'gsub': single result
 
-    ## INFO [2026-06-29 08:03:56] Running step 5 of 5
+    ## INFO [2026-06-29 08:09:12] Running step 5 of 5
 
-    ## INFO [2026-06-29 08:03:56] Parsing arguments for command simple_split
+    ## INFO [2026-06-29 08:09:12] Parsing arguments for command simple_split
 
-    ## INFO [2026-06-29 08:03:56]   Command 'simple_split': 26854 results
+    ## INFO [2026-06-29 08:09:12]   Command 'simple_split': 26854 results
 
 After running, you can inspect the results:
 
@@ -203,35 +203,35 @@ You can now run the imported workflow and inspect the results as before:
 my_run_2 <- run(my_wf_imported, from = 1, to = 4)
 ```
 
-    ## INFO [2026-06-29 08:03:57] Starting workflow run with ID: '20260629080357_01e47766'
+    ## INFO [2026-06-29 08:09:12] Starting workflow run with ID: '20260629080912_01e47766'
 
-    ## INFO [2026-06-29 08:03:57] Running step 1 of 4
+    ## INFO [2026-06-29 08:09:12] Running step 1 of 4
 
-    ## INFO [2026-06-29 08:03:57] Parsing arguments for command simple_split
+    ## INFO [2026-06-29 08:09:12] Parsing arguments for command simple_split
 
-    ## INFO [2026-06-29 08:03:57]   Command 'simple_split': 3 results
+    ## INFO [2026-06-29 08:09:12]   Command 'simple_split': 3 results
 
-    ## INFO [2026-06-29 08:03:57] Running step 2 of 4
+    ## INFO [2026-06-29 08:09:12] Running step 2 of 4
 
-    ## INFO [2026-06-29 08:03:57] Parsing arguments for command fetch_WebText
+    ## INFO [2026-06-29 08:09:12] Parsing arguments for command fetch_WebText
 
-    ## INFO [2026-06-29 08:03:58]   2 sample x iteration runs for command 'fetch_WebText':
+    ## INFO [2026-06-29 08:09:14]   2 sample x iteration runs for command 'fetch_WebText':
 
-    ## INFO [2026-06-29 08:03:58]      2 single results.
+    ## INFO [2026-06-29 08:09:14]      2 single results.
 
-    ## INFO [2026-06-29 08:03:58] Running step 3 of 4
+    ## INFO [2026-06-29 08:09:14] Running step 3 of 4
 
-    ## INFO [2026-06-29 08:03:58] Parsing arguments for command paste
+    ## INFO [2026-06-29 08:09:14] Parsing arguments for command paste
 
-    ## WARN [2026-06-29 08:03:58] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
+    ## WARN [2026-06-29 08:09:14] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
 
-    ## INFO [2026-06-29 08:03:58]   Command 'paste': single result
+    ## INFO [2026-06-29 08:09:14]   Command 'paste': single result
 
-    ## INFO [2026-06-29 08:03:58] Running step 4 of 4
+    ## INFO [2026-06-29 08:09:14] Running step 4 of 4
 
-    ## INFO [2026-06-29 08:03:58] Parsing arguments for command gsub
+    ## INFO [2026-06-29 08:09:14] Parsing arguments for command gsub
 
-    ## INFO [2026-06-29 08:03:58]   Command 'gsub': single result
+    ## INFO [2026-06-29 08:09:14]   Command 'gsub': single result
 
 ``` r
 
