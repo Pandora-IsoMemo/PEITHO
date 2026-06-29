@@ -2,8 +2,10 @@ pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  peitho_workflow_authoring_editing: peitho_workflow_authoring_editing.html
   peitho_workflow_basics: peitho_workflow_basics.html
-last_built: 2026-05-11T14:29Z
+  peitho_workflow_execution_recovery: peitho_workflow_execution_recovery.html
+last_built: 2026-06-29T08:03Z
 urls:
   reference: https://pandora-isomemo.github.io/PEITHO/reference
   article: https://pandora-isomemo.github.io/PEITHO/articles

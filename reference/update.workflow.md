@@ -2,7 +2,7 @@
 
 This function updates a specific field of a \`workflowstep\` object with
 a new value. It is used to modify step details such as name, label,
-comments, command, parameters, or loop settings.
+comments, command, parameters, or iteration settings.
 
 ## Usage
 
@@ -24,7 +24,7 @@ update(x, step, field, value, ...)
 - field:
 
   The name of the field to update (one of "name", "label", "comments",
-  "command", "args", "loop")
+  "command", "args", "iteration", "loop")
 
 - value:
 

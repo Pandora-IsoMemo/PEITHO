@@ -20,16 +20,24 @@
   : Convert a workflowstate to a data frame
 - [`as.data.frame(`*`<workflowstep>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/as.data.frame.workflowstep.md)
   : Convert a workflowstep to a data frame
+- [`as.graph_tables()`](https://pandora-isomemo.github.io/PEITHO/reference/as.graph_tables.md)
+  : Convert a workflow to graph tables
+- [`as.graph_tables(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/as.graph_tables.workflow.md)
+  : Convert a workflow to graph tables
 - [`config()`](https://pandora-isomemo.github.io/PEITHO/reference/config.md)
   : Load PEITHO configuration
 - [`fetch_WebText()`](https://pandora-isomemo.github.io/PEITHO/reference/fetch_WebText.md)
   : Fetch and parse web text from a URL
+- [`generate_letter_combinations()`](https://pandora-isomemo.github.io/PEITHO/reference/generate_letter_combinations.md)
+  : Generate letter combinations
 - [`get_field()`](https://pandora-isomemo.github.io/PEITHO/reference/get_field.md)
   : Get a specific field
 - [`get_field(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/get_field.workflow.md)
   : Get a specific field from a workflow
 - [`get_field(`*`<workflowstep>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/get_field.workflowstep.md)
   : Get a specific field from a workflowstep
+- [`get_resume_cursor()`](https://pandora-isomemo.github.io/PEITHO/reference/get_resume_cursor.md)
+  : Determine where to resume a partially completed workflow run
 - [`import_workflow()`](https://pandora-isomemo.github.io/PEITHO/reference/import_workflow.md)
   : Import workflow from a ZIP file
 - [`inputs_table_server()`](https://pandora-isomemo.github.io/PEITHO/reference/inputs_table_server.md)
@@ -53,6 +61,8 @@
 - [`` `%||%` ``](https://pandora-isomemo.github.io/PEITHO/reference/null-coalescing-operator.md)
   : Null coalescing operator Returns left value if not NULL, otherwise
   right value.
+- [`paste_prompt_list()`](https://pandora-isomemo.github.io/PEITHO/reference/paste_prompt_list.md)
+  : Paste a list of strings with a prefix and suffix
 - [`print(`*`<operationparam>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/print.operationparam.md)
   : Print method for operationparam objects
 - [`print(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/print.workflow.md)
@@ -65,6 +75,17 @@
   : Print method for workflowstep objects
 - [`print(`*`<workflowsteprun>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/print.workflowsteprun.md)
   : Print method for workflowsteprun objects
+- [`prune_nulls()`](https://pandora-isomemo.github.io/PEITHO/reference/prune_nulls.md)
+  : Recursively clean a list by removing NULL values This function takes
+  a list and recursively removes any NULL values from it. If the input
+  is not a list, it returns the input unchanged. If the input is NULL,
+  it returns NULL.
+- [`read_iteration_records_for_step()`](https://pandora-isomemo.github.io/PEITHO/reference/read_iteration_records_for_step.md)
+  : Read existing iteration records for a specific step and run
+- [`read_reconstructed_step_results()`](https://pandora-isomemo.github.io/PEITHO/reference/read_reconstructed_step_results.md)
+  : Read and reconstruct per-step results from the results JSON file
+- [`reconstruct_step_results()`](https://pandora-isomemo.github.io/PEITHO/reference/reconstruct_step_results.md)
+  : Reconstruct legacy per-step results from flat iteration records
 - [`remove_step()`](https://pandora-isomemo.github.io/PEITHO/reference/remove_step.md)
   : Remove a step from a workflow
 - [`remove_step(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/remove_step.workflow.md)
@@ -95,19 +116,31 @@
   : Add a workflow step run to the workflow state
 - [`update(`*`<workflowstep>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/update.workflowstep.md)
   : Update a workflow step
+- [`update_functions()`](https://pandora-isomemo.github.io/PEITHO/reference/update_functions.md)
+  : Update the custom functions of a workflow
+- [`update_functions(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/update_functions.workflow.md)
+  : Update the functions file of a workflow
 - [`update_input_list()`](https://pandora-isomemo.github.io/PEITHO/reference/update_input_list.md)
   : Update the input list of a workflow
 - [`update_input_list(`*`<workflow>`*`)`](https://pandora-isomemo.github.io/PEITHO/reference/update_input_list.workflow.md)
   : Update the input list of a workflow
+- [`workflow_example()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_example.md)
+  : Workflow example from package files
 - [`workflow_file_paths()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_file_paths.md)
   : Helper to get file paths for PEITHO workflow files
 - [`workflow_files_server()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_files_server.md)
   : Workflow Files Server
 - [`workflow_files_ui()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_files_ui.md)
   : Workflow Files UI
+- [`workflow_graph_server()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_graph_server.md)
+  : Graph Server
+- [`workflow_graph_ui()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_graph_ui.md)
+  : Graph UI
 - [`workflow_steps_from_files()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_steps_from_files.md)
   : Extract workflow steps from files in a folder
 - [`workflow_table_server()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_table_server.md)
   : Workflow Table Server
 - [`workflow_table_ui()`](https://pandora-isomemo.github.io/PEITHO/reference/workflow_table_ui.md)
   : Workflow Table UI
+- [`write_functions_file()`](https://pandora-isomemo.github.io/PEITHO/reference/write_functions_file.md)
+  : Write content to the functions file of a workflow

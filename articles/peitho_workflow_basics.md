@@ -1,13 +1,24 @@
-# Working with Workflows in PEITHO: Import, Export, and Execution
+# Workflow Quickstart in PEITHO: Load, Run, Import, Export
 
 ## Introduction
 
-This vignette demonstrates how to use the PEITHO package to manage,
-export, import, and execute workflows. The workflow system in PEITHO
-allows you to define a sequence of steps (such as data fetching,
-processing, or analysis), save and share workflows as zip files, and
-re-import or modify them for further use. This guide is aimed at users
-with basic R knowledge, but no advanced R expertise is required.
+This quickstart shows the fastest path to run a workflow in PEITHO and
+share it as a `.peitho` file. You will:
+
+- Load a workflow
+- Run selected steps
+- Inspect results
+- Export and re-import the workflow bundle
+
+For advanced execution topics (resume, robust error handling), see the
+vignette `peitho_workflow_execution_recovery`. For workflow authoring
+and editing, see `peitho_workflow_authoring_editing`.
+
+## When to Use This Vignette
+
+Use this vignette when you want a fast first success with PEITHO
+workflows. It intentionally focuses on the core run/import/export flow
+and skips advanced execution and authoring details.
 
 ## Prerequisites
 
@@ -29,8 +40,7 @@ library(PEITHO)
 
 ## Loading the Example Workflow
 
-You can create a workflow object from your own files by specifying a
-path, or use the example workflow included with PEITHO by passing an
+You can use the example workflow included with PEITHO by passing an
 empty string as the path:
 
 ``` r
@@ -38,7 +48,62 @@ empty string as the path:
 my_wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 ```
 
-    ## INFO [2026-05-11 14:29:45] Creating empty results.json file.
+You can inspect what was loaded:
+
+``` r
+
+my_wf
+```
+
+    ## <workflow>
+    ##   name:   Untitled workflow
+    ##   steps:  9
+    ##   current:1
+    ##   step summary:
+    ##    * [1] Split (command: simple_split)
+    ##      [2] get_content (command: fetch_WebText)
+    ##      [3] paste_urls (command: paste)
+    ##      [4] substitute_content (command: gsub)
+    ##      [5] split_content (command: simple_split)
+    ##      [6] Split_2 (command: simple_split)
+    ##      [7] get_content_2 (command: fetch_WebText)
+    ##      [8] paste_urls_2 (command: paste)
+    ##      [9] paste_content (command: paste)
+    ##   path to folder: /home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow
+    ##   inputs file:   /home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow/inputs.json
+    ##   commands file: /home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow/commands.json
+    ##   results file:  /home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow/results.json
+    ##   functions file:/home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow/functions.R
+    ##   available fields: $name, $input_list, $steps, $current, $workflow_file_paths, $dots
+
+## Loading a Workflow from a Custom Folder
+
+If you have workflow configuration files (`commands.json`,
+`inputs.json`, etc.) stored in a local folder, you can load them
+directly by specifying the folder path:
+
+``` r
+
+# define the workflow
+my_custom_wf <- new_workflow(
+  workflow_file_paths = workflow_file_paths(
+    path = file.path("PATH", "TO", "YOUR_CUSTOM_WORKFLOW_FOLDER")
+  )
+)
+
+# run the workflow, e.g. steps 2 through 4
+my_run <- run(my_custom_wf, from = 2, to = 4)
+
+# check the result of the last step
+my_run$state$last_result
+```
+
+This approach is useful for:
+
+- Testing custom workflows during development
+- Loading workflows from local directories without packaging them as zip
+  files
+- Working with multiple workflow variants stored in different folders
 
 ## Exporting a Workflow as a Zip File
 
@@ -51,7 +116,7 @@ zipfile_path <- "./examples/my_workflow.peitho"
 save_as_zip(my_wf, file = zipfile_path)
 ```
 
-    ## INFO [2026-05-11 14:29:45] Creating directory './examples' for saving zip file.
+    ## INFO [2026-06-29 08:03:55] Creating directory './examples' for saving zip file.
 
 ## Running a Workflow
 
@@ -64,41 +129,41 @@ function. You can specify which steps to run (e.g., from step 1 to 5):
 my_run_1 <- run(my_wf, from = 1, to = 5)
 ```
 
-    ## INFO [2026-05-11 14:29:45] Starting workflow run with ID: '20260511142945_19cb283f'
+    ## INFO [2026-06-29 08:03:55] Starting workflow run with ID: '20260629080355_19cb283f'
 
-    ## INFO [2026-05-11 14:29:45] Running step 1 of 5
+    ## INFO [2026-06-29 08:03:55] Running step 1 of 5
 
-    ## INFO [2026-05-11 14:29:45] Parsing arguments for command simple_split
+    ## INFO [2026-06-29 08:03:55] Parsing arguments for command simple_split
 
-    ## INFO [2026-05-11 14:29:45]   Command 'simple_split': 3 results
+    ## INFO [2026-06-29 08:03:55]   Command 'simple_split': 3 results
 
-    ## INFO [2026-05-11 14:29:45] Running step 2 of 5
+    ## INFO [2026-06-29 08:03:55] Running step 2 of 5
 
-    ## INFO [2026-05-11 14:29:45] Parsing arguments for command fetch_WebText
+    ## INFO [2026-06-29 08:03:55] Parsing arguments for command fetch_WebText
 
-    ## INFO [2026-05-11 14:29:47]   2 loop iterations for command 'fetch_WebText':
+    ## INFO [2026-06-29 08:03:56]   2 sample x iteration runs for command 'fetch_WebText':
 
-    ## INFO [2026-05-11 14:29:47]      2 single results.
+    ## INFO [2026-06-29 08:03:56]      2 single results.
 
-    ## INFO [2026-05-11 14:29:47] Running step 3 of 5
+    ## INFO [2026-06-29 08:03:56] Running step 3 of 5
 
-    ## INFO [2026-05-11 14:29:47] Parsing arguments for command paste
+    ## INFO [2026-06-29 08:03:56] Parsing arguments for command paste
 
-    ## WARN [2026-05-11 14:29:47] WARNING! Detected list argument(s) for command 'paste', but 'loop' is set to 'no'.
+    ## WARN [2026-06-29 08:03:56] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
 
-    ## INFO [2026-05-11 14:29:47]   Command 'paste': single result
+    ## INFO [2026-06-29 08:03:56]   Command 'paste': single result
 
-    ## INFO [2026-05-11 14:29:47] Running step 4 of 5
+    ## INFO [2026-06-29 08:03:56] Running step 4 of 5
 
-    ## INFO [2026-05-11 14:29:47] Parsing arguments for command gsub
+    ## INFO [2026-06-29 08:03:56] Parsing arguments for command gsub
 
-    ## INFO [2026-05-11 14:29:47]   Command 'gsub': single result
+    ## INFO [2026-06-29 08:03:56]   Command 'gsub': single result
 
-    ## INFO [2026-05-11 14:29:47] Running step 5 of 5
+    ## INFO [2026-06-29 08:03:56] Running step 5 of 5
 
-    ## INFO [2026-05-11 14:29:47] Parsing arguments for command simple_split
+    ## INFO [2026-06-29 08:03:56] Parsing arguments for command simple_split
 
-    ## INFO [2026-05-11 14:29:47]   Command 'simple_split': 31356 results
+    ## INFO [2026-06-29 08:03:56]   Command 'simple_split': 26854 results
 
 After running, you can inspect the results:
 
@@ -114,14 +179,12 @@ length(my_run_1$state$last_result)
 PEITHO:::trunc(my_run_1$state$last_result, n_char = 100)
 ```
 
-    ## [1] "Toggl, \n th, \n tabl, \n of cont, \nnts Roman Empir, \n... (31351 more items)"
+    ## [1] "Rom, \n (27 BC – AD 476)[c]\n\nConstantinopl, \n (330–1453)[d]\n\nOfficial: initially Latin, incr, \nasingly Gr, \n, \n... (26849 more items)"
 
-## Importing and Modifying a Workflow from a Zip File
+## Importing a Workflow from a Zip File
 
 To import a workflow from a zip file, first define the directory where
-the workflow files will be extracted. You may also modify the workflow
-steps (for example, by editing `commands.json` or `inputs.json` in the
-extracted folder) before running it.
+the workflow files will be extracted.
 
 ``` r
 
@@ -133,43 +196,42 @@ my_wf_imported <- PEITHO::import_workflow(
 )
 ```
 
-You can now run the imported (and possibly modified) workflow and
-inspect the results as before:
+You can now run the imported workflow and inspect the results as before:
 
 ``` r
 
 my_run_2 <- run(my_wf_imported, from = 1, to = 4)
 ```
 
-    ## INFO [2026-05-11 14:29:48] Starting workflow run with ID: '20260511142948_01e47766'
+    ## INFO [2026-06-29 08:03:57] Starting workflow run with ID: '20260629080357_01e47766'
 
-    ## INFO [2026-05-11 14:29:48] Running step 1 of 4
+    ## INFO [2026-06-29 08:03:57] Running step 1 of 4
 
-    ## INFO [2026-05-11 14:29:48] Parsing arguments for command simple_split
+    ## INFO [2026-06-29 08:03:57] Parsing arguments for command simple_split
 
-    ## INFO [2026-05-11 14:29:48]   Command 'simple_split': 3 results
+    ## INFO [2026-06-29 08:03:57]   Command 'simple_split': 3 results
 
-    ## INFO [2026-05-11 14:29:48] Running step 2 of 4
+    ## INFO [2026-06-29 08:03:57] Running step 2 of 4
 
-    ## INFO [2026-05-11 14:29:48] Parsing arguments for command fetch_WebText
+    ## INFO [2026-06-29 08:03:57] Parsing arguments for command fetch_WebText
 
-    ## INFO [2026-05-11 14:29:49]   2 loop iterations for command 'fetch_WebText':
+    ## INFO [2026-06-29 08:03:58]   2 sample x iteration runs for command 'fetch_WebText':
 
-    ## INFO [2026-05-11 14:29:49]      2 single results.
+    ## INFO [2026-06-29 08:03:58]      2 single results.
 
-    ## INFO [2026-05-11 14:29:49] Running step 3 of 4
+    ## INFO [2026-06-29 08:03:58] Running step 3 of 4
 
-    ## INFO [2026-05-11 14:29:49] Parsing arguments for command paste
+    ## INFO [2026-06-29 08:03:58] Parsing arguments for command paste
 
-    ## WARN [2026-05-11 14:29:49] WARNING! Detected list argument(s) for command 'paste', but 'loop' is set to 'no'.
+    ## WARN [2026-06-29 08:03:58] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
 
-    ## INFO [2026-05-11 14:29:49]   Command 'paste': single result
+    ## INFO [2026-06-29 08:03:58]   Command 'paste': single result
 
-    ## INFO [2026-05-11 14:29:49] Running step 4 of 4
+    ## INFO [2026-06-29 08:03:58] Running step 4 of 4
 
-    ## INFO [2026-05-11 14:29:49] Parsing arguments for command gsub
+    ## INFO [2026-06-29 08:03:58] Parsing arguments for command gsub
 
-    ## INFO [2026-05-11 14:29:49]   Command 'gsub': single result
+    ## INFO [2026-06-29 08:03:58]   Command 'gsub': single result
 
 ``` r
 
@@ -183,16 +245,25 @@ length(my_run_2$state$last_result)
 PEITHO:::trunc(my_run_2$state$last_result, n_char = 100)
 ```
 
-    ## [1] "TogglHALLO thHALLO tablHALLO of contHALLOnts Roman EmpirHALLO 188 languagHALLOs Acèh Afrikaans አማርኛ  ..."
+    ## [1] "RomHALLO (27 BC – AD 476)[c]\n\nConstantinoplHALLO (330–1453)[d]\n\nOfficial: initially Latin, incrHALLO ..."
 
 ## Summary
 
 PEITHO’s workflow system allows you to:
 
+- Load workflows from the built-in example or custom folder paths
 - Load and execute multi-step workflows from configuration files
 - Export workflows as zip files for sharing or backup
-- Import and modify workflows from zip files
+- Import workflows from zip files
 - Inspect and print results from workflow execution
 
 This makes it easy to share, reuse, and adapt complex analysis pipelines
 in a reproducible way.
+
+## Next Steps
+
+- Advanced execution and recovery (resume runs, error handling):
+  [`vignette("peitho_workflow_execution_recovery")`](https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_execution_recovery.md)
+- Authoring and editing workflows (JSON schema, tags, selectors, update
+  APIs):
+  [`vignette("peitho_workflow_authoring_editing")`](https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_authoring_editing.md)

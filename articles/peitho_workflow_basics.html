@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Working with Workflows in PEITHO: Import, Export, and Execution • PEITHO</title>
+<title>Workflow Quickstart in PEITHO: Load, Run, Import, Export • PEITHO</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Working with Workflows in PEITHO: Import, Export, and Execution">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Workflow Quickstart in PEITHO: Load, Run, Import, Export">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PEITHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.04.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.06.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,12 +30,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/peitho_workflow_basics.html">Working with Workflows in PEITHO: Import, Export, and Execution</a></li>
-  </ul>
-</li>
+<li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -55,7 +50,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Working with Workflows in PEITHO: Import, Export, and Execution</h1>
+      <h1>Workflow Quickstart in PEITHO: Load, Run, Import, Export</h1>
             
       
 
@@ -67,12 +62,25 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>This vignette demonstrates how to use the PEITHO package to manage,
-export, import, and execute workflows. The workflow system in PEITHO
-allows you to define a sequence of steps (such as data fetching,
-processing, or analysis), save and share workflows as zip files, and
-re-import or modify them for further use. This guide is aimed at users
-with basic R knowledge, but no advanced R expertise is required.</p>
+<p>This quickstart shows the fastest path to run a workflow in PEITHO
+and share it as a <code>.peitho</code> file. You will:</p>
+<ul>
+<li>Load a workflow</li>
+<li>Run selected steps</li>
+<li>Inspect results</li>
+<li>Export and re-import the workflow bundle</li>
+</ul>
+<p>For advanced execution topics (resume, robust error handling), see
+the vignette <code>peitho_workflow_execution_recovery</code>. For
+workflow authoring and editing, see
+<code>peitho_workflow_authoring_editing</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="when-to-use-this-vignette">When to Use This Vignette<a class="anchor" aria-label="anchor" href="#when-to-use-this-vignette"></a>
+</h2>
+<p>Use this vignette when you want a fast first success with PEITHO
+workflows. It intentionally focuses on the core run/import/export flow
+and skips advanced execution and authoring details.</p>
 </div>
 <div class="section level2">
 <h2 id="prerequisites">Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites"></a>
@@ -95,108 +103,169 @@ instead of <code><a href="https://pandora-isomemo.github.io/PEITHO/">library(PEI
 <div class="section level2">
 <h2 id="loading-the-example-workflow">Loading the Example Workflow<a class="anchor" aria-label="anchor" href="#loading-the-example-workflow"></a>
 </h2>
-<p>You can create a workflow object from your own files by specifying a
-path, or use the example workflow included with PEITHO by passing an
+<p>You can use the example workflow included with PEITHO by passing an
 empty string as the path:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_workflow.html">new_workflow</a></span><span class="op">(</span>workflow_file_paths <span class="op">=</span> <span class="fu"><a href="../reference/workflow_file_paths.html">workflow_file_paths</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">""</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:45] Creating empty results.json file.</span></span></code></pre>
+<p>You can inspect what was loaded:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_wf</span></span></code></pre></div>
+<pre><code><span><span class="co">## &lt;workflow&gt;</span></span>
+<span><span class="co">##   name:   Untitled workflow</span></span>
+<span><span class="co">##   steps:  9</span></span>
+<span><span class="co">##   current:1</span></span>
+<span><span class="co">##   step summary:</span></span>
+<span><span class="co">##    * [1] Split (command: simple_split)</span></span>
+<span><span class="co">##      [2] get_content (command: fetch_WebText)</span></span>
+<span><span class="co">##      [3] paste_urls (command: paste)</span></span>
+<span><span class="co">##      [4] substitute_content (command: gsub)</span></span>
+<span><span class="co">##      [5] split_content (command: simple_split)</span></span>
+<span><span class="co">##      [6] Split_2 (command: simple_split)</span></span>
+<span><span class="co">##      [7] get_content_2 (command: fetch_WebText)</span></span>
+<span><span class="co">##      [8] paste_urls_2 (command: paste)</span></span>
+<span><span class="co">##      [9] paste_content (command: paste)</span></span>
+<span><span class="co">##   path to folder: /home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow</span></span>
+<span><span class="co">##   inputs file:   /home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow/inputs.json</span></span>
+<span><span class="co">##   commands file: /home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow/commands.json</span></span>
+<span><span class="co">##   results file:  /home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow/results.json</span></span>
+<span><span class="co">##   functions file:/home/runner/work/_temp/Library/PEITHO/scripts/peitho_files/example_workflow/functions.R</span></span>
+<span><span class="co">##   available fields: $name, $input_list, $steps, $current, $workflow_file_paths, $dots</span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="loading-a-workflow-from-a-custom-folder">Loading a Workflow from a Custom Folder<a class="anchor" aria-label="anchor" href="#loading-a-workflow-from-a-custom-folder"></a>
+</h2>
+<p>If you have workflow configuration files (<code>commands.json</code>,
+<code>inputs.json</code>, etc.) stored in a local folder, you can load
+them directly by specifying the folder path:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># define the workflow</span></span>
+<span><span class="va">my_custom_wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_workflow.html">new_workflow</a></span><span class="op">(</span></span>
+<span>  workflow_file_paths <span class="op">=</span> <span class="fu"><a href="../reference/workflow_file_paths.html">workflow_file_paths</a></span><span class="op">(</span></span>
+<span>    path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"PATH"</span>, <span class="st">"TO"</span>, <span class="st">"YOUR_CUSTOM_WORKFLOW_FOLDER"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># run the workflow, e.g. steps 2 through 4</span></span>
+<span><span class="va">my_run</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_custom_wf</span>, from <span class="op">=</span> <span class="fl">2</span>, to <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># check the result of the last step</span></span>
+<span><span class="va">my_run</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span></span></code></pre></div>
+<p>This approach is useful for:</p>
+<ul>
+<li>Testing custom workflows during development</li>
+<li>Loading workflows from local directories without packaging them as
+zip files</li>
+<li>Working with multiple workflow variants stored in different
+folders</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="exporting-a-workflow-as-a-zip-file">Exporting a Workflow as a Zip File<a class="anchor" aria-label="anchor" href="#exporting-a-workflow-as-a-zip-file"></a>
 </h2>
 <p>You can export the current workflow setup (all relevant files) as a
 zip archive (here with the <code>.peitho</code> extension):</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zipfile_path</span> <span class="op">&lt;-</span> <span class="st">"./examples/my_workflow.peitho"</span></span>
 <span><span class="fu"><a href="../reference/save_as_zip.html">save_as_zip</a></span><span class="op">(</span><span class="va">my_wf</span>, file <span class="op">=</span> <span class="va">zipfile_path</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:45] Creating directory './examples' for saving zip file.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:55] Creating directory './examples' for saving zip file.</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="running-a-workflow">Running a Workflow<a class="anchor" aria-label="anchor" href="#running-a-workflow"></a>
 </h2>
 <p>To execute the workflow, use the <code><a href="../reference/run.html">run()</a></code> function. You can
 specify which steps to run (e.g., from step 1 to 5):</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_run_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_wf</span>, from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:45] Starting workflow run with ID: '20260511142945_19cb283f'</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:45] Running step 1 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:45] Parsing arguments for command simple_split</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:45]   Command 'simple_split': 3 results</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:45] Running step 2 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:45] Parsing arguments for command fetch_WebText</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:47]   2 loop iterations for command 'fetch_WebText':</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:47]      2 single results.</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:47] Running step 3 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:47] Parsing arguments for command paste</span></span></code></pre>
-<pre><code><span><span class="co">## WARN [2026-05-11 14:29:47] WARNING! Detected list argument(s) for command 'paste', but 'loop' is set to 'no'.</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:47]   Command 'paste': single result</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:47] Running step 4 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:47] Parsing arguments for command gsub</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:47]   Command 'gsub': single result</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:47] Running step 5 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:47] Parsing arguments for command simple_split</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:47]   Command 'simple_split': 31356 results</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:55] Starting workflow run with ID: '20260629080355_19cb283f'</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:55] Running step 1 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:55] Parsing arguments for command simple_split</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:55]   Command 'simple_split': 3 results</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:55] Running step 2 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:55] Parsing arguments for command fetch_WebText</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:56]   2 sample x iteration runs for command 'fetch_WebText':</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:56]      2 single results.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:56] Running step 3 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:56] Parsing arguments for command paste</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-06-29 08:03:56] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:56]   Command 'paste': single result</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:56] Running step 4 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:56] Parsing arguments for command gsub</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:56]   Command 'gsub': single result</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:56] Running step 5 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:56] Parsing arguments for command simple_split</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:56]   Command 'simple_split': 26854 results</span></span></code></pre>
 <p>After running, you can inspect the results:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_run_1</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 1</span></span></code></pre>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">PEITHO</span><span class="fu">:::</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">trunc</a></span><span class="op">(</span><span class="va">my_run_1</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span>, n_char <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "Toggl, \n th, \n tabl, \n of cont, \nnts Roman Empir, \n... (31351 more items)"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "Rom, \n (27 BC – AD 476)[c]\n\nConstantinopl, \n (330–1453)[d]\n\nOfficial: initially Latin, incr, \nasingly Gr, \n, \n... (26849 more items)"</span></span></code></pre>
 </div>
 <div class="section level2">
-<h2 id="importing-and-modifying-a-workflow-from-a-zip-file">Importing and Modifying a Workflow from a Zip File<a class="anchor" aria-label="anchor" href="#importing-and-modifying-a-workflow-from-a-zip-file"></a>
+<h2 id="importing-a-workflow-from-a-zip-file">Importing a Workflow from a Zip File<a class="anchor" aria-label="anchor" href="#importing-a-workflow-from-a-zip-file"></a>
 </h2>
 <p>To import a workflow from a zip file, first define the directory
-where the workflow files will be extracted. You may also modify the
-workflow steps (for example, by editing <code>commands.json</code> or
-<code>inputs.json</code> in the extracted folder) before running it.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+where the workflow files will be extracted.</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zipfile_path</span> <span class="op">&lt;-</span> <span class="st">"./examples/my_workflow.peitho"</span></span>
 <span></span>
 <span><span class="va">my_wf_imported</span> <span class="op">&lt;-</span> <span class="fu">PEITHO</span><span class="fu">::</span><span class="fu"><a href="../reference/import_workflow.html">import_workflow</a></span><span class="op">(</span></span>
 <span>  zipfile <span class="op">=</span> <span class="va">zipfile_path</span>,</span>
 <span>  extract_dir <span class="op">=</span> <span class="st">"./examples/peitho_import"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>You can now run the imported (and possibly modified) workflow and
-inspect the results as before:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<p>You can now run the imported workflow and inspect the results as
+before:</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_run_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_wf_imported</span>, from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:48] Starting workflow run with ID: '20260511142948_01e47766'</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:48] Running step 1 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:48] Parsing arguments for command simple_split</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:48]   Command 'simple_split': 3 results</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:48] Running step 2 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:48] Parsing arguments for command fetch_WebText</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:49]   2 loop iterations for command 'fetch_WebText':</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:49]      2 single results.</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:49] Running step 3 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:49] Parsing arguments for command paste</span></span></code></pre>
-<pre><code><span><span class="co">## WARN [2026-05-11 14:29:49] WARNING! Detected list argument(s) for command 'paste', but 'loop' is set to 'no'.</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:49]   Command 'paste': single result</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:49] Running step 4 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:49] Parsing arguments for command gsub</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-05-11 14:29:49]   Command 'gsub': single result</span></span></code></pre>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:57] Starting workflow run with ID: '20260629080357_01e47766'</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:57] Running step 1 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:57] Parsing arguments for command simple_split</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:57]   Command 'simple_split': 3 results</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:57] Running step 2 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:57] Parsing arguments for command fetch_WebText</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:58]   2 sample x iteration runs for command 'fetch_WebText':</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:58]      2 single results.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:58] Running step 3 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:58] Parsing arguments for command paste</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-06-29 08:03:58] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:58]   Command 'paste': single result</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:58] Running step 4 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:58] Parsing arguments for command gsub</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-06-29 08:03:58]   Command 'gsub': single result</span></span></code></pre>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_run_2</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 1</span></span></code></pre>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">PEITHO</span><span class="fu">:::</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">trunc</a></span><span class="op">(</span><span class="va">my_run_2</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span>, n_char <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "TogglHALLO thHALLO tablHALLO of contHALLOnts Roman EmpirHALLO 188 languagHALLOs Acèh Afrikaans አማርኛ  ..."</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "RomHALLO (27 BC – AD 476)[c]\n\nConstantinoplHALLO (330–1453)[d]\n\nOfficial: initially Latin, incrHALLO ..."</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
 <p>PEITHO’s workflow system allows you to:</p>
 <ul>
+<li>Load workflows from the built-in example or custom folder paths</li>
 <li>Load and execute multi-step workflows from configuration files</li>
 <li>Export workflows as zip files for sharing or backup</li>
-<li>Import and modify workflows from zip files</li>
+<li>Import workflows from zip files</li>
 <li>Inspect and print results from workflow execution</li>
 </ul>
 <p>This makes it easy to share, reuse, and adapt complex analysis
 pipelines in a reproducible way.</p>
+</div>
+<div class="section level2">
+<h2 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+</h2>
+<ul>
+<li>Advanced execution and recovery (resume runs, error handling):
+<code><a href="../articles/peitho_workflow_execution_recovery.html">vignette("peitho_workflow_execution_recovery")</a></code>
+</li>
+<li>Authoring and editing workflows (JSON schema, tags, selectors,
+update APIs):
+<code><a href="../articles/peitho_workflow_authoring_editing.html">vignette("peitho_workflow_authoring_editing")</a></code>
+</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

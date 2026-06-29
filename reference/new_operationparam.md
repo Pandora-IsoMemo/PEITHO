@@ -14,7 +14,8 @@ new_operationparam(
   value = "",
   label = "",
   type = c("literal", "input", "result"),
-  loop = c("no", "yes", "auto"),
+  iteration = c("no", "yes", "auto"),
+  loop = NULL,
   selector = NULL,
   ...
 )
@@ -48,11 +49,15 @@ new_operationparam(
   or external input - "result" : value refers to a previous step's
   result - "literal": value is used as-is (a literal argument)
 
+- iteration:
+
+  Iteration behavior for this parameter. One of: - "no" : do not
+  iterate - "yes" : always iterate - "auto" : automatically determine
+  iteration, iterate if input is a list else not
+
 - loop:
 
-  Looping behavior for this parameter. One of: - "no" : do not loop -
-  "yes" : always loop - "auto" : automatically determine looping, loop
-  if input is a list else not
+  Deprecated alias for \`iteration\` (kept for backward compatibility).
 
 - selector:
 

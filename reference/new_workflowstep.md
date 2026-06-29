@@ -13,7 +13,9 @@ new_workflowstep(
   label = NULL,
   comments = "",
   args = "",
-  loop = "auto",
+  iteration = "auto",
+  samples = 1L,
+  loop = NULL,
   env = parent.frame(),
   ...
 )
@@ -48,10 +50,19 @@ new_workflowstep(
 
   The original argument string from the workflow file, for reference.
 
+- iteration:
+
+  A character string indicating if the step should iterate over list
+  arguments. Can be "yes", "no", or "auto".
+
+- samples:
+
+  Integer number of samples to run per iteration. Must be \>= 1.
+  Defaults to 1 (current behavior).
+
 - loop:
 
-  A character string indicating if the step should be looped over. Can
-  be "yes", "no", or "auto".
+  Deprecated alias for \`iteration\` (kept for backward compatibility).
 
 - env:
 

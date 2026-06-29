@@ -7,7 +7,18 @@ state with the result or error from the step execution.
 
 ``` r
 # S3 method for class 'workflowstep'
-run(x, state, env = NULL, step_i = NULL, input_list = NULL, ...)
+run(
+  x,
+  state,
+  env = NULL,
+  step_i = NULL,
+  step_idx = NULL,
+  input_list = NULL,
+  results_path = NULL,
+  resume_from_sample = NULL,
+  resume_from_iteration = NULL,
+  ...
+)
 ```
 
 ## Arguments
@@ -30,10 +41,26 @@ run(x, state, env = NULL, step_i = NULL, input_list = NULL, ...)
 
   The number of the step in the workflow, used for logging purposes.
 
+- step_idx:
+
+  The absolute index of the step in the workflow, used for persistence.
+
 - input_list:
 
   A list of inputs for argument parsing, loaded from the workflow's
   inputs file.
+
+- results_path:
+
+  An optional path to a results file for intermediate writes.
+
+- resume_from_sample:
+
+  The first sample index still needing execution (NULL = run all).
+
+- resume_from_iteration:
+
+  The first iteration index still needing execution (NULL = run all).
 
 - ...:
 

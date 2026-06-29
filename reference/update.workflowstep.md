@@ -28,7 +28,7 @@ update(x, workflow_file_paths, value, field, with_map_field = TRUE, ...)
 - field:
 
   The name of the field to update. Must be one of "name", "label",
-  "comments", "command", "args", or "loop".
+  "comments", "command", "args", "iteration", "samples", or "loop".
 
 - with_map_field:
 
