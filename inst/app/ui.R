@@ -28,6 +28,7 @@ tagList(
           tabsetPanel(id = "main_tabs",
             tabPanel("Workflow", workflow_table_ui("wf_table", title = "Workflow commands")),
             tabPanel("Inputs", inputs_table_ui("inputs_table", title = "Workflow inputs")),
+            tabPanel("Graph", workflow_graph_ui("graph", title = "Workflow graph")),
             tabPanel("Results", results_table_ui("results_table", title = "Workflow results")),
             tabPanel(
               "Folders & Files",

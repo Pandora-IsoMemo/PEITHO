@@ -4,7 +4,18 @@
 \alias{run.workflowstep}
 \title{Run a workflow step}
 \usage{
-\method{run}{workflowstep}(x, state, env = NULL, step_i = NULL, input_list = NULL, ...)
+\method{run}{workflowstep}(
+  x,
+  state,
+  env = NULL,
+  step_i = NULL,
+  step_idx = NULL,
+  input_list = NULL,
+  results_path = NULL,
+  resume_from_sample = NULL,
+  resume_from_iteration = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{A `workflowstep` object representing the step to execute.}
@@ -15,7 +26,15 @@
 
 \item{step_i}{The number of the step in the workflow, used for logging purposes.}
 
+\item{step_idx}{The absolute index of the step in the workflow, used for persistence.}
+
 \item{input_list}{A list of inputs for argument parsing, loaded from the workflow's inputs file.}
+
+\item{results_path}{An optional path to a results file for intermediate writes.}
+
+\item{resume_from_sample}{The first sample index still needing execution (NULL = run all).}
+
+\item{resume_from_iteration}{The first iteration index still needing execution (NULL = run all).}
 
 \item{...}{Additional arguments (not used).}
 }

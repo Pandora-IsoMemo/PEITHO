@@ -10,9 +10,7 @@ test_that("workflow can be exported, imported, and run as in example_wf.R", {
   extract_dir <- file.path(tmp_dir, "imported")
 
   # Create workflow from example files
-  my_wf <- PEITHO::new_workflow(
-    workflow_file_paths = PEITHO::workflow_file_paths(path = "")
-  )
+  my_wf <- PEITHO::workflow_example()
 
   # Export as zip
   PEITHO::save_as_zip(my_wf, file = zipfile_path)
@@ -47,4 +45,50 @@ test_that("workflow can be exported, imported, and run as in example_wf.R", {
   trunc_out2 <- strsplit(trunc_out2, split = " ..., ")[[1]]
   trunc_out2 <- gsub(" ...", "", trunc_out2)
   expect_true(all(nchar(trunc_out2) <= 100))
+})
+
+# Test for PEITHO workflow zip export/import and run
+
+test_that("workflow can be converted to graph_table and rendered", {
+  skip_on_cran()
+  skip_if_not_installed("PEITHO")
+
+  # Create workflow from example files
+  example_wf <- PEITHO::workflow_example()
+  my_graph_tables <- as.graph_tables(example_wf)
+
+  # test that graph tables have the expected structure
+  expect_true(is.list(my_graph_tables))
+  expect_true(all(c("nodes", "edges") %in% names(my_graph_tables)))
+  expect_true(is.data.frame(my_graph_tables$nodes))
+  expect_true(is.data.frame(my_graph_tables$edges))
+  expect_equal(nrow(my_graph_tables$nodes), length(example_wf$steps) + length(example_wf$input_list))
+  # Check that first step node has correct command
+  step_nodes <- my_graph_tables$nodes[my_graph_tables$nodes$type == "step", ]
+  expect_equal(
+    step_nodes$command[1],
+    example_wf$steps[[1]]$command
+  )
+  # Verify input nodes are present
+  input_nodes <- my_graph_tables$nodes[my_graph_tables$nodes$type == "input", ]
+  expect_equal(nrow(input_nodes), length(example_wf$input_list))
+
+  renderedGraph <- DiagrammeR::create_graph(directed = TRUE) |>
+    DiagrammeR::add_nodes_from_table(
+      my_graph_tables$nodes,
+      label_col = "label",
+      type_col = "type"
+    ) |>
+    DiagrammeR::add_edges_from_table(
+      my_graph_tables$edges,
+      from_col = "from",
+      to_col = "to",
+      from_to_map = "id_external",
+      rel_col = "rel"
+    ) |>
+    DiagrammeR::render_graph(layout = "tree")
+  # Verify graph was rendered successfully
+  expect_true(is.list(renderedGraph))
+  # test that rendering does not throw an error
+  expect_silent(renderedGraph)
 })

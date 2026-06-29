@@ -75,18 +75,15 @@ trunc <- function(val, n_char = 40, n_items = 5) {
 #' @export
 print.workflowstate <- function(x, ...) {
   # in which step errors occurred?
-  is_error <- sapply(x$stepruns, function(sr) sr$has_error)
+  step_summaries <- lapply(x$stepruns, summary)
+  is_error <- vapply(step_summaries, function(s) !is.null(s$error), logical(1))
   cat("<workflowstate>\n")
   cat("  stepruns:      ", length(x$stepruns), "\n", sep = "")
   cat("  has error:    ", any(is_error), "\n", sep = "")
   if (any(is_error)) {
     cat("  error in steps:", paste(which(is_error), collapse = ", "), "\n", sep = " ")
     cat("                 (use summary() to see error details)\n")
-    first_error <- x$stepruns[[which(is_error)[1]]]$error
-    if (is.list(first_error) && !inherits(first_error, "condition")) {
-      non_null <- Filter(function(e) !is.null(e), first_error)
-      first_error <- if (length(non_null) > 0L) non_null[[1L]] else NULL
-    }
+    first_error <- step_summaries[[which(is_error)[1]]]$error
     cat("  first error:   ", trunc(first_error), "\n", sep = "")
   }
   cat("  initial_input: ", trunc(x$initial_input), "\n", sep = "")
@@ -113,14 +110,15 @@ as.data.frame.workflowstate <- function(x, row.names = NULL, optional = FALSE, .
   max_items <- if ("max_items" %in% names(dots)) dots$max_items else 5
 
   sr <- x$stepruns
+  sr_summaries <- lapply(sr, summary)
 
   data.frame(
     entry     = vapply(sr, function(s) s$step$entry, integer(1)),
-    name   = vapply(sr, function(s) s$step$name, character(1)),
+    name      = vapply(sr, function(s) s$step$name, character(1)),
     label     = vapply(sr, function(s) s$step$label, character(1)),
-    has_error   = vapply(sr, function(s) s$has_error, logical(1)),
-    error       = vapply(sr, function(s) if (s$has_error) trunc(s$error, n_char = max_char, n_items = max_items) else "", character(1)),
-    output      = vapply(sr, function(s) if (!s$has_error) trunc(s$output, n_char = max_char, n_items = max_items) else "", character(1)),
+    has_error = vapply(sr_summaries, function(s) !is.null(s$error), logical(1)),
+    error     = vapply(sr_summaries, function(s) if (!is.null(s$error)) trunc(s$error, n_char = max_char, n_items = max_items) else "", character(1)),
+    output    = vapply(sr_summaries, function(s) trunc(s$result, n_char = max_char, n_items = max_items), character(1)),
     row.names = row.names,
     check.names = !isTRUE(optional),
     stringsAsFactors = FALSE
@@ -157,7 +155,11 @@ update.workflowstate <- function(x, steprun, idx, ...) {
     x$stepruns[[length(x$stepruns) + 1L]] <- steprun
   }
 
-  if (!steprun$has_error) {
+  sr_summary <- summary(steprun)
+  
+  #if (is.null(sr_summary$error)) {
+    # Always cache results, even if they have errors
+    # (errored steps will have character(0) as output from normalize_step_part)
     x$last_result <- steprun$output
 
     # cache with stable keys
@@ -172,8 +174,8 @@ update.workflowstate <- function(x, steprun, idx, ...) {
 
     # key by name (names should be unique once you start prefixing subflows)
     x$results_by_name[[sname]] <- steprun$output
-  } # else: on error, do not update last_result or caches
+  #} # else: on error, do not update last_result or caches
 
-  x$errors <- if (steprun$has_error) c(x$errors, steprun$error) else x$errors
+  x$errors <- if (!is.null(sr_summary$error)) c(x$errors, list(sr_summary$error)) else x$errors
   x
 }

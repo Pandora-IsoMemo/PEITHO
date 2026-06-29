@@ -1,4 +1,8 @@
-# Helper functions for workflow extraction from files
+# -------------------------------------------------------------------------
+# Workflow extraction and parsing from files
+# -------------------------------------------------------------------------
+# These helpers parse tagged workflow definitions from inputs/command files
+# and normalize references used when constructing workflow steps.
 
 normalize_varname <- function(x) {
   x <- trimws(x)
@@ -49,11 +53,6 @@ extract_result_ref <- function(x) {
 extract_tag_varname <- function(x, pattern) {
   varname <- sub(pattern, "\\1\\2", x, perl = TRUE)
   normalize_varname(varname)
-}
-
-read_json_if_exists <- function(path) {
-  if (!file_nonempty(path)) return(list())
-  jsonlite::fromJSON(path, simplifyVector = FALSE)
 }
 
 load_inputs_to_list <- function(
@@ -142,7 +141,7 @@ make_param_from_arg <- function(
     value    = value,
     type     = type,
     label    = label,
-    loop     = cmd_loop %||% "no",
+    iteration = cmd_loop %||% "no",
     selector = selector %||% NULL
   )
 }
@@ -278,7 +277,6 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
         basename(script_path),
         conditionMessage(e)
       )
-      PEITHO:::logError("%s", err_msg)
       stop(err_msg, call. = FALSE)
     }
   )
@@ -407,11 +405,39 @@ workflow_steps_from_files <- function(
       comments        = cmd$comments %||% "",
       command         = cmd$command,
       args            = cmd$args %||% "",
-      loop            = cmd$loop %||% "no",
+      iteration       = cmd$iteration %||% cmd$loop %||% "no",
+      samples         = cmd$samples %||% 1L,
       env             = env
     )
   })
 
   # return all steps as list
   steps
+}
+
+#' Workflow example from package files
+#'
+#' @param name Name for the workflow.
+#' @return A `workflow` object.
+#' @export
+workflow_example <- function(name = "example_workflow") {
+  cfg <- config()
+  example_dir <- system.file(cfg$pathToFolder, package = "PEITHO")
+
+  if (!nzchar(example_dir) || !dir.exists(example_dir)) {
+    stop(
+      paste0(
+        "Example workflow folder not found in package 'PEITHO': ",
+        cfg$pathToFolder
+      ),
+      call. = FALSE
+    )
+  }
+
+  new_workflow(
+    name = name,
+    workflow_file_paths = PEITHO:::workflow_file_paths(
+      path = example_dir
+    )
+  )
 }

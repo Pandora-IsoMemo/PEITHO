@@ -1,0 +1,125 @@
+---
+title: "Workflow Execution in PEITHO: Errors, Resume, and Recovery"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Workflow Execution in PEITHO: Errors, Resume, and Recovery}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+This vignette covers robust workflow execution patterns in PEITHO. It focuses on how to:
+
+- Continue runs after failures
+- Control stop-on-error behavior
+- Reuse run IDs to resume partially completed runs
+- Inspect run metadata for troubleshooting
+
+If you are new to PEITHO workflows, start with `vignette("peitho_workflow_basics")`.
+
+# When to Use This Vignette
+
+Use this vignette when your workflow runs are long-running, error-prone, or need restart/resume behavior.
+
+# Prerequisites
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+library(PEITHO)
+```
+
+# Load a Workflow
+
+```{r, echo=TRUE}
+wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
+```
+
+# Basic Run and Run Metadata
+
+```{r, echo=TRUE}
+run_1 <- run(wf, from = 1, to = 3)
+run_1$run_id
+```
+
+The `run_id` uniquely identifies a workflow execution and is used for resume operations.
+
+# Error Handling Strategy
+
+By default, `run()` uses `stop_on_error = TRUE`. You can set `stop_on_error = FALSE` to continue execution and inspect errors afterward.
+
+```{r, eval=FALSE}
+run_nonstop <- run(
+  wf,
+  from = 1,
+  to = 5,
+  stop_on_error = FALSE
+)
+
+run_nonstop$errors
+```
+
+Use this mode when you want a full pass and post-run diagnosis, rather than fail-fast behavior.
+
+# Resume a Run
+
+If a run stops midway, resume using the same `run_id`.
+
+```{r, eval=FALSE}
+# First run (example may stop due to an error):
+first_try <- run(wf, from = 1, to = 5)
+
+# Resume from saved run ID:
+resumed <- run(
+  wf,
+  from = 1,
+  to = 5,
+  resume_run_id = first_try$run_id
+)
+```
+
+`resume_run_id` tells PEITHO to continue from the first unfinished step/iteration recorded for that run.
+
+# Practical Recovery Workflow
+
+A common pattern for robust execution:
+
+1. Run with `stop_on_error = TRUE` during normal usage.
+2. Capture `run_id` when an interruption/error occurs.
+3. Fix the issue (input values, custom function, environment, etc.).
+4. Re-run with `resume_run_id` to avoid repeating finished work.
+
+```{r, eval=FALSE}
+safe_run <- run(wf, from = 1, to = 5, stop_on_error = TRUE)
+
+# ... investigate/fix root cause ...
+
+safe_run_resumed <- run(
+  wf,
+  from = 1,
+  to = 5,
+  resume_run_id = safe_run$run_id,
+  stop_on_error = TRUE
+)
+```
+
+# Troubleshooting Checklist
+
+- Confirm workflow files exist and are readable.
+- Ensure command functions are available in the expected environment.
+- Verify inputs referenced in command args actually exist in `input_list`.
+- Check the run object (`$errors`, `$state`, `$run_id`) before retrying.
+
+# Summary
+
+You now have a robust execution workflow:
+
+- Run with explicit error strategy
+- Capture and reuse `run_id`
+- Resume incomplete runs without reprocessing completed steps
+
+For schema details and editing workflows, continue with `vignette("peitho_workflow_authoring_editing")`.
+
+# Related Vignettes
+
+- Quickstart (load, run, import/export): `vignette("peitho_workflow_basics")`
+- Authoring and editing (files, tags, selectors, update APIs): `vignette("peitho_workflow_authoring_editing")`

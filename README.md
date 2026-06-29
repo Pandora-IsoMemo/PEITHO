@@ -4,26 +4,69 @@
 [![R-CMD-check](https://github.com/Pandora-IsoMemo/PEITHO/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Pandora-IsoMemo/PEITHO/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-### Documenation
-
-https://pandora-isomemo.github.io/PEITHO/
-
 ### Release notes (Changelog)
 
 See the latest release notes in [NEWS.md](./NEWS.md)
 
-## How to use this Package
+### Documentation
 
-Refer to the [vignette](https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_basics.html) 
-for a description of the usage of the PEITHO package. You can find it in the [Documentation](#documenation) above.
+- Documentation home: https://pandora-isomemo.github.io/PEITHO/
+- Workflow quickstart (load, run, import/export): https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_basics.html
+- Workflow execution and recovery (errors, resume): https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_execution_recovery.html
+- Workflow authoring and editing (files, tags, update APIs): https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_authoring_editing.html
+
+## Quick Example
+
+This README provides a minimal starting point. Detailed workflow guidance is split across the workflow vignettes listed below.
+
+### Local Installation
+
+```R
+# Add repositories
+options(
+  repos = c(
+    getOption("repos"),
+    PANDORA = "https://Pandora-IsoMemo.github.io/drat/",
+    INWTlab = "https://inwtlab.github.io/drat/"
+  )
+)
+
+# Install package
+install.packages("PEITHO")
+
+# Load and attach package
+library("PEITHO")
+```
+
+### Run the built-in example workflow
+
+Use the bundled example workflow to quickly verify your setup:
+
+```R
+# Load workflow from package example files
+my_wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
+
+# Run a subset of steps
+my_run <- run(my_wf, from = 1, to = 3)
+
+# Inspect result size
+length(my_run$state$last_result)
+```
+
+For custom-folder workflows, import/export workflows, and result inspection patterns, see the quickstart vignette in the Documentation section above.
+
+## Choose a Workflow Guide
+
+- Quickstart: [Workflow Quickstart in PEITHO](https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_basics.html)
+- Execution and recovery: [Workflow Execution in PEITHO](https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_execution_recovery.html)
+- Authoring and editing: [Workflow Authoring in PEITHO](https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_authoring_editing.html)
 
 ## Notes for developers
 
 ### Documentation Updates
 
-When adding information to the _help_ sites, _docstrings_ or the _vignette_ of this 
-package, please update documentation locally as follows. The documentation of
-the main branch is build automatically via github action.
+When adding information to help pages, docstrings, or vignettes, please update documentation locally as follows. The documentation of
+the main branch is built automatically via GitHub Actions. Run these commands before opening a PR with doc or vignette changes.
 
 ```R
 devtools::document() # or CTRL + SHIFT + D in RStudio

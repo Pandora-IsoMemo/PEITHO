@@ -1,3 +1,25 @@
+# PEITHO 26.06.0
+
+## New Features
+- Introduced resumable workflow execution
+- Added “samples per iteration” support to PEITHO’s workflow runner
+- Expanded new persistence utilities and helper functions
+
+## Updates
+- Expanded tests and documentation to cover the new behavior.
+- Reworked workflow documentation into three focused vignettes (quickstart, execution/recovery, and authoring/editing), including cross-links between guides (#39).
+- Updated README documentation navigation to link all workflow guides directly and trimmed duplicated workflow walkthrough content.
+
+# PEITHO 26.05.1
+
+## Updates
+- Updated the “Folders & Files” module to make it easier to manage custom workflow functions by adding one-click actions to copy defaults into the workflow or reset the workflow functions back to defaults.
+
+# PEITHO 26.05.0
+
+## New Features
+- Added the ability to convert a workflow into node/edge tables and display it as a rendered workflow graph in the Shiny app (#35)
+
 # PEITHO 26.04.2
 
 ## Updates
