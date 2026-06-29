@@ -105,7 +105,7 @@ earlier output.
 wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 ```
 
-    ## INFO [2026-06-29 08:09:07] Creating empty results.json file.
+    ## INFO [2026-06-29 19:46:17] Creating empty results.json file.
 
 ### Update inputs
 
