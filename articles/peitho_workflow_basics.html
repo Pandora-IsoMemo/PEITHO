@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PEITHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.06.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.07.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -167,7 +167,7 @@ zip archive (here with the <code>.peitho</code> extension):</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zipfile_path</span> <span class="op">&lt;-</span> <span class="st">"./examples/my_workflow.peitho"</span></span>
 <span><span class="fu"><a href="../reference/save_as_zip.html">save_as_zip</a></span><span class="op">(</span><span class="va">my_wf</span>, file <span class="op">=</span> <span class="va">zipfile_path</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:01] Creating directory './examples' for saving zip file.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:40] Creating directory './examples' for saving zip file.</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="running-a-workflow">Running a Workflow<a class="anchor" aria-label="anchor" href="#running-a-workflow"></a>
@@ -176,29 +176,33 @@ zip archive (here with the <code>.peitho</code> extension):</p>
 specify which steps to run (e.g., from step 1 to 5):</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_run_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_wf</span>, from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:01] Starting workflow run with ID: '20260629201501_19cb283f'</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:01] Running step 1 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:01] Parsing arguments for command simple_split</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:01]   Command 'simple_split': 3 results</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:01] Running step 2 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:01] Parsing arguments for command fetch_WebText</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03]   2 sample x iteration runs for command 'fetch_WebText':</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03]      2 single results.</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03] Running step 3 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03] Parsing arguments for command paste</span></span></code></pre>
-<pre><code><span><span class="co">## WARN [2026-06-29 20:15:03] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03]   Command 'paste': single result</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03] Running step 4 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03] Parsing arguments for command gsub</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03]   Command 'gsub': single result</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03] Running step 5 of 5</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03] Parsing arguments for command simple_split</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03]   Command 'simple_split': 26854 results</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:40] Starting workflow run with ID: '20260701142140_19cb283f'</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:40] Running step 1 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:40] Parsing arguments for command simple_split</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:40]   1 sample x iteration runs for command 'simple_split':</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-07-01 14:21:40]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:40] Running step 2 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:40] Parsing arguments for command fetch_WebText</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42]   2 sample x iteration runs for command 'fetch_WebText':</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42]      2 single results.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42] Running step 3 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42] Parsing arguments for command paste</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-07-01 14:21:42] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42]   1 sample x iteration runs for command 'paste':</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42]      1 single results.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42] Running step 4 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42] Parsing arguments for command gsub</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42]   1 sample x iteration runs for command 'gsub':</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42]      1 single results.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42] Running step 5 of 5</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42] Parsing arguments for command simple_split</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:42]   1 sample x iteration runs for command 'simple_split':</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-07-01 14:21:42]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.</span></span></code></pre>
 <p>After running, you can inspect the results:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_run_1</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 1</span></span></code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">PEITHO</span><span class="fu">:::</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">trunc</a></span><span class="op">(</span><span class="va">my_run_1</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span>, n_char <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "Rom, \n (27 BC – AD 476)[c]\n\nConstantinopl, \n (330–1453)[d]\n\nOfficial: initially Latin, incr, \nasingly Gr, \n, \n... (26849 more items)"</span></span></code></pre>
 </div>
@@ -207,7 +211,7 @@ specify which steps to run (e.g., from step 1 to 5):</p>
 </h2>
 <p>To import a workflow from a zip file, first define the directory
 where the workflow files will be extracted.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zipfile_path</span> <span class="op">&lt;-</span> <span class="st">"./examples/my_workflow.peitho"</span></span>
 <span></span>
 <span><span class="va">my_wf_imported</span> <span class="op">&lt;-</span> <span class="fu">PEITHO</span><span class="fu">::</span><span class="fu"><a href="../reference/import_workflow.html">import_workflow</a></span><span class="op">(</span></span>
@@ -216,27 +220,30 @@ where the workflow files will be extracted.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>You can now run the imported workflow and inspect the results as
 before:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_run_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run.html">run</a></span><span class="op">(</span><span class="va">my_wf_imported</span>, from <span class="op">=</span> <span class="fl">1</span>, to <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03] Starting workflow run with ID: '20260629201503_01e47766'</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03] Running step 1 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03] Parsing arguments for command simple_split</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03]   Command 'simple_split': 3 results</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03] Running step 2 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:03] Parsing arguments for command fetch_WebText</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:05]   2 sample x iteration runs for command 'fetch_WebText':</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:05]      2 single results.</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:05] Running step 3 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:05] Parsing arguments for command paste</span></span></code></pre>
-<pre><code><span><span class="co">## WARN [2026-06-29 20:15:05] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:05]   Command 'paste': single result</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:05] Running step 4 of 4</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:05] Parsing arguments for command gsub</span></span></code></pre>
-<pre><code><span><span class="co">## INFO [2026-06-29 20:15:05]   Command 'gsub': single result</span></span></code></pre>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:43] Starting workflow run with ID: '20260701142143_01e47766'</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:43] Running step 1 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:43] Parsing arguments for command simple_split</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:43]   1 sample x iteration runs for command 'simple_split':</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-07-01 14:21:43]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:43] Running step 2 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:43] Parsing arguments for command fetch_WebText</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:45]   2 sample x iteration runs for command 'fetch_WebText':</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:45]      2 single results.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:45] Running step 3 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:45] Parsing arguments for command paste</span></span></code></pre>
+<pre><code><span><span class="co">## WARN [2026-07-01 14:21:45] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:45]   1 sample x iteration runs for command 'paste':</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:45]      1 single results.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:45] Running step 4 of 4</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:45] Parsing arguments for command gsub</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:45]   1 sample x iteration runs for command 'gsub':</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-01 14:21:45]      1 single results.</span></span></code></pre>
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_run_2</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 1</span></span></code></pre>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">PEITHO</span><span class="fu">:::</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">trunc</a></span><span class="op">(</span><span class="va">my_run_2</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span>, n_char <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "RomHALLO (27 BC – AD 476)[c]\n\nConstantinoplHALLO (330–1453)[d]\n\nOfficial: initially Latin, incrHALLO ..."</span></span></code></pre>
 </div>
