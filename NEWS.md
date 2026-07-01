@@ -1,3 +1,9 @@
+# PEITHO 26.07.0
+
+## Bug Fixes
+- Included the latest llmModule version, which fixes handling of null model input.
+- Unified loop and non-loop runs to improve result tracking.
+
 # PEITHO 26.06.0
 
 ## New Features
