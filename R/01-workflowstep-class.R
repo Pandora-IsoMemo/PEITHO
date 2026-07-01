@@ -548,148 +548,116 @@ run.workflowstep <- function(
     )
   }
 
-  # 3) actually call the function, if needed then in a loop
-  if (any(is_param_config_loop) || sample_total > 1L) {
-    is_iteration_loop <- any(is_param_config_loop)
+  # 3) Execute command through a unified iteration/sample path.
+  # This keeps output shape stable (always list) and enables detail persistence
+  # even for non-loop single-sample runs.
+  is_iteration_loop <- any(is_param_config_loop)
 
-    PEITHO:::logDebug(
-      "  Running command: samples=%d, %s",
-      sample_total,
-      if (is_iteration_loop) sprintf("WITH ITERATION over argument index %d", loop_param_indices) else "WITHOUT ITERATION"
-    )
+  PEITHO:::logDebug(
+    "  Running command: samples=%d, %s",
+    sample_total,
+    if (is_iteration_loop) sprintf("WITH ITERATION over argument index %d", loop_param_indices) else "WITHOUT ITERATION"
+  )
 
-    loop_index <- if (is_iteration_loop) loop_param_indices[1] else NA_integer_
-    loop_values <- if (is_iteration_loop) args[[loop_index]] else list(NULL)
-    iteration_total <- length(loop_values)
+  loop_index <- if (is_iteration_loop) loop_param_indices[1] else NA_integer_
+  loop_values <- if (is_iteration_loop) args[[loop_index]] else list(NULL)
+  iteration_total <- length(loop_values)
 
-    step_parts <- vector("list", sample_total * iteration_total)
-    resume_sample <- if (!is.null(resume_from_sample)) as.integer(resume_from_sample) else 1L
-    resume_iteration <- if (!is.null(resume_from_iteration)) as.integer(resume_from_iteration) else 1L
+  step_parts <- vector("list", sample_total * iteration_total)
+  resume_sample <- if (!is.null(resume_from_sample)) as.integer(resume_from_sample) else 1L
+  resume_iteration <- if (!is.null(resume_from_iteration)) as.integer(resume_from_iteration) else 1L
 
-    for (iter_i in seq_along(loop_values)) {
-      for (sample_i in seq_len(sample_total)) {
-        part_idx <- (iter_i - 1L) * sample_total + sample_i
+  for (iter_i in seq_along(loop_values)) {
+    for (sample_i in seq_len(sample_total)) {
+      part_idx <- (iter_i - 1L) * sample_total + sample_i
 
-        should_skip <-
-          (!is.null(resume_from_sample) || !is.null(resume_from_iteration)) &&
-          (iter_i < resume_iteration || (iter_i == resume_iteration && sample_i < resume_sample))
+      should_skip <-
+        (!is.null(resume_from_sample) || !is.null(resume_from_iteration)) &&
+        (iter_i < resume_iteration || (iter_i == resume_iteration && sample_i < resume_sample))
 
-        if (should_skip) {
-          prior_record <- if (!is.null(prior_detail_records)) {
-            Find(function(r) {
-              as.integer(r$sample_id %||% 1L) == sample_i &&
-                as.integer(r$iteration_id %||% 0L) == iter_i
-            }, prior_detail_records)
-          } else {
-            NULL
-          }
-
-          if (!is.null(prior_record)) {
-            err_str <- prior_record$error
-            step_parts[[part_idx]] <- list(
-              output = prior_record$result,
-              error  = if (!is.null(err_str) && nzchar(err_str)) err_str else NULL
-            )
-          } else {
-            step_parts[[part_idx]] <- list(output = character(0), error = NULL)
-          }
-          PEITHO:::logInfo("  Iteration %d, sample %d: skipped (loaded from prior run)", iter_i, sample_i)
-          next
+      if (should_skip) {
+        prior_record <- if (!is.null(prior_detail_records)) {
+          Find(function(r) {
+            as.integer(r$sample_id %||% 1L) == sample_i &&
+              as.integer(r$iteration_id %||% 0L) == iter_i
+          }, prior_detail_records)
+        } else {
+          NULL
         }
 
-        if (is_iteration_loop) {
-          v <- loop_values[[iter_i]]
-          args[[loop_index]] <- v
+        if (!is.null(prior_record)) {
+          err_str <- prior_record$error
+          step_parts[[part_idx]] <- list(
+            output = prior_record$result,
+            error  = if (!is.null(err_str) && nzchar(err_str)) err_str else NULL
+          )
+        } else {
+          step_parts[[part_idx]] <- list(output = character(0), error = NULL)
         }
+        PEITHO:::logInfo("  Iteration %d, sample %d: skipped (loaded from prior run)", iter_i, sample_i)
+        next
+      }
 
-        step_part <- run_with_error(fn, args)
-        step_part <- normalize_step_part(
-          step_part = step_part,
-          step_label = sprintf("%s (entry=%d)", x$name, x$entry),
-          coerce_atomic = TRUE
+      if (is_iteration_loop) {
+        v <- loop_values[[iter_i]]
+        args[[loop_index]] <- v
+      }
+
+      step_part <- run_with_error(fn, args)
+      step_part <- normalize_step_part(
+        step_part = step_part,
+        step_label = sprintf("%s (entry=%d)", x$name, x$entry),
+        coerce_atomic = TRUE
+      )
+      step_parts[[part_idx]] <- step_part
+
+      if (!is.null(results_file_name) && !is.null(results_path_to_folder)) {
+        detail_record <- new_iteration_result_record(
+          run_id = state$run_id,
+          step = detail_step_id,
+          workflowstep = x,
+          iteration_id = iter_i,
+          iteration_total = iteration_total,
+          sample_id = sample_i,
+          sample_total = sample_total,
+          result = step_part$output,
+          error = step_part$error
         )
-        step_parts[[part_idx]] <- step_part
-
-        if (!is.null(results_file_name) && !is.null(results_path_to_folder)) {
-          detail_record <- new_iteration_result_record(
-            run_id = state$run_id,
-            step = detail_step_id,
-            workflowstep = x,
-            iteration_id = iter_i,
-            iteration_total = iteration_total,
-            sample_id = sample_i,
-            sample_total = sample_total,
-            result = step_part$output,
-            error = step_part$error
-          )
-          upsert_results_record(
-            record = detail_record,
-            path_to_folder = results_path_to_folder,
-            results_file = results_file_name
-          )
-        }
+        upsert_results_record(
+          record = detail_record,
+          path_to_folder = results_path_to_folder,
+          results_file = results_file_name
+        )
       }
     }
+  }
 
-    results <- lapply(step_parts, `[[`, "output")
-    errors  <- lapply(step_parts, `[[`, "error")
+  results <- lapply(step_parts, `[[`, "output")
+  errors  <- lapply(step_parts, `[[`, "error")
 
-    PEITHO:::logInfo("  %d sample x iteration runs for command '%s':", length(step_parts), x$command)
-    result_lengths <- lengths(results)
-    max_result_length <- if (length(result_lengths)) max(result_lengths) else 0L
-    if (max_result_length > 1L) {
-      PEITHO:::logWarn(
-        "     WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs."
-      )
-    } else {
-      PEITHO:::logInfo("     %d single results.", length(results))
-    }
-
-    # return list of results/errors
-    steprun <- new_workflowsteprun(
-      step   = x,
-      args   = args,
-      output = results,
-      error  = errors,
-      run_id = state$run_id,
-      is_looped = is_iteration_loop || sample_total > 1L,
-      iteration_total = iteration_total,
-      sample_total = sample_total,
-      completed_iterations = iteration_total
+  PEITHO:::logInfo("  %d sample x iteration runs for command '%s':", length(step_parts), x$command)
+  result_lengths <- lengths(results)
+  max_result_length <- if (length(result_lengths)) max(result_lengths) else 0L
+  if (max_result_length > 1L) {
+    PEITHO:::logWarn(
+      "     WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs."
     )
   } else {
-    PEITHO:::logDebug("  Running command: NO LOOPING")
-
-    run <- run_with_error(fn, args) # <--- RUN FUNCTION HERE, single run
-    run <- normalize_step_part(
-      step_part = run,
-      step_label = sprintf("%s (entry=%d)", x$name, x$entry),
-      coerce_atomic = TRUE
-    )
-
-    # check if result has length > 1 or not
-    is_single_result <- length(run$output) == 1L
-    PEITHO:::logInfo(
-      "  Command '%s': %s result%s",
-      x$command,
-      if (is_single_result) "single" else length(run$output),
-      if (is_single_result) "" else "s"
-    )
-
-    PEITHO:::logDebug(
-      "  Always returning a list of results/errors for consistency with looped execution."
-    )
-    # return list of results/errors (to keep structure consistent)
-    steprun <- new_workflowsteprun(
-      step   = x,
-      args   = args,
-      output = list(run$output),
-      error  = list(run$error),
-      run_id = state$run_id,
-      is_looped = FALSE,
-      iteration_total = 1L
-    )
+    PEITHO:::logInfo("     %d single results.", length(results))
   }
+
+  # return list of results/errors
+  steprun <- new_workflowsteprun(
+    step   = x,
+    args   = args,
+    output = results,
+    error  = errors,
+    run_id = state$run_id,
+    is_looped = is_iteration_loop || sample_total > 1L,
+    iteration_total = iteration_total,
+    sample_total = sample_total,
+    completed_iterations = iteration_total
+  )
 
   steprun
 }
