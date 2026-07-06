@@ -109,6 +109,7 @@ is_result_tag <- function(x) {
 make_param_from_arg <- function(
   arg,
   arg_name,
+  arg_type = "character",
   step_i,
   arg_i,
   cmd_loop,
@@ -140,6 +141,7 @@ make_param_from_arg <- function(
     name     = arg_name,
     value    = value,
     type     = type,
+    arg_type = arg_type,
     label    = label,
     iteration = cmd_loop %||% "no",
     selector = selector %||% NULL
@@ -284,7 +286,13 @@ load_workflow_script_env <- function(script_path, parent_env, show_functions_pat
   return(script_env)
 }
 
-make_param_from_arg_loop <- function(args_string, loop, step_i, input_list) {
+make_param_from_arg_loop <- function(
+  args_string,
+  loop,
+  step_i,
+  input_list,
+  arg_types = character(0)
+) {
   parsed   <- parse_args(args_string)
   args_vec <- parsed$values
   args_names <- parsed$names
@@ -294,9 +302,16 @@ make_param_from_arg_loop <- function(args_string, loop, step_i, input_list) {
   for (arg_i in seq_along(args_vec)) {
     PEITHO:::logDebug("  Processing argument %d: %s", arg_i, args_vec[[arg_i]])
 
+    arg_name <- args_names[arg_i]
+    arg_type <- "character"
+    if (!is.null(arg_types) && length(arg_types) > 0L && nzchar(arg_name) && arg_name %in% names(arg_types)) {
+      arg_type <- arg_types[[arg_name]]
+    }
+
     params[[arg_i]] <- make_param_from_arg(
       arg      = args_vec[[arg_i]],
-      arg_name = args_names[arg_i],
+      arg_name = arg_name,
+      arg_type = arg_type,
       arg_i    = arg_i,
       step_i   = step_i,
       cmd_loop = loop,
@@ -407,6 +422,7 @@ workflow_steps_from_files <- function(
       args            = cmd$args %||% "",
       iteration       = cmd$iteration %||% cmd$loop %||% "no",
       samples         = cmd$samples %||% 1L,
+      arg_types       = cmd$arg_types %||% NULL,
       env             = env
     )
   })
