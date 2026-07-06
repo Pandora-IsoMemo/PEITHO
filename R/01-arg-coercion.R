@@ -61,7 +61,8 @@ coerce_arg <- function(x, type, arg) {
     lx <- tolower(trimws(as.character(x)))
     allowed <- c("true", "false", "t", "f", "1", "0")
 
-    if (any(!lx %in% allowed)) {
+    invalid <- is.na(lx) | !lx %in% allowed
+    if (any(invalid)) {
       stop(sprintf("Argument '%s' must be logical.", arg), call. = FALSE)
     }
 
