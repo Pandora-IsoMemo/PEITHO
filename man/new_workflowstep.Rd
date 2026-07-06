@@ -13,6 +13,7 @@ new_workflowstep(
   args = "",
   iteration = "auto",
   samples = 1L,
+  arg_types = NULL,
   loop = NULL,
   env = parent.frame(),
   ...
@@ -39,6 +40,11 @@ list arguments. Can be "yes", "no", or "auto".}
 
 \item{samples}{Integer number of samples to run per iteration. Must be
 >= 1. Defaults to 1 (current behavior).}
+
+\item{arg_types}{Optional named type map for literal arguments.
+Names must match named args in `args` and values must be one of
+"character", "numeric", "integer", or "logical".
+Omitted args default to "character".}
 
 \item{loop}{Deprecated alias for `iteration` (kept for backward compatibility).}
 

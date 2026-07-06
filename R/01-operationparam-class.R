@@ -12,6 +12,9 @@
 #'   - "input"  : value comes from user input or external input
 #'   - "result" : value refers to a previous step's result
 #'   - "literal": value is used as-is (a literal argument)
+#' @param arg_type The target type for literal values. One of
+#'   "character", "numeric", "integer", "logical".
+#'   Omitted values default to "character".
 #' @param iteration Iteration behavior for this parameter. One of:
 #'   - "no"   : do not iterate
 #'   - "yes"  : always iterate
@@ -29,12 +32,14 @@ new_operationparam <- function(
   value = "",
   label = "",
   type = c("literal", "input", "result"),
+  arg_type = "character",
   iteration = c("no", "yes", "auto"),
   loop = NULL,
   selector = NULL,
   ...
 ) {
   type <- match.arg(type)
+  arg_type <- normalize_arg_type(arg_type)
 
   if (!is.null(loop)) {
     iteration <- loop
@@ -51,6 +56,7 @@ new_operationparam <- function(
       name     = name,
       value    = value,
       type     = type,
+      arg_type = arg_type,
       tag      = tag,
       label    = label,
       iteration = iteration,
@@ -76,6 +82,7 @@ print.operationparam <- function(x, ...) {
   cat("  label:    ", x$label, "\n", sep = "")
   cat("  selector: ", x$selector %||% "", "\n", sep = "")
   cat("  type:     ", x$type, "\n", sep = "")
+  cat("  arg_type: ", x$arg_type, "\n", sep = "")
   cat("  iteration:", x$iteration %||% x$loop, "\n", sep = "")
   invisible(x)
 }
@@ -120,11 +127,30 @@ extract_arg_list <- function(
     stop("'state' must be a 'workflowstate' object.", call. = FALSE)
   }
 
-  if (operationparam$type %in% c("input", "literal")) {
+  if (operationparam$type == "input") {
     if (operationparam$name != "") {
       return(stats::setNames(list(operationparam$value), operationparam$name))
     } else {
       return(list(operationparam$value))
+    }
+  }
+
+  if (operationparam$type == "literal") {
+    arg_name <- operationparam$name
+    if (is.null(arg_name) || !nzchar(arg_name)) {
+      arg_name <- paste0("position ", operationparam$position)
+    }
+
+    arg_value <- coerce_arg(
+      x = operationparam$value,
+      type = operationparam$arg_type %||% "character",
+      arg = arg_name
+    )
+
+    if (!is.null(operationparam$name) && nzchar(operationparam$name)) {
+      return(stats::setNames(list(arg_value), operationparam$name))
+    } else {
+      return(list(arg_value))
     }
   }
 
