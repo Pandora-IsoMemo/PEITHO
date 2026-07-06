@@ -43,9 +43,10 @@ coerce_arg <- function(x, type, arg) {
     out_int <- suppressWarnings(as.integer(x))
 
     invalid_non_numeric <- is.na(out_num) & !is.na(x)
-    invalid_fractional <- !invalid_non_numeric & !is.na(out_num) & (out_num != out_int)
+    invalid_overflow <- !is.na(out_num) & is.na(out_int)
+    invalid_fractional <- !invalid_non_numeric & !invalid_overflow & !is.na(out_num) & !is.na(out_int) & (out_num != out_int)
 
-    if (any(invalid_non_numeric | invalid_fractional)) {
+    if (any(invalid_non_numeric | invalid_overflow | invalid_fractional, na.rm = TRUE)) {
       stop(sprintf("Argument '%s' must be integer.", arg), call. = FALSE)
     }
 
