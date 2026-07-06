@@ -1,3 +1,10 @@
+# PEITHO 26.07.1
+
+## Updates
+- Added sparse `arg_types` support in `commands.json` for typed literal arguments, with default fallback to `character` when a type is not specified.
+- Added literal coercion support for `character`, `numeric`, `integer`, and `logical` step arguments.
+- Updated README and workflow vignettes with `arg_types` usage examples.
+
 # PEITHO 26.07.0
 
 ## Bug Fixes
