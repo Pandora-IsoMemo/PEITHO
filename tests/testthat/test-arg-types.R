@@ -78,9 +78,17 @@ test_that("run.workflowstep coerces literal args using sparse arg_types", {
   typed_capture <- function(x, y, flag) {
     paste(class(x), class(y), class(flag), sep = "|")
   }
-  assign("typed_capture", typed_capture, envir = .GlobalEnv)
-  on.exit(rm("typed_capture", envir = .GlobalEnv), add = TRUE)
 
+  had_typed_capture <- exists("typed_capture", envir = .GlobalEnv, inherits = FALSE)
+  old_typed_capture <- if (had_typed_capture) get("typed_capture", envir = .GlobalEnv, inherits = FALSE) else NULL
+  assign("typed_capture", typed_capture, envir = .GlobalEnv)
+  on.exit({
+    if (had_typed_capture) {
+      assign("typed_capture", old_typed_capture, envir = .GlobalEnv)
+    } else {
+      rm("typed_capture", envir = .GlobalEnv)
+    }
+  }, add = TRUE)
   step <- new_workflowstep(
     entry = 1,
     command = "typed_capture",
