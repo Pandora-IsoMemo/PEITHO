@@ -19,6 +19,10 @@
 #'                       list arguments. Can be "yes", "no", or "auto".
 #' @param samples        Integer number of samples to run per iteration. Must be
 #'                       >= 1. Defaults to 1 (current behavior).
+#' @param arg_types      Optional named type map for literal arguments.
+#'                       Names must match named args in `args` and values must be one of
+#'                       "character", "numeric", "integer", or "logical".
+#'                       Omitted args default to "character".
 #' @param loop           Deprecated alias for `iteration` (kept for backward compatibility).
 #' @param env            An environment to look up the command function.
 #'                       Defaults to the caller's env. Warns if the command
@@ -36,6 +40,7 @@ new_workflowstep <- function(
   args            = "",          # original argument string from workflow file, for reference
   iteration       = "auto",      # iteration behavior for list arguments
   samples         = 1L,           # number of repeated runs per iteration
+  arg_types       = NULL,         # optional named type overrides for literal args
   loop            = NULL,          # deprecated alias
   env             = parent.frame(),
   ...
@@ -57,6 +62,12 @@ new_workflowstep <- function(
     stop("Argument 'samples' must be a single integer >= 1.", call. = FALSE)
   }
 
+  arg_types <- normalize_arg_types(
+    arg_types = arg_types,
+    step_label = label,
+    args_string = args
+  )
+
   required_inputs <- required_fields$inputs
   required_steps  <- required_fields$steps
 
@@ -72,6 +83,7 @@ new_workflowstep <- function(
       args            = args,
       iteration       = iteration,
       samples         = samples,
+      arg_types       = arg_types,
       loop            = iteration,
       dots            = list(...)     # extension point
     ),
@@ -147,7 +159,7 @@ as.data.frame.workflowstep <- function(x, ...) {
 #' @return A list representing the workflow step for commands.json.
 #' @export
 as.commands_record.workflowstep <- function(x, ...) {
-  list(
+  record <- list(
     entry    = as.integer(x$entry),
     name     = as.character(x$name),
     label    = as.character(x$label),
@@ -158,6 +170,13 @@ as.commands_record.workflowstep <- function(x, ...) {
     samples  = as.integer(x$samples %||% 1L),
     prompt   = ""
   )
+
+  arg_types <- x$arg_types %||% character(0)
+  if (length(arg_types) > 0L) {
+    record$arg_types <- as.list(arg_types)
+  }
+
+  record
 }
 
 map_field <- function() {
@@ -475,7 +494,8 @@ run.workflowstep <- function(
     args_string = x$args,
     loop = x$iteration %||% x$loop,
     step_i = step_i,
-    input_list = input_list
+    input_list = input_list,
+    arg_types = x$arg_types %||% character(0)
   )
 
   if (!is.list(params)) params <- list()

@@ -77,6 +77,10 @@ This approach is useful for:
 - Loading workflows from local directories without packaging them as zip files
 - Working with multiple workflow variants stored in different folders
 
+If your custom `commands.json` contains non-character literal arguments (for example logical flags),
+you can use the optional sparse `arg_types` field per step. See
+`vignette("peitho_workflow_authoring_editing")` for details and examples.
+
 # Exporting a Workflow as a Zip File
 
 You can export the current workflow setup (all relevant files) as a zip archive (here with the `.peitho` extension):
