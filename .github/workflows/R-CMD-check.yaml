@@ -43,7 +43,8 @@ jobs:
           extra-repositories: https://Pandora-IsoMemo.github.io/drat/
 
       - name: Install system dependencies
-        run: sudo apt-get install -y libglpk-dev
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libglpk-dev
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
