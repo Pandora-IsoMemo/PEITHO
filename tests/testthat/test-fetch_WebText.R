@@ -1,6 +1,9 @@
 test_that("fetch_WebText returns valid WebText object for example.com", {
-  # Mock httr2 response functions
+  # Mock request execution and response parsing to avoid real network calls.
   local_mocked_bindings(
+    req_perform = function(req, ...) {
+      structure(list(), class = "mock_response")
+    },
     resp_status = function(resp) 200L,
     resp_body_html = function(resp) {
       xml2::read_html("<html><head><title>Test</title></head><body>Test content</body></html>")
@@ -8,9 +11,9 @@ test_that("fetch_WebText returns valid WebText object for example.com", {
     .package = "httr2"
   )
   
-  obj <- fetch_WebText("https://httpbin.org/html", return_text_blocks_only = FALSE)
+  obj <- fetch_WebText("https://example.com", return_text_blocks_only = FALSE)
   expect_true(is_WebText(obj))
-  expect_equal(obj$url, "https://httpbin.org/html")
+  expect_equal(obj$url, "https://example.com")
   expect_type(obj$text, "character")
   expect_s3_class(obj, "WebText")
   expect_true(obj$status_code >= 200)
@@ -35,8 +38,11 @@ test_that("fetch_WebText handles invalid URL gracefully", {
 })
 
 test_that("fetch_WebText can return text blocks only", {
-  # Mock httr2 response functions
+  # Mock request execution and response parsing to avoid real network calls.
   local_mocked_bindings(
+    req_perform = function(req, ...) {
+      structure(list(), class = "mock_response")
+    },
     resp_status = function(resp) 200L,
     resp_body_html = function(resp) {
       xml2::read_html("<html><body><main>Test content here</main></body></html>")
@@ -45,7 +51,7 @@ test_that("fetch_WebText can return text blocks only", {
   )
   
   text_blocks <- fetch_WebText(
-    "https://httpbin.org/html",
+    "https://example.com",
     return_text_blocks_only = TRUE
   )
   expect_type(text_blocks, "character")
