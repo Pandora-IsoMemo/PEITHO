@@ -14,6 +14,7 @@ new_operationparam(
   value = "",
   label = "",
   type = c("literal", "input", "result"),
+  arg_type = "character",
   iteration = c("no", "yes", "auto"),
   loop = NULL,
   selector = NULL,
@@ -48,6 +49,11 @@ new_operationparam(
   Type of the parameter. One of: - "input" : value comes from user input
   or external input - "result" : value refers to a previous step's
   result - "literal": value is used as-is (a literal argument)
+
+- arg_type:
+
+  The target type for literal values. One of "character", "numeric",
+  "integer", "logical". Omitted values default to "character".
 
 - iteration:
 

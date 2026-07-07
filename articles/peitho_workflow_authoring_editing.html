@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PEITHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.07.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.07.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -124,6 +124,59 @@ tag-based references, or programmatically modify workflow objects.</p>
 <span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="fu">}</span></span>
 <span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="ot">]</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="typed-literal-arguments-with-arg_types">Typed Literal Arguments with arg_types<a class="anchor" aria-label="anchor" href="#typed-literal-arguments-with-arg_types"></a>
+</h3>
+<p>By default, untagged literals in <code>args</code> are interpreted as
+character values. You can override selected literals with an optional
+sparse <code>arg_types</code> map per step.</p>
+<ul>
+<li>Only define entries that should not be character</li>
+<li>Omitted arguments default to <code>"character"</code>
+</li>
+<li>Supported values: <code>"character"</code>, <code>"numeric"</code>,
+<code>"integer"</code>, <code>"logical"</code>
+</li>
+</ul>
+<p>Example (sparse override for a logical flag):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="dt">"entry"</span><span class="fu">:</span> <span class="dv">12</span><span class="fu">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"fetch_urls"</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="dt">"label"</span><span class="fu">:</span> <span class="st">"fetch_urls"</span><span class="fu">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="dt">"comments"</span><span class="fu">:</span> <span class="st">""</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="dt">"command"</span><span class="fu">:</span> <span class="st">"fetch_WebText"</span><span class="fu">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="dt">"args"</span><span class="fu">:</span> <span class="st">"url=@#*L*#@read_urls_cleaned@#*L*#@, stop_on_error = FALSE"</span><span class="fu">,</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="dt">"arg_types"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>    <span class="dt">"stop_on_error"</span><span class="fu">:</span> <span class="st">"logical"</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="dt">"iteration"</span><span class="fu">:</span> <span class="st">"auto"</span><span class="fu">,</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  <span class="dt">"samples"</span><span class="fu">:</span> <span class="dv">1</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Another example (logical append in <code>cat</code>):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="dt">"entry"</span><span class="fu">:</span> <span class="dv">4</span><span class="fu">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"cat_past_polities"</span><span class="fu">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="dt">"label"</span><span class="fu">:</span> <span class="st">"cat_past_polities"</span><span class="fu">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="dt">"comments"</span><span class="fu">:</span> <span class="st">""</span><span class="fu">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="dt">"command"</span><span class="fu">:</span> <span class="st">"cat"</span><span class="fu">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="dt">"args"</span><span class="fu">:</span> <span class="st">"@#*L*#@prompt_for_past_polities@#*L*#@, file=</span><span class="ch">\"</span><span class="st">polities_llmModule.txt</span><span class="ch">\"</span><span class="st">, append=TRUE, sep=</span><span class="ch">\"\\</span><span class="st">n</span><span class="ch">\"</span><span class="st">"</span><span class="fu">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="dt">"arg_types"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>    <span class="dt">"append"</span><span class="fu">:</span> <span class="st">"logical"</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="dt">"iteration"</span><span class="fu">:</span> <span class="st">"auto"</span><span class="fu">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  <span class="dt">"samples"</span><span class="fu">:</span> <span class="dv">1</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Notes:</p>
+<ul>
+<li>
+<code>arg_types</code> keys should match named arguments in
+<code>args</code>
+</li>
+<li>Unused keys trigger a warning during workflow construction</li>
+<li>In this iteration, coercion is applied to literal arguments;
+tag-based input/result references keep their current behavior</li>
+</ul>
+</div>
 </div>
 <div class="section level2">
 <h2 id="argument-tags">Argument Tags<a class="anchor" aria-label="anchor" href="#argument-tags"></a>
@@ -137,16 +190,16 @@ results:</p>
 </li>
 </ul>
 <p>Example:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="dt">"entry"</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"get_content"</span><span class="fu">,</span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="dt">"label"</span><span class="fu">:</span> <span class="st">"Fetch web content"</span><span class="fu">,</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="dt">"comments"</span><span class="fu">:</span> <span class="st">""</span><span class="fu">,</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="dt">"command"</span><span class="fu">:</span> <span class="st">"fetch_WebText"</span><span class="fu">,</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="dt">"args"</span><span class="fu">:</span> <span class="st">"url=@#*L*#@Split@#*L*#@"</span><span class="fu">,</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="dt">"iteration"</span><span class="fu">:</span> <span class="st">"auto"</span><span class="fu">,</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="dt">"samples"</span><span class="fu">:</span> <span class="dv">1</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="dt">"entry"</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"get_content"</span><span class="fu">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="dt">"label"</span><span class="fu">:</span> <span class="st">"Fetch web content"</span><span class="fu">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="dt">"comments"</span><span class="fu">:</span> <span class="st">""</span><span class="fu">,</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="dt">"command"</span><span class="fu">:</span> <span class="st">"fetch_WebText"</span><span class="fu">,</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="dt">"args"</span><span class="fu">:</span> <span class="st">"url=@#*L*#@Split@#*L*#@"</span><span class="fu">,</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="dt">"iteration"</span><span class="fu">:</span> <span class="st">"auto"</span><span class="fu">,</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="dt">"samples"</span><span class="fu">:</span> <span class="dv">1</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="result-selectors">Result Selectors<a class="anchor" aria-label="anchor" href="#result-selectors"></a>
@@ -167,13 +220,13 @@ earlier output.</p>
 <div class="section level2">
 <h2 id="load-and-edit-a-workflow-programmatically">Load and Edit a Workflow Programmatically<a class="anchor" aria-label="anchor" href="#load-and-edit-a-workflow-programmatically"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_workflow.html">new_workflow</a></span><span class="op">(</span>workflow_file_paths <span class="op">=</span> <span class="fu"><a href="../reference/workflow_file_paths.html">workflow_file_paths</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">""</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## INFO [2026-07-01 14:21:37] Creating empty results.json file.</span></span></code></pre>
+<pre><code><span><span class="co">## INFO [2026-07-07 04:15:54] Creating empty results.json file.</span></span></code></pre>
 <div class="section level3">
 <h3 id="update-inputs">Update inputs<a class="anchor" aria-label="anchor" href="#update-inputs"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/update_input_list.html">update_input_list</a></span><span class="op">(</span></span>
 <span>  <span class="va">wf</span>,</span>
 <span>  new_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -185,7 +238,7 @@ earlier output.</p>
 <div class="section level3">
 <h3 id="update-a-step-field">Update a step field<a class="anchor" aria-label="anchor" href="#update-a-step-field"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/update.html">update</a></span><span class="op">(</span></span>
 <span>  <span class="va">wf</span>,</span>
 <span>  step <span class="op">=</span> <span class="fl">2</span>,</span>
@@ -196,7 +249,7 @@ earlier output.</p>
 <div class="section level3">
 <h3 id="add-and-remove-steps">Add and remove steps<a class="anchor" aria-label="anchor" href="#add-and-remove-steps"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">new_step</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_workflowstep.html">new_workflowstep</a></span><span class="op">(</span></span>
 <span>  entry <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">wf</span><span class="op">$</span><span class="va">steps</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span>,</span>
 <span>  command <span class="op">=</span> <span class="st">"identity"</span>,</span>
@@ -213,7 +266,7 @@ earlier output.</p>
 <div class="section level3">
 <h3 id="update-custom-functions">Update custom functions<a class="anchor" aria-label="anchor" href="#update-custom-functions"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/update_functions.html">update_functions</a></span><span class="op">(</span></span>
 <span>  <span class="va">wf</span>,</span>
 <span>  new_functions <span class="op">=</span> <span class="st">"custom_helper &lt;- function(x) x"</span></span>

@@ -9,7 +9,7 @@ including its unique identifier, name, command, parameters, and other metadata."
 
     <a class="navbar-brand me-2" href="../index.html">PEITHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.07.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.07.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,7 @@ including its unique identifier, name, command, parameters, and other metadata.<
 <span>  args <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  iteration <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  samples <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  arg_types <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  loop <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -96,6 +97,13 @@ list arguments. Can be "yes", "no", or "auto".</p></dd>
 <dt id="arg-samples">samples<a class="anchor" aria-label="anchor" href="#arg-samples"></a></dt>
 <dd><p>Integer number of samples to run per iteration. Must be
 &gt;= 1. Defaults to 1 (current behavior).</p></dd>
+
+
+<dt id="arg-arg-types">arg_types<a class="anchor" aria-label="anchor" href="#arg-arg-types"></a></dt>
+<dd><p>Optional named type map for literal arguments.
+Names must match named args in `args` and values must be one of
+"character", "numeric", "integer", or "logical".
+Omitted args default to "character".</p></dd>
 
 
 <dt id="arg-loop">loop<a class="anchor" aria-label="anchor" href="#arg-loop"></a></dt>

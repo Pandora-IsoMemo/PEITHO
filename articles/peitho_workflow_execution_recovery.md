@@ -39,40 +39,40 @@ wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 run_1 <- run(wf, from = 1, to = 3)
 ```
 
-    ## INFO [2026-07-01 14:21:48] Starting workflow run with ID: '20260701142148_14acd597'
+    ## INFO [2026-07-07 04:16:05] Starting workflow run with ID: '20260707041605_14acd597'
 
-    ## INFO [2026-07-01 14:21:48] Running step 1 of 3
+    ## INFO [2026-07-07 04:16:05] Running step 1 of 3
 
-    ## INFO [2026-07-01 14:21:48] Parsing arguments for command simple_split
+    ## INFO [2026-07-07 04:16:05] Parsing arguments for command simple_split
 
-    ## INFO [2026-07-01 14:21:48]   1 sample x iteration runs for command 'simple_split':
+    ## INFO [2026-07-07 04:16:05]   1 sample x iteration runs for command 'simple_split':
 
-    ## WARN [2026-07-01 14:21:48]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
+    ## WARN [2026-07-07 04:16:05]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
 
-    ## INFO [2026-07-01 14:21:48] Running step 2 of 3
+    ## INFO [2026-07-07 04:16:05] Running step 2 of 3
 
-    ## INFO [2026-07-01 14:21:48] Parsing arguments for command fetch_WebText
+    ## INFO [2026-07-07 04:16:05] Parsing arguments for command fetch_WebText
 
-    ## INFO [2026-07-01 14:21:49]   2 sample x iteration runs for command 'fetch_WebText':
+    ## INFO [2026-07-07 04:16:07]   2 sample x iteration runs for command 'fetch_WebText':
 
-    ## INFO [2026-07-01 14:21:49]      2 single results.
+    ## INFO [2026-07-07 04:16:07]      2 single results.
 
-    ## INFO [2026-07-01 14:21:49] Running step 3 of 3
+    ## INFO [2026-07-07 04:16:07] Running step 3 of 3
 
-    ## INFO [2026-07-01 14:21:49] Parsing arguments for command paste
+    ## INFO [2026-07-07 04:16:07] Parsing arguments for command paste
 
-    ## WARN [2026-07-01 14:21:49] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
+    ## WARN [2026-07-07 04:16:07] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
 
-    ## INFO [2026-07-01 14:21:49]   1 sample x iteration runs for command 'paste':
+    ## INFO [2026-07-07 04:16:07]   1 sample x iteration runs for command 'paste':
 
-    ## INFO [2026-07-01 14:21:49]      1 single results.
+    ## INFO [2026-07-07 04:16:07]      1 single results.
 
 ``` r
 
 run_1$run_id
 ```
 
-    ## [1] "20260701142148_14acd597"
+    ## [1] "20260707041605_14acd597"
 
 The `run_id` uniquely identifies a workflow execution and is used for
 resume operations.

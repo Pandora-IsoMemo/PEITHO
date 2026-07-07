@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">PEITHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.07.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.07.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -107,6 +107,11 @@
 <span><span class="co"># Inspect result size</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">my_run</span><span class="op">$</span><span class="va">state</span><span class="op">$</span><span class="va">last_result</span><span class="op">)</span></span></code></pre></div>
 <p>For custom-folder workflows, import/export workflows, and result inspection patterns, see the quickstart vignette in the Documentation section above.</p>
+</div>
+<div class="section level3">
+<h3 id="typed-literal-arguments-in-commandsjson">Typed Literal Arguments in commands.json<a class="anchor" aria-label="anchor" href="#typed-literal-arguments-in-commandsjson"></a>
+</h3>
+<p>Workflow step arguments in <code>args</code> are parsed as character literals by default (except tagged input/result references). You can override selected arguments using the optional sparse <code>arg_types</code> field in <code>commands.json</code>. For complete syntax and examples, see the authoring vignette: <a href="https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_authoring_editing.html">Workflow Authoring in PEITHO</a>.</p>
 </div>
 </div>
 <div class="section level2">

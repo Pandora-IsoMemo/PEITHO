@@ -60,6 +60,15 @@ For custom-folder workflows, import/export workflows, and result
 inspection patterns, see the quickstart vignette in the Documentation
 section above.
 
+### Typed Literal Arguments in commands.json
+
+Workflow step arguments in `args` are parsed as character literals by
+default (except tagged input/result references). You can override
+selected arguments using the optional sparse `arg_types` field in
+`commands.json`. For complete syntax and examples, see the authoring
+vignette: [Workflow Authoring in
+PEITHO](https://pandora-isomemo.github.io/PEITHO/articles/peitho_workflow_authoring_editing.html).
+
 ## Choose a Workflow Guide
 
 - Quickstart: [Workflow Quickstart in

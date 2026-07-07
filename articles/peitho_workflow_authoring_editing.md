@@ -64,6 +64,59 @@ A file-backed workflow usually includes:
 ]
 ```
 
+### Typed Literal Arguments with arg_types
+
+By default, untagged literals in `args` are interpreted as character
+values. You can override selected literals with an optional sparse
+`arg_types` map per step.
+
+- Only define entries that should not be character
+- Omitted arguments default to `"character"`
+- Supported values: `"character"`, `"numeric"`, `"integer"`, `"logical"`
+
+Example (sparse override for a logical flag):
+
+``` json
+{
+  "entry": 12,
+  "name": "fetch_urls",
+  "label": "fetch_urls",
+  "comments": "",
+  "command": "fetch_WebText",
+  "args": "url=@#*L*#@read_urls_cleaned@#*L*#@, stop_on_error = FALSE",
+  "arg_types": {
+    "stop_on_error": "logical"
+  },
+  "iteration": "auto",
+  "samples": 1
+}
+```
+
+Another example (logical append in `cat`):
+
+``` json
+{
+  "entry": 4,
+  "name": "cat_past_polities",
+  "label": "cat_past_polities",
+  "comments": "",
+  "command": "cat",
+  "args": "@#*L*#@prompt_for_past_polities@#*L*#@, file=\"polities_llmModule.txt\", append=TRUE, sep=\"\\n\"",
+  "arg_types": {
+    "append": "logical"
+  },
+  "iteration": "auto",
+  "samples": 1
+}
+```
+
+Notes:
+
+- `arg_types` keys should match named arguments in `args`
+- Unused keys trigger a warning during workflow construction
+- In this iteration, coercion is applied to literal arguments; tag-based
+  input/result references keep their current behavior
+
 ## Argument Tags
 
 Use tags in `args` to reference inputs and prior results:
@@ -105,7 +158,7 @@ earlier output.
 wf <- new_workflow(workflow_file_paths = workflow_file_paths(path = ""))
 ```
 
-    ## INFO [2026-07-01 14:21:37] Creating empty results.json file.
+    ## INFO [2026-07-07 04:15:54] Creating empty results.json file.
 
 ### Update inputs
 

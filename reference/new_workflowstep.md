@@ -15,6 +15,7 @@ new_workflowstep(
   args = "",
   iteration = "auto",
   samples = 1L,
+  arg_types = NULL,
   loop = NULL,
   env = parent.frame(),
   ...
@@ -59,6 +60,12 @@ new_workflowstep(
 
   Integer number of samples to run per iteration. Must be \>= 1.
   Defaults to 1 (current behavior).
+
+- arg_types:
+
+  Optional named type map for literal arguments. Names must match named
+  args in \`args\` and values must be one of "character", "numeric",
+  "integer", or "logical". Omitted args default to "character".
 
 - loop:
 
