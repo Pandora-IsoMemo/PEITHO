@@ -122,7 +122,7 @@ zipfile_path <- "./examples/my_workflow.peitho"
 save_as_zip(my_wf, file = zipfile_path)
 ```
 
-    ## INFO [2026-07-07 10:43:05] Creating directory './examples' for saving zip file.
+    ## INFO [2026-07-07 10:52:01] Creating directory './examples' for saving zip file.
 
 ## Running a Workflow
 
@@ -135,49 +135,49 @@ function. You can specify which steps to run (e.g., from step 1 to 5):
 my_run_1 <- run(my_wf, from = 1, to = 5)
 ```
 
-    ## INFO [2026-07-07 10:43:05] Starting workflow run with ID: '20260707104305_19cb283f'
+    ## INFO [2026-07-07 10:52:01] Starting workflow run with ID: '20260707105201_19cb283f'
 
-    ## INFO [2026-07-07 10:43:05] Running step 1 of 5
+    ## INFO [2026-07-07 10:52:01] Running step 1 of 5
 
-    ## INFO [2026-07-07 10:43:05] Parsing arguments for command simple_split
+    ## INFO [2026-07-07 10:52:01] Parsing arguments for command simple_split
 
-    ## INFO [2026-07-07 10:43:05]   1 sample x iteration runs for command 'simple_split':
+    ## INFO [2026-07-07 10:52:01]   1 sample x iteration runs for command 'simple_split':
 
-    ## WARN [2026-07-07 10:43:05]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
+    ## WARN [2026-07-07 10:52:01]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
 
-    ## INFO [2026-07-07 10:43:05] Running step 2 of 5
+    ## INFO [2026-07-07 10:52:01] Running step 2 of 5
 
-    ## INFO [2026-07-07 10:43:05] Parsing arguments for command fetch_WebText
+    ## INFO [2026-07-07 10:52:01] Parsing arguments for command fetch_WebText
 
-    ## INFO [2026-07-07 10:43:07]   2 sample x iteration runs for command 'fetch_WebText':
+    ## INFO [2026-07-07 10:52:03]   2 sample x iteration runs for command 'fetch_WebText':
 
-    ## INFO [2026-07-07 10:43:07]      2 single results.
+    ## INFO [2026-07-07 10:52:03]      2 single results.
 
-    ## INFO [2026-07-07 10:43:07] Running step 3 of 5
+    ## INFO [2026-07-07 10:52:03] Running step 3 of 5
 
-    ## INFO [2026-07-07 10:43:07] Parsing arguments for command paste
+    ## INFO [2026-07-07 10:52:03] Parsing arguments for command paste
 
-    ## WARN [2026-07-07 10:43:07] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
+    ## WARN [2026-07-07 10:52:03] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
 
-    ## INFO [2026-07-07 10:43:07]   1 sample x iteration runs for command 'paste':
+    ## INFO [2026-07-07 10:52:03]   1 sample x iteration runs for command 'paste':
 
-    ## INFO [2026-07-07 10:43:07]      1 single results.
+    ## INFO [2026-07-07 10:52:03]      1 single results.
 
-    ## INFO [2026-07-07 10:43:07] Running step 4 of 5
+    ## INFO [2026-07-07 10:52:03] Running step 4 of 5
 
-    ## INFO [2026-07-07 10:43:07] Parsing arguments for command gsub
+    ## INFO [2026-07-07 10:52:03] Parsing arguments for command gsub
 
-    ## INFO [2026-07-07 10:43:07]   1 sample x iteration runs for command 'gsub':
+    ## INFO [2026-07-07 10:52:03]   1 sample x iteration runs for command 'gsub':
 
-    ## INFO [2026-07-07 10:43:07]      1 single results.
+    ## INFO [2026-07-07 10:52:03]      1 single results.
 
-    ## INFO [2026-07-07 10:43:07] Running step 5 of 5
+    ## INFO [2026-07-07 10:52:03] Running step 5 of 5
 
-    ## INFO [2026-07-07 10:43:07] Parsing arguments for command simple_split
+    ## INFO [2026-07-07 10:52:03] Parsing arguments for command simple_split
 
-    ## INFO [2026-07-07 10:43:07]   1 sample x iteration runs for command 'simple_split':
+    ## INFO [2026-07-07 10:52:04]   1 sample x iteration runs for command 'simple_split':
 
-    ## WARN [2026-07-07 10:43:07]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
+    ## WARN [2026-07-07 10:52:04]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
 
 After running, you can inspect the results:
 
@@ -217,41 +217,41 @@ You can now run the imported workflow and inspect the results as before:
 my_run_2 <- run(my_wf_imported, from = 1, to = 4)
 ```
 
-    ## INFO [2026-07-07 10:43:08] Starting workflow run with ID: '20260707104308_01e47766'
+    ## INFO [2026-07-07 10:52:05] Starting workflow run with ID: '20260707105205_01e47766'
 
-    ## INFO [2026-07-07 10:43:08] Running step 1 of 4
+    ## INFO [2026-07-07 10:52:05] Running step 1 of 4
 
-    ## INFO [2026-07-07 10:43:08] Parsing arguments for command simple_split
+    ## INFO [2026-07-07 10:52:05] Parsing arguments for command simple_split
 
-    ## INFO [2026-07-07 10:43:08]   1 sample x iteration runs for command 'simple_split':
+    ## INFO [2026-07-07 10:52:05]   1 sample x iteration runs for command 'simple_split':
 
-    ## WARN [2026-07-07 10:43:08]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
+    ## WARN [2026-07-07 10:52:05]      WARNING! Multiple results per iteration! Ensure that downstream steps handle list inputs.
 
-    ## INFO [2026-07-07 10:43:08] Running step 2 of 4
+    ## INFO [2026-07-07 10:52:05] Running step 2 of 4
 
-    ## INFO [2026-07-07 10:43:08] Parsing arguments for command fetch_WebText
+    ## INFO [2026-07-07 10:52:05] Parsing arguments for command fetch_WebText
 
-    ## INFO [2026-07-07 10:43:10]   2 sample x iteration runs for command 'fetch_WebText':
+    ## INFO [2026-07-07 10:52:06]   2 sample x iteration runs for command 'fetch_WebText':
 
-    ## INFO [2026-07-07 10:43:10]      2 single results.
+    ## INFO [2026-07-07 10:52:06]      2 single results.
 
-    ## INFO [2026-07-07 10:43:10] Running step 3 of 4
+    ## INFO [2026-07-07 10:52:06] Running step 3 of 4
 
-    ## INFO [2026-07-07 10:43:10] Parsing arguments for command paste
+    ## INFO [2026-07-07 10:52:06] Parsing arguments for command paste
 
-    ## WARN [2026-07-07 10:43:10] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
+    ## WARN [2026-07-07 10:52:06] WARNING! Detected list argument(s) for command 'paste', but 'iteration' is set to 'no'.
 
-    ## INFO [2026-07-07 10:43:10]   1 sample x iteration runs for command 'paste':
+    ## INFO [2026-07-07 10:52:06]   1 sample x iteration runs for command 'paste':
 
-    ## INFO [2026-07-07 10:43:10]      1 single results.
+    ## INFO [2026-07-07 10:52:06]      1 single results.
 
-    ## INFO [2026-07-07 10:43:10] Running step 4 of 4
+    ## INFO [2026-07-07 10:52:06] Running step 4 of 4
 
-    ## INFO [2026-07-07 10:43:10] Parsing arguments for command gsub
+    ## INFO [2026-07-07 10:52:06] Parsing arguments for command gsub
 
-    ## INFO [2026-07-07 10:43:10]   1 sample x iteration runs for command 'gsub':
+    ## INFO [2026-07-07 10:52:06]   1 sample x iteration runs for command 'gsub':
 
-    ## INFO [2026-07-07 10:43:10]      1 single results.
+    ## INFO [2026-07-07 10:52:06]      1 single results.
 
 ``` r
 
