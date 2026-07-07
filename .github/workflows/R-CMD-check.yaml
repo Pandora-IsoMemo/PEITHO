@@ -19,8 +19,8 @@ jobs:
       matrix:
         config:
           # We test only a subset of os & r combination for non CRAN packages
-          #- {os: macos-latest,   r: 'release'} # we receive segmentation faults in the tests for macos
-          #- {os: windows-latest, r: 'release'} # jags installation is failing for windows
+          - {os: macos-latest,   r: 'release'} # we receive segmentation faults in the tests for macos
+          - {os: windows-latest, r: 'release'} # jags installation is failing for windows
           - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
           - {os: ubuntu-latest,   r: 'release'}
           - {os: ubuntu-latest,   r: 'oldrel-1'}
