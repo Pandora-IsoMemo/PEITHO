@@ -1,26 +1,54 @@
-# Data files
-.RData
-.Ruserdata
-
-# Environ file
-.Renviron
-
-# History files
+# R session/user state
 .Rhistory
 .Rapp.history
-
-# Example code in package build process
-*-Ex.R
-
-# Output files from R CMD build
-/*.tar.gz
-
-# Output files from R CMD check
-/*.Rcheck/
-
-# RStudio files
+.RData
+.Ruserdata
 .Rproj.user/
 .Rprofile
+
+# Local environment/config
+.Renviron
+.env
+.env.*
+!.env.example
+
+# R package build/check artifacts
+*.tar.gz
+*.Rcheck/
+check/
+Meta/
+src/*.o
+src/*.so
+src/*.dll
+
+# Generated documentation/sites
+docs/
+inst/doc/
+
+# Test/coverage artifacts
+.Rcoverage
+covr/
+
+# Local dependency libraries
+lib/
+libLinux/*
+libWin/*
+libMac/*
+!libLinux/.gitignore
+!libWin/.gitignore
+!libMac/.gitignore
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+
+# Optional IDE/editor config
+.vscode/
+.lintr
 
 # produced vignettes
 vignettes/*.html
@@ -38,26 +66,13 @@ vignettes/*.pdf
 *.knit.md
 .Rproj.user
 
-# jupyter files and notebooks
-.ipynb_checkpoints/
-*.ipynb
-
-# src files
-src/*
-
 # profiling script and doc files
 RScripts/profileApp.R
-inst/doc
 /doc/
 /Meta/
-docs
 
 # imported workflow files
 inst/scripts/peitho_files/imported/
 vignettes/examples/
 
 .DS_Store
-
-# vscode settings
-.vscode/
-.lintr
