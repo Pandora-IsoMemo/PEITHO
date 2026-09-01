@@ -25,6 +25,8 @@ jobs:
           - {os: ubuntu-latest,   r: 'release'}
           - {os: ubuntu-latest,   r: 'oldrel-1'}
           - {os: ubuntu-latest,   r: 'oldrel-2'}
+          - {os: ubuntu-latest,  r: 'oldrel-3'}
+          - {os: ubuntu-latest,  r: 'oldrel-4'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -41,6 +43,12 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
           extra-repositories: https://Pandora-IsoMemo.github.io/drat/
+
+      - name: Show R version
+        run: |
+          echo "Matrix R selector: ${{ matrix.config.r }}"
+          Rscript -e 'cat("Resolved R version:", R.version.string, "\n")'
+          Rscript -e 'cat("Repositories:\n"); print(getOption("repos"))'
 
       - name: Install system dependencies
         if: runner.os == 'Linux'
