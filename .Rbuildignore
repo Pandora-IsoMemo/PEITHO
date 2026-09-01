@@ -1,21 +1,56 @@
-^.+\.Rproj$
-^libWin$
-^libMac$
-^lib$
-^libLinux$
-^Dockerfile$
-^docker-compose.yml
-^deps$
-^Jenkinsfile$
-^bin$
-^LICENSE\.md$
-^deploy\.sh$
-^\..*$
+# RStudio / IDE files
+^.*\.Rproj$
 ^\.Rproj\.user$
+^\.vscode$
+
+# Local/user config
+^\.Rprofile$
+^\.Renviron$
+^\.env$
+
+# Version control / GitHub
+^\.git$
+^\.gitignore$
+^\.github$
+
+# CI / deployment / containers
+^Dockerfile$
+^\.dockerignore$
+^docker-compose.yml
+^Jenkinsfile$
+^deploy\.sh$
+
+# pkgdown site and config
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
-^\.github$
+
+# Local dependency/vendor libraries
+^lib$
+^libWin$
+^libMac$
+^libLinux$
+^deps$
+
+# Build/test artifacts
+^covr$
+^bin$
+^.*\.tar\.gz$
+^.*\.Rcheck$
+
+# Non-package license/readme variants
+^LICENSE\.md$
+
+
+^RScripts$
+^reports$
+^\.ssh$
+^ssh_config$
+^ssh_github_bpred$
+^ssh_known_hosts$
+^inst/app/predefinedModels/
+^inst/app/dataQueries/
+
 ^inst/scripts/drafts
 ^tests/testthat/testdata_large/
 ^doc$
