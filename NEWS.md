@@ -1,4 +1,4 @@
-# PEITHO 26.08.0
+# PEITHO 26.09.0
 
 ## Updates
 - Increased the required DataTools version to the most recent version.
