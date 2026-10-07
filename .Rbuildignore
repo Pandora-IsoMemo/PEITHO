@@ -55,3 +55,4 @@
 ^tests/testthat/testdata_large/
 ^doc$
 ^Meta$
+^Applications$
